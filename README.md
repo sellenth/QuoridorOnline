@@ -6,8 +6,7 @@ I'll be experimenting with bringing the whole system online using a serverless a
 
 If all that works, I'd like to implement a scoreboard and friend system. Potentially game replay feature.
 
-
 ## TODOs
 
-- [x] Login using oauth 
+- [x] Login using oauth
 - [ ] store user in db

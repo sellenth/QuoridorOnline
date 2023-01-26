@@ -2,7 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
-html, body {
-    background-color: theme('colors.theme.500') ;
-    overflow-x: hidden;
+html,
+body {
+  background-color: theme('colors.theme.500');
+  overflow-x: hidden;
 }
