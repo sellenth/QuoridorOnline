@@ -35,7 +35,6 @@ export default function Login() {
     }
   }
 
-
   // this `session` is from the root loader - server-side
   // therefore, it can safely be used to conditionally render
   // SSR pages without issues with hydration

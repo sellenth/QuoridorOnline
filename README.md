@@ -9,4 +9,7 @@ If all that works, I'd like to implement a scoreboard and friend system. Potenti
 ## TODOs
 
 - [x] Login using oauth
-- [ ] store user in db
+- [x] store user in db
+- [x] create page showing all users
+- [ ] add another login method
+- [ ] render game at some route
