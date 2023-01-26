@@ -35,8 +35,6 @@ export default function Login() {
     }
   }
 
-  console.log('login')
-  console.log(session)
 
   // this `session` is from the root loader - server-side
   // therefore, it can safely be used to conditionally render
