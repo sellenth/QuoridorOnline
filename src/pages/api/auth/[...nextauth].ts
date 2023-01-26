@@ -1,6 +1,16 @@
 import NextAuth from "next-auth"
 import GithubProvider from "next-auth/providers/github"
 import type { NextAuthOptions } from "next-auth";
+import SequelizeAdapter from "@next-auth/sequelize-adapter"
+import { Sequelize } from "sequelize"
+
+const sequelize = new Sequelize({
+  dialect: 'sqlite',
+  storage: 'qo.db',
+});
+
+//sequelize.sync();
+const adapter = SequelizeAdapter(sequelize)
 
 export const authOptions: NextAuthOptions = {
     // Configure one or more authentication providers
@@ -11,6 +21,7 @@ export const authOptions: NextAuthOptions = {
         }),
         // ...add more providers here
     ],
+    adapter,
     callbacks: {
         async signIn({ user, account, profile, email, credentials }) {
             const isAllowedToSignIn = true

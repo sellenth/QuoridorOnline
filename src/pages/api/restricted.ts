@@ -2,7 +2,7 @@ import { authOptions } from './auth/[...nextauth]'
 import { unstable_getServerSession } from "next-auth/next"
 import type { NextApiRequest, NextApiResponse } from 'next'
 
-export default async (req: NextApiRequest, res: NextApiResponse) => {
+const Route = async (req: NextApiRequest, res: NextApiResponse) => {
   const session = await unstable_getServerSession(req, res, authOptions)
   if (session) {
     res.send({
@@ -15,3 +15,5 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
     })
   }
 }
+
+export default Route

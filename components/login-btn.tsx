@@ -7,17 +7,14 @@ export default function Component() {
   if (session) {
     return (
       <>
-        Signed in as {session.user.email} <br />
         <button onClick={() => signOut()}>Sign out</button>
-        <AccessToken />
       </>
     )
   }
   return (
       <>
-          Not signed in <br />
           <Link href="/auth/signin">
-          <button>Sign in</button>
+            <button>Sign in</button>
           </Link>
       </>
   )
