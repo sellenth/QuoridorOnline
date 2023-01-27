@@ -11,5 +11,7 @@ If all that works, I'd like to implement a scoreboard and friend system. Potenti
 - [x] Login using oauth
 - [x] store user in db
 - [x] create page showing all users
-- [ ] add another login method
+- [x] add another login method
 - [ ] render game at some route
+- [ ] flesh out email signup so it isn't hardcoded
+- [ ] alert user if signup procces goes wrong (email not confirmed, row not created)

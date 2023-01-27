@@ -6,15 +6,41 @@ import { useSupabase } from './supabase-provider'
 export default function Login() {
   const { supabase, session } = useSupabase()
 
+  const handleEmailSignUp = async () => {
+    const { data, error } = await supabase.auth.signUp({
+      email: 'halston@sellent.in',
+      password: 'password',
+      options: {
+        data: {
+          preferred_username: 'gamer'
+        }
+      },
+    })
+
+    if (error) {
+      console.log({ error })
+    }
+  }
+
   const handleEmailLogin = async () => {
     const { error } = await supabase.auth.signInWithPassword({
-      email: 'jon@supabase.com',
+      email: 'halston@sellent.in',
       password: 'password',
     })
 
     if (error) {
       console.log({ error })
     }
+  }
+
+  const handleGoogleLogin = async () => {
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+    })
+
+    if (error) {
+      console.log({ error })
+    } else { console.log( data ) }
   }
 
   const handleGitHubLogin = async () => {
@@ -42,7 +68,10 @@ export default function Login() {
     <button onClick={handleLogout}>Logout</button>
   ) : (
     <>
-      {/*  <button onClick={handleEmailLogin}>Email Login</button>*/}
+      <button onClick={handleEmailSignUp}>Email Signup</button>
+      <br />
+      <button onClick={handleEmailLogin}>Email Login</button>
+      <br />
       <button onClick={handleGitHubLogin}>GitHub Login</button>
     </>
   )
