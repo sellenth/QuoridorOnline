@@ -6,15 +6,15 @@ import {crossProductVec3, subVec3, addVec3, scaleVec3, normalizeVec3, cos_d, sin
 //let audio = new Audio("/static/jakesTrack.m4a");
 
 export class Camera {
-    #frontVec: Vec3 = [0, 0, 1];
-    #rightVec: Vec3 = [1, 0, 0];
-    #upVec: Vec3    = [0, 1, 0];
-    #position: Vec3 = [5., .3, 0.];
-    #yaw = -89;
-    #pitch = 0;
-    #moveSpeed = 10;
-    #mouseSens = 0.1;
-    #spaceExtents: Vec3 = [10, 10, 10];
+    frontVec: Vec3 = [0, 0, 1];
+    rightVec: Vec3 = [1, 0, 0];
+    upVec: Vec3    = [0, 1, 0];
+    position: Vec3 = [5., .3, 0.];
+    yaw = -89;
+    pitch = 0;
+    moveSpeed = 10;
+    mouseSens = 0.1;
+    spaceExtents: Vec3 = [10, 10, 10];
     keysDown = {
         a: false,
         w: false,
@@ -32,79 +32,80 @@ export class Camera {
 
     SetExtents(extents: Vec3)
     {
-        this.#spaceExtents = extents
+        this.spaceExtents = extents
     }
 
     GetPosition()
     {
-        return this.#position;
+        return this.position;
     }
 
     GetFrontVec()
     {
-        return this.#frontVec;
+        return this.frontVec;
     }
 
     GetYaw()
     {
-        return this.#yaw;
+        return this.yaw;
     }
 
     GetPitch()
     {
-        return this.#pitch;
+        console.log(this.pitch)
+        return this.pitch;
     }
 
     Move(deltaTime: number)
     {
-        let velocity = this.#moveSpeed * deltaTime;
+        let velocity = this.moveSpeed * deltaTime;
         if (this.keysDown.w)
         {
-            this.#position = subVec3(this.#position, scaleVec3(this.#frontVec, velocity));
+            this.position = subVec3(this.position, scaleVec3(this.frontVec, velocity));
         }
         if (this.keysDown.s) {
-            this.#position = addVec3(this.#position, scaleVec3(this.#frontVec, velocity));
+            this.position = addVec3(this.position, scaleVec3(this.frontVec, velocity));
         }
         if (this.keysDown.a) {
-            this.#position = subVec3(this.#position, scaleVec3(this.#rightVec, velocity));
+            this.position = subVec3(this.position, scaleVec3(this.rightVec, velocity));
         }
         if (this.keysDown.d) {
-            this.#position = addVec3(this.#position, scaleVec3(this.#rightVec, velocity));
+            this.position = addVec3(this.position, scaleVec3(this.rightVec, velocity));
         }
         if (this.keysDown.space) {
-            this.#position = addVec3(this.#position, [0, velocity, 0]);
+            this.position = addVec3(this.position, [0, velocity, 0]);
         }
         if (this.keysDown.ctrl) {
-            this.#position = addVec3(this.#position, [0, -velocity, 0]);
+            this.position = addVec3(this.position, [0, -velocity, 0]);
         }
 
-        this.#position.forEach((_, i, arr) => {
+        this.position.forEach((_, i, arr) => {
             const padding = 5.;
 
-            arr[i] = clamp(arr[i], -padding, this.#spaceExtents[i] + padding)
+            arr[i] = clamp(arr[i], -padding, this.spaceExtents[i] + padding)
         })
     }
 
     updateVectors()
     {
         let front: Vec3 = [0, 0, 0];
-        front[0] = cos_d(this.#yaw) * cos_d(this.#pitch);
-        front[1] = sin_d(this.#pitch);
-        front[2] = sin_d(this.#yaw) * cos_d(this.#pitch);
+        front[0] = cos_d(this.yaw) * cos_d(this.pitch);
+        front[1] = sin_d(this.pitch);
+        front[2] = sin_d(this.yaw) * cos_d(this.pitch);
 
-        this.#frontVec = normalizeVec3(front);
-        this.#rightVec = normalizeVec3(crossProductVec3( this.#frontVec, [0, 1, 0] ));
-        this.#upVec = normalizeVec3(crossProductVec3( this.#rightVec, this.#frontVec ));
+        this.frontVec = normalizeVec3(front);
+        this.rightVec = normalizeVec3(crossProductVec3( this.frontVec, [0, 1, 0] ));
+        this.upVec = normalizeVec3(crossProductVec3( this.rightVec, this.frontVec ));
 
     }
 
     getCameraMatrix()
     {
         return [
-            ...this.#rightVec, 0,
-            ...this.#upVec,    0,
-            ...this.#frontVec, 0,
-            ...this.#position, 1
+            ...this.rightVec, 0,
+            ...this.upVec,    0,
+            ...this.frontVec, 0,
+            ...this.position, 1
         ]
     }
 
@@ -115,16 +116,16 @@ export class Camera {
 
     Look(xOffset: number, yOffset: number)
     {
-        xOffset *= this.#mouseSens;
-        yOffset *= this.#mouseSens;
+        xOffset *= this.mouseSens;
+        yOffset *= this.mouseSens;
 
-        this.#yaw -= xOffset;
-        this.#pitch += yOffset;
+        this.yaw -= xOffset;
+        this.pitch += yOffset;
 
-        if (this.#pitch > 89)
-            this.#pitch = 89;
-        if (this.#pitch < -89)
-            this.#pitch = -89;
+        if (this.pitch > 89)
+            this.pitch = 89;
+        if (this.pitch < -89)
+            this.pitch = -89;
 
         this.updateVectors();
     }
@@ -179,7 +180,7 @@ export class Camera {
                 this.keysDown.space = false;
         })
 
-        canvas.addEventListener('click', e => {
+        canvas.addEventListener('click', (_) => {
             this.firstLook = true;
             if (this.firstLook == true)
             {

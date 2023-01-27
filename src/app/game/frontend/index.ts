@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import vss from "./vs";
 import { fsFence, fsPlayer, fsCamera, fsGrid } from "./fs";
 import { createShader, createProgram, resizeCanvasToDisplaySize, sleep } from "./utils"
@@ -21,13 +23,13 @@ class GameStatusHandler
     myWallsElement: Node;
     theirWallsElement: Node;
     turnIndicatorElement: Node;
-    GameOverModal: Node;
+    //GameOverModal: Node;
 
     constructor()
     {
-        this.myWallsElement = document.querySelector("#myWalls");
-        this.theirWallsElement = document.querySelector("#theirWalls");
-        this.turnIndicatorElement = document.querySelector("#turnIndicator");
+        this.myWallsElement = document.querySelector("#myWalls")!;
+        this.theirWallsElement = document.querySelector("#theirWalls")!;
+        this.turnIndicatorElement = document.querySelector("#turnIndicator")!;
     }
 
     Update(myID: ID, state: GameStatePayload)
@@ -35,13 +37,13 @@ class GameStatusHandler
         state.players.forEach((player) => {
             this.UpdateWalls(myID, player);
         })
-        this.UpdateTurnIndicator(myID, state.activePlayerId);
+        this.UpdateTurnIndicator(myID, state.activePlayerId!);
 
     }
 
     GameOver(myID: ID, winningID: ID)
     {
-        const el = document.querySelector("#gameOver");
+        const el = document.querySelector("#gameOver")!;
         el.textContent = myID == winningID ? "You win" : "Better luck next time";
         el.classList.add("fancy-animation");
         setTimeout(() => {
@@ -74,8 +76,10 @@ class FrameTiming
     constructor()
     {
         this.then = new Date().getTime() * .001;
-        this.counterElement = document.querySelector("#fps").lastChild;
+        this.counterElement = document.querySelector("#fps")!.lastChild!;
         this.elapsed = 0.;
+        this.deltaTime = 0;
+        this.fps = 0;
     }
 
     tick()
@@ -93,18 +97,18 @@ export default class Engine
 {
     canvas: HTMLCanvasElement
     gameLogic: GameLogic;
-    gl: WebGL2RenderingContext;
-    sceneObjects: VisualUnit[];
-    camera: Camera;
-    networkedCameras: NetworkCamera[];
-    frameTiming: FrameTiming;
-    gameStateSocket: WebSocket;
-    gameStatusHandler: GameStatusHandler;
+    gl: WebGL2RenderingContext | null;
+    sceneObjects: VisualUnit[] = [];
+    camera: Camera = new Camera();
+    networkedCameras: NetworkCamera[] = [];
+    frameTiming: FrameTiming = new FrameTiming();
+    //gameStateSocket: WebSocket;
+    gameStatusHandler: GameStatusHandler = new GameStatusHandler();
 
 
     constructor()
     {
-        this.canvas = document.querySelector("#c");
+        this.canvas = document.querySelector("#c")!;
         this.gameLogic = new GameLogic();
         this.gameLogic.players = [
                 {
@@ -126,7 +130,6 @@ export default class Engine
         this.gl.enable(this.gl.BLEND);
         this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
 
-        this.camera = new Camera();
         this.camera.configureCameraListeners(this.canvas, this.gameLogic);
         this.camera.SetExtents([this.gameLogic.gridSizeXY,
                                 this.gameLogic.gridLayers,
@@ -143,6 +146,7 @@ export default class Engine
 
     }
 
+    /*
     configureWebsocket()
     {
         let connectionURL = location.origin.replace(/^http/, 'ws')
@@ -170,7 +174,7 @@ export default class Engine
                 }
             ))
         }, 1000)
-    }
+    }*/
 
     handleServerPayload(payload: ServerPayload)
     {
@@ -186,7 +190,7 @@ export default class Engine
                     let data = payload.data as GameStatePayload;
                     this.gameLogic.updateFences(data.fences);
                     this.gameLogic.updatePlayers(data.players);
-                    this.gameLogic.setActivePlayer(data.activePlayerId);
+                    this.gameLogic.setActivePlayer(data.activePlayerId ?? 'none');
                     this.gameStatusHandler.Update(this.gameLogic.myId, data);
                     break;
                 case MessageType.GameOver:
@@ -203,11 +207,16 @@ export default class Engine
     {
         const gl = this.gl;
 
+        if (!gl) {
+            return
+        }
+        let canvas = gl.canvas as HTMLCanvasElement
+
         while (true)
         {
             this.frameTiming.tick()
 
-            resizeCanvasToDisplaySize(gl.canvas, 1);
+            resizeCanvasToDisplaySize(canvas, 1);
 
             gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
             gl.clearColor(0., 0., 0., 0.);
@@ -217,7 +226,8 @@ export default class Engine
             this.camera.Move(this.frameTiming.deltaTime);
 
             // Calculate program independent matrices
-            let projMat = projection(3.14 / 2, gl.canvas.clientWidth / gl.canvas.clientHeight, 0.1, 50);
+
+            let projMat = projection(3.14 / 2, canvas.clientWidth / canvas.clientHeight, 0.1, 50);
             let viewMat = this.camera.getViewMatrix();
 
             this.sceneObjects.forEach( so => {
@@ -232,6 +242,10 @@ export default class Engine
     configurePrograms()
     {
         this.sceneObjects = [];
+        let prog = this.createPlayerProgram();
+        if (prog) {
+            this.sceneObjects.push(prog)
+        }
         this.sceneObjects.push(this.createPlayerProgram());
         this.sceneObjects.push(this.createCameraProgram());
         this.sceneObjects.push(this.createFenceProgram());
@@ -240,12 +254,20 @@ export default class Engine
 
     createGridProgram()
     {
-        const gl = this.gl;
+        const gl = this.gl!;
         let vs = createShader(gl, gl.VERTEX_SHADER, vss);
         let fs = createShader(gl, gl.FRAGMENT_SHADER, fsGrid);
 
+        if (!vs || !fs) {
+            return
+        }
+
 
         let gridProgram = createProgram(gl, vs, fs);
+
+        if (!gridProgram) {
+            return
+        }
         let positionAttribLocation = gl.getAttribLocation(gridProgram, "a_position");
 
         let gridVAO = gl.createVertexArray();
@@ -293,20 +315,20 @@ export default class Engine
             program: gridProgram,
             VAO: gridVAO,
             render: (projMat: Mat4, viewMat: Mat4) => {
-                gl.useProgram(gridProgram);
+                gl.useProgram(gridProgram!);
                 gl.bindVertexArray(gridVAO);
 
-                let camPosLoc = gl.getUniformLocation(gridProgram, "camPos");
+                let camPosLoc = gl.getUniformLocation(gridProgram!, "camPos");
                 gl.uniform3fv(camPosLoc, this.camera.GetPosition());
 
-                let projLoc = gl.getUniformLocation(gridProgram, "projection");
+                let projLoc = gl.getUniformLocation(gridProgram!, "projection");
                 gl.uniformMatrix4fv(projLoc, false, projMat);
 
-                let camLoc = gl.getUniformLocation(gridProgram, "camera");
+                let camLoc = gl.getUniformLocation(gridProgram!, "camera");
                 gl.uniformMatrix4fv(camLoc, false, viewMat);
 
                 let modelMat = identity();
-                let modelLoc = gl.getUniformLocation(gridProgram, "model");
+                let modelLoc = gl.getUniformLocation(gridProgram!, "model");
                 gl.uniformMatrix4fv(modelLoc, false, modelMat);
 
                 gl.drawArrays(gl.LINES, 0, gridData.length / 3);
@@ -316,11 +338,20 @@ export default class Engine
 
     createPlayerProgram()
     {
-        const gl = this.gl;
+        const gl = this.gl!;
+
         let vs = createShader(gl, gl.VERTEX_SHADER, vss);
         let fs = createShader(gl, gl.FRAGMENT_SHADER, fsPlayer);
 
+        if (!vs || !fs) {
+            return
+        }
+
         let playerProgram = createProgram(gl, vs, fs);
+
+        if (!playerProgram) {
+            return
+        }
         let playerPosAttrib = gl.getAttribLocation(playerProgram, "a_position");
 
         let playerVAO = gl.createVertexArray();
@@ -384,23 +415,23 @@ export default class Engine
             program: playerProgram,
             VAO: playerVAO,
             render: (projMat: Mat4, viewMat: Mat4) => {
-                gl.useProgram(playerProgram);
+                gl.useProgram(playerProgram!);
                 gl.bindVertexArray(playerVAO);
 
-                let projLoc = gl.getUniformLocation(playerProgram, "projection");
+                let projLoc = gl.getUniformLocation(playerProgram!, "projection");
                 gl.uniformMatrix4fv(projLoc, false, projMat);
 
-                let camLoc = gl.getUniformLocation(playerProgram, "camera");
+                let camLoc = gl.getUniformLocation(playerProgram!, "camera");
                 gl.uniformMatrix4fv(camLoc, false, viewMat);
 
                 this.gameLogic.players.forEach(player => {
                     let modelMat = translate(...addVec3(player.pos, [.2, .2, .2]), identity());
                     modelMat = scale(0.6, 0.6, 0.6, modelMat);
 
-                    let colorLoc = gl.getUniformLocation(playerProgram, "color");
+                    let colorLoc = gl.getUniformLocation(playerProgram!, "color");
                     gl.uniform3fv(colorLoc, player.color);
 
-                    let modelLoc = gl.getUniformLocation(playerProgram, "model");
+                    let modelLoc = gl.getUniformLocation(playerProgram!, "model");
                     gl.uniformMatrix4fv(modelLoc, false, modelMat);
 
                     gl.drawElements(gl.TRIANGLES, 36, gl.UNSIGNED_SHORT, 0);
@@ -408,14 +439,14 @@ export default class Engine
 
                 if (this.gameLogic.IsMyTurn() && this.gameLogic.cursorMode == "pawn" )
                 {
-                    let modelMat = translate(...addVec3(this.gameLogic.getActivePlayer().pos, this.gameLogic.cursor.pos), identity());
+                    let modelMat = translate(...addVec3(this.gameLogic.getActivePlayer()?.pos || [0, 0, 0], this.gameLogic.cursor.pos), identity());
                     modelMat = translate(0.4, 0.4, 0.4, modelMat);
                     modelMat = scale(0.2, 0.2, 0.2, modelMat);
 
-                    let colorLoc = gl.getUniformLocation(playerProgram, "color");
+                    let colorLoc = gl.getUniformLocation(playerProgram!, "color");
                     gl.uniform3fv(colorLoc, [0, 0, 255]);
 
-                    let modelLoc = gl.getUniformLocation(playerProgram, "model");
+                    let modelLoc = gl.getUniformLocation(playerProgram!, "model");
                     gl.uniformMatrix4fv(modelLoc, false, modelMat);
 
                     gl.drawElements(gl.TRIANGLES, 36, gl.UNSIGNED_SHORT, 0);
@@ -426,11 +457,18 @@ export default class Engine
 
     createCameraProgram()
     {
-        const gl = this.gl;
+        const gl = this.gl!;
         let vs = createShader(gl, gl.VERTEX_SHADER, vss);
         let fs = createShader(gl, gl.FRAGMENT_SHADER, fsCamera);
+        if (!vs || !fs) {
+            return
+        }
 
         let cameraProgram = createProgram(gl, vs, fs);
+        if (!cameraProgram) {
+            return
+        }
+
         let cameraPosAttrib = gl.getAttribLocation(cameraProgram, "a_position");
 
         let cameraVAO = gl.createVertexArray();
@@ -506,13 +544,13 @@ export default class Engine
             program: cameraProgram,
             VAO: cameraVAO,
             render: (projMat: Mat4, viewMat: Mat4) => {
-                gl.useProgram(cameraProgram);
+                gl.useProgram(cameraProgram!);
                 gl.bindVertexArray(cameraVAO);
 
-                let projLoc = gl.getUniformLocation(cameraProgram, "projection");
+                let projLoc = gl.getUniformLocation(cameraProgram!, "projection");
                 gl.uniformMatrix4fv(projLoc, false, projMat);
 
-                let camLoc = gl.getUniformLocation(cameraProgram, "camera");
+                let camLoc = gl.getUniformLocation(cameraProgram!, "camera");
                 gl.uniformMatrix4fv(camLoc, false, viewMat);
 
 
@@ -524,10 +562,10 @@ export default class Engine
                         modelMat = rotationYZ( degreesToRadians(camera.pitch * -1), modelMat );
                         modelMat = translate(-.5, -.5, 0, modelMat);
 
-                        let colorLoc = gl.getUniformLocation(cameraProgram, "color");
+                        let colorLoc = gl.getUniformLocation(cameraProgram!, "color");
                         gl.uniform3fv(colorLoc, [.2, .4, .6]);
 
-                        let modelLoc = gl.getUniformLocation(cameraProgram, "model");
+                        let modelLoc = gl.getUniformLocation(cameraProgram!, "model");
                         gl.uniformMatrix4fv(modelLoc, false, modelMat);
 
                         gl.drawElements(gl.TRIANGLES, elements.length, gl.UNSIGNED_SHORT, 0);
@@ -539,11 +577,17 @@ export default class Engine
 
     createFenceProgram()
     {
-        const gl = this.gl;
+        const gl = this.gl!;
         let vs = createShader(gl, gl.VERTEX_SHADER, vss);
         let fs = createShader(gl, gl.FRAGMENT_SHADER, fsFence);
+        if (!vs || !fs){
+            return
+        }
 
         let fenceProgram = createProgram(gl, vs, fs);
+        if (!fenceProgram) {
+            return
+        }
         let fencePosAttrib = gl.getAttribLocation(fenceProgram, "a_position");
 
         let fenceVAO = gl.createVertexArray();
@@ -608,18 +652,18 @@ export default class Engine
             VAO: fenceVAO,
             render: (projMat: Mat4, viewMat: Mat4) => {
                 // Draw Fences
-                gl.useProgram(fenceProgram);
+                gl.useProgram(fenceProgram!);
                 gl.bindVertexArray(fenceVAO);
 
-                let projLoc = gl.getUniformLocation(fenceProgram, "projection");
+                let projLoc = gl.getUniformLocation(fenceProgram!, "projection");
                 gl.uniformMatrix4fv(projLoc, false, projMat);
 
-                let camLoc = gl.getUniformLocation(fenceProgram, "camera");
+                let camLoc = gl.getUniformLocation(fenceProgram!, "camera");
                 gl.uniformMatrix4fv(camLoc, false, viewMat);
 
-                let colorLoc = gl.getUniformLocation(fenceProgram, "color");
+                let colorLoc = gl.getUniformLocation(fenceProgram!, "color");
 
-                let timeLoc = gl.getUniformLocation(fenceProgram, "u_time");
+                let timeLoc = gl.getUniformLocation(fenceProgram!, "u_time");
                 gl.uniform1f(timeLoc, this.frameTiming.elapsed);
 
                 this.gameLogic.fencePositions.forEach(fence => {
@@ -629,7 +673,7 @@ export default class Engine
                     if (fence.orientation == Orientation.Vertical)
                         modelMat = rotationXZ(Math.PI / 2, modelMat);
 
-                    let modelLoc = gl.getUniformLocation(fenceProgram, "model");
+                    let modelLoc = gl.getUniformLocation(fenceProgram!, "model");
                     gl.uniformMatrix4fv(modelLoc, false, modelMat);
 
                     gl.uniform3fv(colorLoc, [.0, 0., 0.]);
@@ -646,7 +690,7 @@ export default class Engine
                     if (this.gameLogic.cursor.orientation == Orientation.Vertical)
                         modelMat = rotationXZ(Math.PI / 2, modelMat);
 
-                    let modelLoc = gl.getUniformLocation(fenceProgram, "model");
+                    let modelLoc = gl.getUniformLocation(fenceProgram!, "model");
                     gl.uniformMatrix4fv(modelLoc, false, modelMat);
 
                     gl.uniform3fv(colorLoc, [.5, 0., 0.]);

@@ -2,6 +2,10 @@ import { Mat4 } from "../shared/types"
 
 export function createShader(gl: WebGL2RenderingContext, type: GLuint, source: string) {
     let shader = gl.createShader(type);
+    if (!shader) {
+        return
+    }
+
     gl.shaderSource(shader, source);
     gl.compileShader(shader);
     let success = gl.getShaderParameter(shader, gl.COMPILE_STATUS);
@@ -15,6 +19,10 @@ export function createShader(gl: WebGL2RenderingContext, type: GLuint, source: s
 
 export function createProgram(gl: WebGL2RenderingContext, vertexShader: WebGLShader, fragmentShader: WebGLShader) {
     let program = gl.createProgram();
+    if (!program) {
+        return
+    }
+
     gl.attachShader(program, vertexShader);
     gl.attachShader(program, fragmentShader);
     gl.linkProgram(program);

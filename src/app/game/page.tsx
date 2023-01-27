@@ -17,7 +17,7 @@ export default function GameView() {
         <div id="fps" className="absolute">fps: <span></span></div>
         <main className="h-full flex flex-col items-center justify-center">
             <div id="gameInfo" className="">
-                <p id="turnIndicator">Player ???'s turn</p>
+                <p id="turnIndicator">Player ???&apos;s turn</p>
                 <div id="wallInfo">
                     <p>Walls Remaining</p>
                     <p id="myWalls">Me - ???</p>

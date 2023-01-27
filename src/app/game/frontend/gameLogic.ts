@@ -24,6 +24,7 @@ export class GameLogic {
     constructor() {
         this.players = [];
         this.fencePositions = [];
+        this.notifyServer = () => {}
     }
 
     assignId(id: ID)
@@ -158,7 +159,7 @@ export class GameLogic {
         else if (this.cursorMode == "pawn")
         {
             this.cursorMode = "fence";
-            this.cursor.pos = this.getActivePlayer().pos;
+            this.cursor.pos = this?.getActivePlayer()?.pos ?? [0., 0., 0.];
         }
     }
 
