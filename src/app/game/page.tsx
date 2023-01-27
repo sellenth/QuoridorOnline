@@ -2,22 +2,21 @@
 
 //import './game-logic/index'
 //import { useRef, useCallback } from 'react';
-import Script from 'next/script'
-
-declare global {
-  interface Window {
-    hbspt: any
-  }
-}
-
+import Engine from './frontend/index'
+import { useEffect } from 'react'
 
 export default function GameView() {
 
+    useEffect(() => {
+        let engine = new Engine()
+        engine.startRenderLoop()
+    }, [])
+
     return (<>
-        <Script src="js/frontend/index.js" type="module" />
-        <div id="fps">fps: <span></span></div>
-        <main>
-            <div id="gameInfo">
+        {/*<Script src="js/frontend/index.js" type="module" />*/}
+        <div id="fps" className="absolute">fps: <span></span></div>
+        <main className="h-full flex flex-col items-center justify-center">
+            <div id="gameInfo" className="">
                 <p id="turnIndicator">Player ???'s turn</p>
                 <div id="wallInfo">
                     <p>Walls Remaining</p>
@@ -25,7 +24,7 @@ export default function GameView() {
                     <p id="theirWalls">Them - ???</p>
                 </div>
             </div>
-            <canvas id="c" tabIndex={0}></canvas>
+            <canvas id="c" className="border border-black h-1/2 w-5/6" tabIndex={0}></canvas>
         </main>
     </>)
 }

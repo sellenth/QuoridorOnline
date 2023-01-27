@@ -4,6 +4,8 @@
 
 html,
 body {
+  height: 100%;
+  width: 100%;
   background-color: theme('colors.theme.500');
   overflow-x: hidden;
 }

@@ -15,5 +15,5 @@ let vss = `#version 300 es
 
     }
 `;
+
 export default vss;
-//# sourceMappingURL=vs.js.map

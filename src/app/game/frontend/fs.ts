@@ -32,6 +32,7 @@ export const fsFence = `#version 300 es
         outColor = vec4(radiatingColor + color, 1.);
     }
 `;
+
 export const fsPlayer = `#version 300 es
     precision highp float;
     
@@ -50,6 +51,7 @@ export const fsPlayer = `#version 300 es
         outColor = vec4(0.3 - z, 0., .75 - z, 1.);
     }
 `;
+
 export const fsCamera = `#version 300 es
     precision highp float;
 
@@ -68,6 +70,7 @@ export const fsCamera = `#version 300 es
         outColor = vec4(z, 0.0, b * 1.5, 1.);
     }
 `;
+
 export const fsGrid = `#version 300 es
     precision highp float;
     
@@ -88,5 +91,5 @@ export const fsGrid = `#version 300 es
         outColor = vec4(0., .5, 0., a);
     }
 `;
+
 export default fsFence;
-//# sourceMappingURL=fs.js.map
