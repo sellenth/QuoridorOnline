@@ -12,6 +12,7 @@ If all that works, I'd like to implement a scoreboard and friend system. Potenti
 - [x] store user in db
 - [x] create page showing all users
 - [x] add another login method
-- [ ] render game at some route
+- [x] render game at some route
+- [x] fix double render bug (strict-mode)
 - [ ] flesh out email signup so it isn't hardcoded
 - [ ] alert user if signup procces goes wrong (email not confirmed, row not created)

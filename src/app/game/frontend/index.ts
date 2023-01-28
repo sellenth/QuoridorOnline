@@ -234,7 +234,7 @@ export default class Engine
                 so.render(projMat, viewMat);
             });
 
-            await sleep(Math.max(0, 32 - this.frameTiming.deltaTime));
+            await sleep(Math.max(0, 16 - this.frameTiming.deltaTime));
         }
 
     }
