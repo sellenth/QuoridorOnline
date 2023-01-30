@@ -112,6 +112,7 @@ export default class Engine
         this.canvas = document.querySelector("#c")!;
         this.gameLogic = new GameLogic();
         this.gameLogic.players = []
+        this.gameLogic.cameraRef = this.camera
 
         this.gl = this.canvas.getContext("webgl2", {premultipliedAlpha: false});
         if (!this.gl) {
@@ -270,7 +271,6 @@ export default class Engine
     {
         this.sceneObjects = [];
         this.sceneObjects.push(this.createPlayerProgram());
-        this.sceneObjects.push(this.createPlayerProgram());
         this.sceneObjects.push(this.createCameraProgram());
         this.sceneObjects.push(this.createFenceProgram());
         this.sceneObjects.push(this.createGridProgram());
@@ -303,22 +303,23 @@ export default class Engine
 
         let gridData = [];
 
-        for (let a = 0; a < this.gameLogic.gridSizeXY; a++)
+        // Create horizontal lines
+        for (let a = 0; a <= this.gameLogic.gridSizeXY; a+=2)
         {
-            for (let b = 0; b < this.gameLogic.gridLayers; b++)
+            for (let b = 0; b <= this.gameLogic.gridLayers; b+=2)
             {
                 gridData.push(0, b, a,
-                              this.gameLogic.gridSizeXY - 1, b, a);
+                              this.gameLogic.gridSizeXY, b, a);
             }
-
         }
 
-        for (let a = 0; a < this.gameLogic.gridSizeXY; a++)
+        // Create depth lines
+        for (let a = 0; a <= this.gameLogic.gridSizeXY; a+=2)
         {
-            for (let b = 0; b < this.gameLogic.gridLayers; b++)
+            for (let b = 0; b <= this.gameLogic.gridLayers; b+=2)
             {
                 gridData.push( a, b, 0,
-                               a, b, this.gameLogic.gridSizeXY - 1);
+                               a, b, this.gameLogic.gridSizeXY);
             }
         }
 
@@ -387,14 +388,14 @@ export default class Engine
 
         let cubeData = [
             0, 0, 0,      255, 0, 0,
-            1, 0, 0,      255, 0, 0,
-            1, 1, 0,      255, 0, 0,
-            0, 1, 0,      255, 0, 0,
+            2, 0, 0,      255, 0, 0,
+            2, 2, 0,      255, 0, 0,
+            0, 2, 0,      255, 0, 0,
 
-            0, 0, 1,      0, 255, 0,
-            1, 0, 1,      0, 255, 0,
-            1, 1, 1,      0, 255, 0,
-            0, 1, 1,      0, 255, 0,
+            0, 0, 2,      0, 255, 0,
+            2, 0, 2,      0, 255, 0,
+            2, 2, 2,      0, 255, 0,
+            0, 2, 2,      0, 255, 0,
 
 
         ];
@@ -449,8 +450,9 @@ export default class Engine
                 gl.uniformMatrix4fv(camLoc, false, viewMat);
 
                 this.gameLogic.players.forEach(player => {
-                    let modelMat = translate(...addVec3(player.pos, [.2, .2, .2]), identity());
-                    modelMat = scale(0.6, 0.6, 0.6, modelMat);
+                    let modelMat = translate(...player.pos, identity());
+                    modelMat = scale(0.8, 0.8, 0.8, modelMat);
+                    modelMat = translate(-1, -1, -1, modelMat);
 
                     let colorLoc = gl.getUniformLocation(playerProgram!, "color");
                     gl.uniform3fv(colorLoc, player.color);
@@ -463,9 +465,10 @@ export default class Engine
 
                 if (this.gameLogic.IsMyTurn() && this.gameLogic.cursorMode == "pawn" )
                 {
-                    let modelMat = translate(...addVec3(this.gameLogic.getActivePlayer()?.pos || [0, 0, 0], this.gameLogic.cursor.pos), identity());
-                    modelMat = translate(0.4, 0.4, 0.4, modelMat);
+                    let modelMat = translate(...(this.gameLogic.getActivePlayer()?.pos ?? [0, 0, 0]), identity());
+                    modelMat = translate(...this.gameLogic.cursor.pos, modelMat);
                     modelMat = scale(0.2, 0.2, 0.2, modelMat);
+                    modelMat = translate(-1, -1, -1, modelMat);
 
                     let colorLoc = gl.getUniformLocation(playerProgram!, "color");
                     gl.uniform3fv(colorLoc, [0, 0, 255]);
@@ -618,19 +621,19 @@ export default class Engine
 
         gl.bindBuffer(gl.ARRAY_BUFFER, buff);
 
-        let farExtent = 1.9;
-        let nearExtent = .1;
+        let farExtent = 3.8;
+        let nearExtent = .2;
 
         let fenceData = [
-            nearExtent, nearExtent, -.05,
-            farExtent, nearExtent, -.05,
-            farExtent, farExtent, -.05,
-            nearExtent, farExtent, -.05,
+            nearExtent, nearExtent, -.1,
+            farExtent, nearExtent, -.1,
+            farExtent, farExtent, -.1,
+            nearExtent, farExtent, -.1,
 
-            nearExtent, nearExtent, .05,
-            farExtent, nearExtent, .05,
-            farExtent, farExtent, .05,
-            nearExtent, farExtent, .05,
+            nearExtent, nearExtent, .1,
+            farExtent, nearExtent, .1,
+            farExtent, farExtent, .1,
+            nearExtent, farExtent, .1,
         ];
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(fenceData), gl.STATIC_DRAW);
 
@@ -706,10 +709,15 @@ export default class Engine
                 {
                     let modelMat = translate (...this.gameLogic.cursor.pos, identity());
                     modelMat = scale (1.01, 1.01, 1.01, modelMat); // prevent z fighting
-                    if (this.gameLogic.cursor.orientation == Orientation.Flat)
+                    if (this.gameLogic.cursor.orientation == Orientation.Flat){
                         modelMat = rotationYZ(3 * Math.PI / 2, modelMat);
-                    if (this.gameLogic.cursor.orientation == Orientation.Vertical)
+                    }
+                    if (this.gameLogic.cursor.orientation == Orientation.Vertical) {
                         modelMat = rotationXZ(Math.PI / 2, modelMat);
+                    }
+                    if (this.gameLogic.cursor.orientation == Orientation.Horizontal) {
+
+                    }
 
                     let modelLoc = gl.getUniformLocation(fenceProgram!, "model");
                     gl.uniformMatrix4fv(modelLoc, false, modelMat);

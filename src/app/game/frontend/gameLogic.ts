@@ -2,20 +2,22 @@ import { Player } from "./types"
 import { addVec3 } from "./math";
 import { Vec3, Cursor, ClientMessage,  ID, Orientation, Player as NetworkPlayer, MessageType } from "../shared/types";
 import { clamp } from "./utils";
+import { Camera } from "./camera"
 
 const UNINITIALIZED = "NA";
 
 type Fence = Cursor
 
 export class GameLogic {
-    gridSizeXY: number = 10;
-    gridLayers: number = 4;
+    gridSizeXY: number = 18;
+    gridLayers: number = 6;
     myId:           ID = UNINITIALIZED;
     activePlayerId: ID = UNINITIALIZED;
+    cameraRef: Camera | null = null
 
     cursor: Cursor = {
-        pos: [1, 0, 0],
-        orientation: Orientation.Horizontal
+        pos: [2, 0, 0],
+        orientation: Orientation.Vertical
     }
     cursorMode = "fence";
     players: Player[];
@@ -40,7 +42,7 @@ export class GameLogic {
         fences.forEach((fence) => {
             this.fencePositions.push(
                 {
-                    pos: [Math.ceil(fence.pos[1] / 2), Math.ceil(fence.pos[2] / 2), Math.ceil(fence.pos[0] / 2) ],
+                    pos: [fence.pos[1], fence.pos[2], fence.pos[0]],
                     orientation: fence.orientation
                 }
             )
@@ -54,7 +56,7 @@ export class GameLogic {
             this.players.push(
                 {
                     id: player.id,
-                    pos: [Math.ceil(player.pos[1] / 2), Math.ceil(player.pos[2] / 2), Math.ceil(player.pos[0] / 2) ],
+                    pos: [player.pos[1], player.pos[2], player.pos[0] ],
                     color: [255, 155, 0],
                     walls: player.numFences,
                 }
@@ -108,47 +110,62 @@ export class GameLogic {
             switch (this.cursor.orientation)
             {
                 case Orientation.Horizontal:
-                    xModifier = 2;
-                    yModifier = 2;
+                    xModifier = 4;
+                    yModifier = 4;
                     break;
                 case Orientation.Vertical:
-                    zModifier = 2;
-                    yModifier = 2;
-                    break;
+                    zModifier = 4;
+                    yModifier = 4;
+                    break
                 case Orientation.Flat:
-                    xModifier = 2;
-                    zModifier = 2;
+                    xModifier = 4;
+                    zModifier = 4;
                     break;
 
             }
         }
-        this.cursor.pos[0] = clamp(this.cursor.pos[0], 0, this.gridSizeXY - 1 - xModifier);
-        this.cursor.pos[1] = clamp(this.cursor.pos[1], 0, this.gridLayers - 1 - yModifier);
-        this.cursor.pos[2] = clamp(this.cursor.pos[2], 0, this.gridSizeXY - 1 - zModifier);
+        this.cursor.pos[0] = clamp(this.cursor.pos[0], 0, this.gridSizeXY - xModifier);
+        this.cursor.pos[1] = clamp(this.cursor.pos[1], 0, this.gridLayers - yModifier);
+        this.cursor.pos[2] = clamp(this.cursor.pos[2], 0, this.gridSizeXY - zModifier);
+    }
+
+    GetNearestAxis(v: Vec3, sign: -1 | 1): Vec3 {
+        let idx = 0
+        let max = Number.MIN_SAFE_INTEGER
+        for (let i = 0; i < 3; ++i) {
+            if (Math.abs(v[i]) > max) {
+                max = Math.abs(v[i])
+                idx = i
+            }
+        }
+
+        let ret: Vec3 = [0, 0, 0]
+        ret[idx] = Math.sign(v[idx]) * 2 * sign
+        return ret
     }
 
     MoveCursorUp() {
-        this.MoveCursor([0, 1, 0]);
+        this.MoveCursor(this.GetNearestAxis(this.cameraRef!.upVec, 1));
     }
 
     MoveCursorDown() {
-        this.MoveCursor([0, -1, 0]);
+        this.MoveCursor(this.GetNearestAxis(this.cameraRef!.upVec, -1));
     }
 
     MoveCursorFront() {
-        this.MoveCursor([0, 0, 1]);
+        this.MoveCursor(this.GetNearestAxis(this.cameraRef!.frontVec, -1));
     }
 
     MoveCursorBack() {
-        this.MoveCursor([0, 0, -1]);
+        this.MoveCursor(this.GetNearestAxis(this.cameraRef!.frontVec, 1));
     }
 
     MoveCursorLeft() {
-        this.MoveCursor([-1, 0, 0]);
+        this.MoveCursor(this.GetNearestAxis(this.cameraRef!.rightVec, -1));
     }
 
     MoveCursorRight() {
-        this.MoveCursor([1, 0, 0]);
+        this.MoveCursor(this.GetNearestAxis(this.cameraRef!.rightVec, 1));
     }
 
     switchCursorMode()
@@ -156,12 +173,13 @@ export class GameLogic {
         if (this.cursorMode == "fence")
         {
             this.cursorMode = "pawn";
-            this.cursor.pos = [1, 0, 0];
+            this.cursor.pos = [2, 0, 0];
         }
         else if (this.cursorMode == "pawn")
         {
             this.cursorMode = "fence";
-            this.cursor.pos = this?.getActivePlayer()?.pos ?? [0., 0., 0.];
+            this.cursor.pos = addVec3([-1, -1, -1], this?.getActivePlayer()?.pos ?? [0., 0., 0.]);
+            this.ClampCursorToBoard();
         }
     }
 
@@ -202,7 +220,7 @@ export class GameLogic {
                 payload: {
                     playerId: this.myId,
                     action: {
-                        heading: {row: pos[2], col: pos[0], layer: pos[1]},
+                        heading: [pos[2], pos[0], pos[1]],
                         fence: undefined,
                     }
                 }
@@ -214,6 +232,7 @@ export class GameLogic {
     commitFenceMove()
     {
         let pos = this.cursor.pos;
+        console.log(pos)
         let orientation = this.cursor.orientation;
         this.notifyServer(
             {

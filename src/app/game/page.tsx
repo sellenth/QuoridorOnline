@@ -43,7 +43,7 @@ export default function GameView() {
                 .from('test-game')
                 .select('*')
                 .limit(1)
-                .order('move_num', { ascending: false })
+                .order('move_num', { ascending: true })
                 .single()
 
             engine.IngestGameState(data)

@@ -15,9 +15,9 @@ export const fsFence = `#version 300 es
         //outColor = vec4(1, 0, 0.5, 1);
 
 
-        float a = distance(modelCoord.xy, vec2(1.)) / 1.75 + 0.5;
+        float a = distance(modelCoord.xy, vec2(2.)) / 1.75 + 0.5;
 
-        a *= (cos(u_time) + 1.) / 8. + .5;
+        a *= (cos(u_time) + 1.) / 8. + .25;
         /*
         float pulseTime = 1.5;
         a *= 1. - mod(u_time, pulseTime) / pulseTime;
@@ -87,7 +87,7 @@ export const fsGrid = `#version 300 es
     void main() {
         vec2 st = gl_FragCoord.xy / u_resolution;
 
-        float a = (5. - distance(camPos.xyz, worldCoord.xyz)) / 5.;
+        float a = (10. - distance(camPos.xyz, worldCoord.xyz)) / 5.;
         outColor = vec4(0., .5, 0., a);
     }
 `;

@@ -9,12 +9,12 @@ export class Camera {
     frontVec: Vec3 = [0, 0, 1];
     rightVec: Vec3 = [1, 0, 0];
     upVec: Vec3    = [0, 1, 0];
-    position: Vec3 = [5., .3, -2.];
+    position: Vec3 = [6., 5., -5.];
     yaw = -89;
-    pitch = 0;
-    moveSpeed = 10;
+    pitch = 30;
+    moveSpeed = 20;
     mouseSens = 0.1;
-    spaceExtents: Vec3 = [10, 10, 10];
+    spaceExtents: Vec3 = [20, 20, 20];
     keysDown = {
         a: false,
         w: false,
@@ -72,10 +72,10 @@ export class Camera {
             this.position = addVec3(this.position, scaleVec3(this.rightVec, velocity));
         }
         if (this.keysDown.space) {
-            this.position = addVec3(this.position, [0, velocity, 0]);
+            this.position = addVec3(this.position, scaleVec3(this.upVec, velocity));
         }
         if (this.keysDown.ctrl) {
-            this.position = addVec3(this.position, [0, -velocity, 0]);
+            this.position = subVec3(this.position, scaleVec3(this.upVec, velocity));
         }
 
         this.position.forEach((_, i, arr) => {
