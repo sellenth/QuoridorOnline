@@ -4,12 +4,59 @@
 //import { useRef, useCallback } from 'react';
 import Engine from './frontend/index'
 import { useEffect } from 'react'
+import { useSupabase } from '../../components/supabase-provider'
+import type { SupabaseClient } from '@supabase/auth-helpers-nextjs'
 
 export default function GameView() {
+    const { supabase, session } = useSupabase()
 
     useEffect(() => {
         let engine = new Engine()
+        engine.gameLogic.assignId(session?.user.id ?? "NA");
         engine.startRenderLoop()
+        const channel = supabase.channel('room1')
+
+        // Subscribe registers your client with the server
+        /*
+        channel
+        .on('broadcast', { event: 'camera-pos' }, (p) => engine.updateNetworkedCameras(p.payload))
+        .subscribe((status: any) => {
+            if (status === 'SUBSCRIBED') {
+                // now you can start broadcasting cursor positions
+                setInterval(() => {
+                    channel.send({
+                        type: 'broadcast',
+                        event: 'camera-pos',
+                        payload: [
+                            session?.user.id,
+                            engine.PackageCameraAsNetPayload(),
+                        ]
+                    })
+                    console.log(status)
+                }, 1000)
+            }
+        })*/
+
+        async function getGameState(supabase: SupabaseClient) {
+            // fetch game state
+            const { data } = await supabase
+                .from('test-game')
+                .select('*')
+                .limit(1)
+                .order('move_num', { ascending: false })
+                .single()
+
+            engine.IngestGameState(data)
+
+        }
+
+        getGameState(supabase)
+
+        return () => {
+            supabase.removeAllChannels()
+            engine.render = false;
+        }
+
     }, [])
 
     return (<>

@@ -9,7 +9,7 @@ export class Camera {
     frontVec: Vec3 = [0, 0, 1];
     rightVec: Vec3 = [1, 0, 0];
     upVec: Vec3    = [0, 1, 0];
-    position: Vec3 = [5., .3, 0.];
+    position: Vec3 = [5., .3, -2.];
     yaw = -89;
     pitch = 0;
     moveSpeed = 10;
@@ -52,7 +52,6 @@ export class Camera {
 
     GetPitch()
     {
-        console.log(this.pitch)
         return this.pitch;
     }
 

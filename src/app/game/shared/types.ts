@@ -3,42 +3,35 @@ export type Vec4 = [number, number, number, number];
 
 export type Mat4 = Float32List;
 
-export type Coordinate = {
-    row: number,
-    col: number,
-    layer: number
-}
-
 export type ID = string;
 
 export type Player = {
     id: ID;
     goalY: number;
     numFences: number;
-    position: Coordinate;
+    pos: Vec3;
+}
+
+export type Cursor = {
+    pos: Vec3,
+    orientation: Orientation
 }
 
 export type NetworkCamera = {
     position: Vec3,
     pitch: number,
     yaw: number,
-    id: ID
 }
 
 export type Action = {
-    heading: Coordinate | undefined;
-    fence: Fence | undefined;
+    heading: Vec3 | undefined;
+    fence: Cursor | undefined;
 }
 
 export enum Orientation {
     Horizontal = 1,
     Vertical = 2,
     Flat = 3
-}
-
-export type Fence = {
-    coord: Coordinate,
-    orientation: Orientation
 }
 
 export enum MessageType { GameState, Identity, GameOver, Cameras, ClientCameraPos, ClientAction };

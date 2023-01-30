@@ -100,25 +100,18 @@ export default class Engine
     gl: WebGL2RenderingContext | null;
     sceneObjects: VisualUnit[] = [];
     camera: Camera = new Camera();
-    networkedCameras: NetworkCamera[] = [];
+    networkedCameras: Record<string, NetworkCamera>
     frameTiming: FrameTiming = new FrameTiming();
     //gameStateSocket: WebSocket;
     gameStatusHandler: GameStatusHandler = new GameStatusHandler();
+    render = true
 
 
     constructor()
     {
         this.canvas = document.querySelector("#c")!;
         this.gameLogic = new GameLogic();
-        this.gameLogic.players = [
-                {
-                    id: "500",
-                    pos: [Math.ceil(0 / 2), Math.ceil(0 / 2), Math.ceil(0 / 2) ],
-                    color: [10, 155, 10],
-                    walls: 10,
-                }
-        ]
-        console.log(this.gameLogic.players)
+        this.gameLogic.players = []
 
         this.gl = this.canvas.getContext("webgl2", {premultipliedAlpha: false});
         if (!this.gl) {
@@ -203,6 +196,41 @@ export default class Engine
         }
     }
 
+    PackageCameraAsNetPayload()
+    {
+        return {
+            position: this.camera.GetPosition(),
+            pitch: this.camera.GetPitch(),
+            yaw: this.camera.GetYaw(),
+        }
+    }
+
+    IngestGameState(data)
+    {
+        // transform game state
+        const fences = data.fences_placed.map( ([orientation, x, y, z]: number[]) => {
+            return {
+                pos: [x, y, z],
+                orientation: orientation  }
+        } )
+
+        const players = [
+            {id: data.p1_id, goalY: 16, numFences: data.p1_fences, pos: data.p1_pos},
+            {id: data.p2_id, goalY: 0, numFences: data.p2_fences, pos: data.p2_pos}]
+
+        // update engine w/ new game state
+        this.gameLogic.updateFences(fences);
+        this.gameLogic.updatePlayers(players);
+        this.gameLogic.setActivePlayer(data.curr_player_id);
+
+    }
+
+
+    updateNetworkedCameras(payload) {
+        let [id, camera] = payload
+        this.networkedCameras[id] = camera;
+    }
+
     async startRenderLoop()
     {
         const gl = this.gl;
@@ -212,7 +240,7 @@ export default class Engine
         }
         let canvas = gl.canvas as HTMLCanvasElement
 
-        while (true)
+        while (this.render)
         {
             this.frameTiming.tick()
 
@@ -226,7 +254,6 @@ export default class Engine
             this.camera.Move(this.frameTiming.deltaTime);
 
             // Calculate program independent matrices
-
             let projMat = projection(3.14 / 2, canvas.clientWidth / canvas.clientHeight, 0.1, 50);
             let viewMat = this.camera.getViewMatrix();
 
@@ -234,7 +261,7 @@ export default class Engine
                 so.render(projMat, viewMat);
             });
 
-            await sleep(Math.max(0, 16 - this.frameTiming.deltaTime));
+            await sleep(Math.max(0, 32 - this.frameTiming.deltaTime));
         }
 
     }
@@ -242,10 +269,7 @@ export default class Engine
     configurePrograms()
     {
         this.sceneObjects = [];
-        let prog = this.createPlayerProgram();
-        if (prog) {
-            this.sceneObjects.push(prog)
-        }
+        this.sceneObjects.push(this.createPlayerProgram());
         this.sceneObjects.push(this.createPlayerProgram());
         this.sceneObjects.push(this.createCameraProgram());
         this.sceneObjects.push(this.createFenceProgram());
@@ -553,24 +577,21 @@ export default class Engine
                 let camLoc = gl.getUniformLocation(cameraProgram!, "camera");
                 gl.uniformMatrix4fv(camLoc, false, viewMat);
 
+                Object.values(this.networkedCameras).forEach((camera) => {
+                    let modelMat = translate(...camera.position, identity());
+                    modelMat = rotationXZ( degreesToRadians(camera.yaw + 90), modelMat );
+                    modelMat = rotationYZ( degreesToRadians(camera.pitch * -1), modelMat );
+                    modelMat = translate(-.5, -.5, 0, modelMat);
 
-                this.networkedCameras.forEach((camera) => {
-                    if (camera.id != this.gameLogic.myId)
-                    {
-                        let modelMat = translate(...camera.position, identity());
-                        modelMat = rotationXZ( degreesToRadians(camera.yaw + 90), modelMat );
-                        modelMat = rotationYZ( degreesToRadians(camera.pitch * -1), modelMat );
-                        modelMat = translate(-.5, -.5, 0, modelMat);
+                    let colorLoc = gl.getUniformLocation(cameraProgram!, "color");
+                    gl.uniform3fv(colorLoc, [.2, .4, .6]);
 
-                        let colorLoc = gl.getUniformLocation(cameraProgram!, "color");
-                        gl.uniform3fv(colorLoc, [.2, .4, .6]);
+                    let modelLoc = gl.getUniformLocation(cameraProgram!, "model");
+                    gl.uniformMatrix4fv(modelLoc, false, modelMat);
 
-                        let modelLoc = gl.getUniformLocation(cameraProgram!, "model");
-                        gl.uniformMatrix4fv(modelLoc, false, modelMat);
+                    gl.drawElements(gl.TRIANGLES, elements.length, gl.UNSIGNED_SHORT, 0);
+                })
 
-                        gl.drawElements(gl.TRIANGLES, elements.length, gl.UNSIGNED_SHORT, 0);
-                    }
-                });
             }
         };
     }

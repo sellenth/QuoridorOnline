@@ -1,9 +1,11 @@
-import { Cursor, Player } from "./types"
+import { Player } from "./types"
 import { addVec3 } from "./math";
-import { Vec3, ClientMessage, Coordinate, Fence, ID, Orientation, Player as NetworkPlayer, MessageType } from "../shared/types";
+import { Vec3, Cursor, ClientMessage,  ID, Orientation, Player as NetworkPlayer, MessageType } from "../shared/types";
 import { clamp } from "./utils";
 
 const UNINITIALIZED = "NA";
+
+type Fence = Cursor
 
 export class GameLogic {
     gridSizeXY: number = 10;
@@ -38,7 +40,7 @@ export class GameLogic {
         fences.forEach((fence) => {
             this.fencePositions.push(
                 {
-                    pos: [Math.ceil(fence.coord.col / 2), Math.ceil(fence.coord.layer / 2), Math.ceil(fence.coord.row / 2) ],
+                    pos: [Math.ceil(fence.pos[1] / 2), Math.ceil(fence.pos[2] / 2), Math.ceil(fence.pos[0] / 2) ],
                     orientation: fence.orientation
                 }
             )
@@ -52,8 +54,8 @@ export class GameLogic {
             this.players.push(
                 {
                     id: player.id,
-                    pos: [Math.ceil(player.position.col / 2), Math.ceil(player.position.layer / 2), Math.ceil(player.position.row / 2) ],
-                    color: [player.goalY, 155, player.goalY],
+                    pos: [Math.ceil(player.pos[1] / 2), Math.ceil(player.pos[2] / 2), Math.ceil(player.pos[0] / 2) ],
+                    color: [255, 155, 0],
                     walls: player.numFences,
                 }
             )
