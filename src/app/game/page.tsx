@@ -14,10 +14,10 @@ export default function GameView() {
         let engine = new Engine()
         engine.gameLogic.assignId(session?.user.id ?? "NA");
         engine.startRenderLoop()
+        /*
         const channel = supabase.channel('room1')
 
         // Subscribe registers your client with the server
-        /*
         channel
         .on('broadcast', { event: 'camera-pos' }, (p) => engine.updateNetworkedCameras(p.payload))
         .subscribe((status: any) => {
@@ -48,6 +48,12 @@ export default function GameView() {
 
             engine.IngestGameState(data)
 
+            /*
+            const { edge_data, error } = await supabase.functions.invoke('hello-world', {
+            body: { name: 'bar' }
+            })
+            console.log(edge_data)
+            */
         }
 
         getGameState(supabase)
