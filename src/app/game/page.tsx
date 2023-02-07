@@ -13,6 +13,7 @@ export default function GameView() {
     useEffect(() => {
         let engine = new Engine()
         engine.gameLogic.assignId(session?.user.id ?? "NA");
+        console.log(session?.user.id)
         engine.startRenderLoop()
         /*
         const channel = supabase.channel('room1')
