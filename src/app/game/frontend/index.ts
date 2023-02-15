@@ -6,34 +6,34 @@ import { createShader, createProgram, resizeCanvasToDisplaySize, sleep } from ".
 import { identity, translate, projection, addVec3, rotationYZ, rotationXZ, scale, degreesToRadians } from "./math"
 import { Camera } from "./camera";
 import { GameLogic } from "./gameLogic";
-import { ClientMessage, GameStatePayload, ID, MessageType, Orientation,
-    Player, ServerPayload, Mat4, NetworkCamera } from "../shared/types"
+import {
+    ClientMessage, GameStatePayload, ID, MessageType, Orientation,
+    Player, ServerPayload, Mat4, NetworkCamera
+} from "../shared/types"
+import type { SupabaseClient } from '@supabase/auth-helpers-nextjs'
 
 const szFLOAT = 4;
 
 type VisualUnit =
-{
-    program: WebGLProgram;
-    VAO: WebGLVertexArrayObject;
-    render: (projMat: Mat4, viewMat: Mat4) => void;
-}
+    {
+        program: WebGLProgram;
+        VAO: WebGLVertexArrayObject;
+        render: (projMat: Mat4, viewMat: Mat4) => void;
+    }
 
-class GameStatusHandler
-{
+class GameStatusHandler {
     myWallsElement: Node;
     theirWallsElement: Node;
     turnIndicatorElement: Node;
     //GameOverModal: Node;
 
-    constructor()
-    {
+    constructor() {
         this.myWallsElement = document.querySelector("#myWalls")!;
         this.theirWallsElement = document.querySelector("#theirWalls")!;
         this.turnIndicatorElement = document.querySelector("#turnIndicator")!;
     }
 
-    Update(myID: ID, state: GameStatePayload)
-    {
+    Update(myID: ID, state: GameStatePayload) {
         state.players.forEach((player) => {
             this.UpdateWalls(myID, player);
         })
@@ -41,8 +41,7 @@ class GameStatusHandler
 
     }
 
-    GameOver(myID: ID, winningID: ID)
-    {
+    GameOver(myID: ID, winningID: ID) {
         const el = document.querySelector("#gameOver")!;
         el.textContent = myID == winningID ? "You win" : "Better luck next time";
         el.classList.add("fancy-animation");
@@ -51,30 +50,26 @@ class GameStatusHandler
         }, 5000);
     }
 
-    UpdateWalls(myID: ID, player: Player)
-    {
+    UpdateWalls(myID: ID, player: Player) {
         const who = myID == player.id ? "You" : "Them";
         const indicatorElement = myID == player.id ? this.myWallsElement : this.theirWallsElement;
         indicatorElement.textContent = `${who} - ${player.numFences}`;
     }
 
-    UpdateTurnIndicator(myID: ID, activePlayerId: ID)
-    {
+    UpdateTurnIndicator(myID: ID, activePlayerId: ID) {
         let who = myID == activePlayerId ? "your" : "the other player's";
         this.turnIndicatorElement.textContent = `It's ${who} turn.`
     }
 }
 
-class FrameTiming
-{
+class FrameTiming {
     then: number;
     deltaTime: number;
     fps: number;
     elapsed: number;
     counterElement: Node;
 
-    constructor()
-    {
+    constructor() {
         this.then = new Date().getTime() * .001;
         this.counterElement = document.querySelector("#fps")!.lastChild!;
         this.elapsed = 0.;
@@ -82,19 +77,17 @@ class FrameTiming
         this.fps = 0;
     }
 
-    tick()
-    {
-            let now = new Date().getTime() * .001;
-            this.deltaTime = now - this.then;
-            this.elapsed += this.deltaTime;
-            this.then = now;
-            this.fps = 1 / this.deltaTime;
-            this.counterElement.textContent = this.fps.toFixed();
+    tick() {
+        let now = new Date().getTime() * .001;
+        this.deltaTime = now - this.then;
+        this.elapsed += this.deltaTime;
+        this.then = now;
+        this.fps = 1 / this.deltaTime;
+        this.counterElement.textContent = this.fps.toFixed();
     }
 }
 
-export default class Engine
-{
+export default class Engine {
     canvas: HTMLCanvasElement
     gameLogic: GameLogic;
     gl: WebGL2RenderingContext | null;
@@ -106,15 +99,25 @@ export default class Engine
     gameStatusHandler: GameStatusHandler = new GameStatusHandler();
     render = true
 
-
-    constructor()
-    {
+    constructor(dbClient: SupabaseClient) {
         this.canvas = document.querySelector("#c")!;
         this.gameLogic = new GameLogic();
         this.gameLogic.players = []
         this.gameLogic.cameraRef = this.camera
 
-        this.gl = this.canvas.getContext("webgl2", {premultipliedAlpha: false});
+        this.dbClient = dbClient
+        this.gameLogic.notifyServer = async () => {
+            const { data, error } = await this.dbClient.functions.invoke('hello-world', {
+                body: { name: 'bar' }
+            })
+            if (error) {
+                console.error(error)
+            } else {
+                console.log(data.message)
+            }
+        }
+
+        this.gl = this.canvas.getContext("webgl2", { premultipliedAlpha: false });
         if (!this.gl) {
             alert("You need a webGL compatible browser")
             return;
@@ -126,8 +129,8 @@ export default class Engine
 
         this.camera.configureCameraListeners(this.canvas, this.gameLogic);
         this.camera.SetExtents([this.gameLogic.gridSizeXY,
-                                this.gameLogic.gridLayers,
-                                this.gameLogic.gridSizeXY ]);
+        this.gameLogic.gridLayers,
+        this.gameLogic.gridSizeXY]);
 
         this.networkedCameras = [];
 
@@ -170,12 +173,20 @@ export default class Engine
         }, 1000)
     }*/
 
-    handleServerPayload(payload: ServerPayload)
-    {
-        if (this.gameLogic)
-        {
-            switch (payload.type)
-            {
+    async networkTick(game_id: string) {
+        // fetch game state
+        const { data } = await this.dbClient
+            .from('games')
+            .select('*, moves (*)')
+            .eq('id', game_id)
+            .single()
+
+        this.IngestGameState(data)
+    }
+
+    handleServerPayload(payload: ServerPayload) {
+        if (this.gameLogic) {
+            switch (payload.type) {
                 case MessageType.Identity:
                     let id = payload.data as ID;
                     this.gameLogic.assignId(id);
@@ -197,8 +208,7 @@ export default class Engine
         }
     }
 
-    PackageCameraAsNetPayload()
-    {
+    PackageCameraAsNetPayload() {
         return {
             position: this.camera.GetPosition(),
             pitch: this.camera.GetPitch(),
@@ -206,23 +216,26 @@ export default class Engine
         }
     }
 
-    IngestGameState(data)
-    {
+    IngestGameState(data) {
         // transform game state
-        const fences = data.fences_placed.map( ([orientation, x, y, z]: number[]) => {
+        const fences = data.moves.fences_placed.map(([orientation, x, y, z]: number[]) => {
             return {
                 pos: [x, y, z],
-                orientation: orientation  }
-        } )
+                orientation: orientation
+            }
+        })
 
         const players = [
-            {id: data.p1_id, goalY: 16, numFences: data.p1_fences, pos: data.p1_pos},
-            {id: data.p2_id, goalY: 0, numFences: data.p2_fences, pos: data.p2_pos}]
+            { id: data.p1_id, goalY: 16, numFences: data.moves.p1_fences, pos: data.moves.p1_pos },
+            { id: data.p2_id, goalY: 0, numFences: data.moves.p2_fences, pos: data.moves.p2_pos }]
 
         // update engine w/ new game state
         this.gameLogic.updateFences(fences);
         this.gameLogic.updatePlayers(players);
-        this.gameLogic.setActivePlayer(data.curr_player_id);
+        this.gameLogic.setActivePlayer(
+            data.move_num % 2
+                ? data.p2_id
+                : data.p1_id);
 
     }
 
@@ -232,8 +245,7 @@ export default class Engine
         this.networkedCameras[id] = camera;
     }
 
-    async startRenderLoop()
-    {
+    async startRenderLoop() {
         const gl = this.gl;
 
         if (!gl) {
@@ -241,8 +253,7 @@ export default class Engine
         }
         let canvas = gl.canvas as HTMLCanvasElement
 
-        while (this.render)
-        {
+        while (this.render) {
             this.frameTiming.tick()
 
             resizeCanvasToDisplaySize(canvas, 1);
@@ -258,7 +269,7 @@ export default class Engine
             let projMat = projection(3.14 / 2, canvas.clientWidth / canvas.clientHeight, 0.1, 50);
             let viewMat = this.camera.getViewMatrix();
 
-            this.sceneObjects.forEach( so => {
+            this.sceneObjects.forEach(so => {
                 so.render(projMat, viewMat);
             });
 
@@ -267,8 +278,7 @@ export default class Engine
 
     }
 
-    configurePrograms()
-    {
+    configurePrograms() {
         this.sceneObjects = [];
         this.sceneObjects.push(this.createPlayerProgram());
         this.sceneObjects.push(this.createCameraProgram());
@@ -276,8 +286,7 @@ export default class Engine
         this.sceneObjects.push(this.createGridProgram());
     }
 
-    createGridProgram()
-    {
+    createGridProgram() {
         const gl = this.gl!;
         let vs = createShader(gl, gl.VERTEX_SHADER, vss);
         let fs = createShader(gl, gl.FRAGMENT_SHADER, fsGrid);
@@ -304,22 +313,18 @@ export default class Engine
         let gridData = [];
 
         // Create horizontal lines
-        for (let a = 0; a <= this.gameLogic.gridSizeXY; a+=2)
-        {
-            for (let b = 0; b <= this.gameLogic.gridLayers; b+=2)
-            {
+        for (let a = 0; a <= this.gameLogic.gridSizeXY; a += 2) {
+            for (let b = 0; b <= this.gameLogic.gridLayers; b += 2) {
                 gridData.push(0, b, a,
-                              this.gameLogic.gridSizeXY, b, a);
+                    this.gameLogic.gridSizeXY, b, a);
             }
         }
 
         // Create depth lines
-        for (let a = 0; a <= this.gameLogic.gridSizeXY; a+=2)
-        {
-            for (let b = 0; b <= this.gameLogic.gridLayers; b+=2)
-            {
-                gridData.push( a, b, 0,
-                               a, b, this.gameLogic.gridSizeXY);
+        for (let a = 0; a <= this.gameLogic.gridSizeXY; a += 2) {
+            for (let b = 0; b <= this.gameLogic.gridLayers; b += 2) {
+                gridData.push(a, b, 0,
+                    a, b, this.gameLogic.gridSizeXY);
             }
         }
 
@@ -329,12 +334,12 @@ export default class Engine
 
         // binds currently bound array_buffer (positionBuffer) & ebo (elBuff) to this attribPointer
         gl.vertexAttribPointer(positionAttribLocation, // vertex attribute to modify
-                               3, // how many elements per attribute
-                               gl.FLOAT, // type of individual element
-                               false, //normalize
-                               3 * szFLOAT, //stride
-                               0 //offset from start of buffer
-                              );
+            3, // how many elements per attribute
+            gl.FLOAT, // type of individual element
+            false, //normalize
+            3 * szFLOAT, //stride
+            0 //offset from start of buffer
+        );
 
         return {
             program: gridProgram,
@@ -361,8 +366,7 @@ export default class Engine
         };
     }
 
-    createPlayerProgram()
-    {
+    createPlayerProgram() {
         const gl = this.gl!;
 
         let vs = createShader(gl, gl.VERTEX_SHADER, vss);
@@ -387,15 +391,15 @@ export default class Engine
         gl.bindBuffer(gl.ARRAY_BUFFER, buff);
 
         let cubeData = [
-            0, 0, 0,      255, 0, 0,
-            2, 0, 0,      255, 0, 0,
-            2, 2, 0,      255, 0, 0,
-            0, 2, 0,      255, 0, 0,
+            0, 0, 0, 255, 0, 0,
+            2, 0, 0, 255, 0, 0,
+            2, 2, 0, 255, 0, 0,
+            0, 2, 0, 255, 0, 0,
 
-            0, 0, 2,      0, 255, 0,
-            2, 0, 2,      0, 255, 0,
-            2, 2, 2,      0, 255, 0,
-            0, 2, 2,      0, 255, 0,
+            0, 0, 2, 0, 255, 0,
+            2, 0, 2, 0, 255, 0,
+            2, 2, 2, 0, 255, 0,
+            0, 2, 2, 0, 255, 0,
 
 
         ];
@@ -429,12 +433,12 @@ export default class Engine
 
         // binds currently bound array_buffer (positionBuffer) & ebo (elBuff) to this attribPointer
         gl.vertexAttribPointer(playerPosAttrib, // vertex attribute to modify
-                               3, // how many elements per attribute
-                               gl.FLOAT, // type of individual element
-                               false, //normalize
-                               6 * szFLOAT, //stride
-                               0 //offset from start of buffer
-                              );
+            3, // how many elements per attribute
+            gl.FLOAT, // type of individual element
+            false, //normalize
+            6 * szFLOAT, //stride
+            0 //offset from start of buffer
+        );
 
         return {
             program: playerProgram,
@@ -463,8 +467,7 @@ export default class Engine
                     gl.drawElements(gl.TRIANGLES, 36, gl.UNSIGNED_SHORT, 0);
                 })
 
-                if (this.gameLogic.IsMyTurn() && this.gameLogic.cursorMode == "pawn" )
-                {
+                if (this.gameLogic.IsMyTurn() && this.gameLogic.cursorMode == "pawn") {
                     let modelMat = translate(...(this.gameLogic.getActivePlayer()?.pos ?? [0, 0, 0]), identity());
                     modelMat = translate(...this.gameLogic.cursor.pos, modelMat);
                     modelMat = scale(0.2, 0.2, 0.2, modelMat);
@@ -482,8 +485,7 @@ export default class Engine
         };
     }
 
-    createCameraProgram()
-    {
+    createCameraProgram() {
         const gl = this.gl!;
         let vs = createShader(gl, gl.VERTEX_SHADER, vss);
         let fs = createShader(gl, gl.FRAGMENT_SHADER, fsCamera);
@@ -560,12 +562,12 @@ export default class Engine
 
         // binds currently bound array_buffer (positionBuffer) & ebo (elBuff) to this attribPointer
         gl.vertexAttribPointer(cameraPosAttrib, // vertex attribute to modify
-                               3, // how many elements per attribute
-                               gl.FLOAT, // type of individual element
-                               false, //normalize
-                               3 * szFLOAT, //stride
-                               0 //offset from start of buffer
-                              );
+            3, // how many elements per attribute
+            gl.FLOAT, // type of individual element
+            false, //normalize
+            3 * szFLOAT, //stride
+            0 //offset from start of buffer
+        );
 
         return {
             program: cameraProgram,
@@ -582,8 +584,8 @@ export default class Engine
 
                 Object.values(this.networkedCameras).forEach((camera) => {
                     let modelMat = translate(...camera.position, identity());
-                    modelMat = rotationXZ( degreesToRadians(camera.yaw + 90), modelMat );
-                    modelMat = rotationYZ( degreesToRadians(camera.pitch * -1), modelMat );
+                    modelMat = rotationXZ(degreesToRadians(camera.yaw + 90), modelMat);
+                    modelMat = rotationYZ(degreesToRadians(camera.pitch * -1), modelMat);
                     modelMat = translate(-.5, -.5, 0, modelMat);
 
                     let colorLoc = gl.getUniformLocation(cameraProgram!, "color");
@@ -599,12 +601,11 @@ export default class Engine
         };
     }
 
-    createFenceProgram()
-    {
+    createFenceProgram() {
         const gl = this.gl!;
         let vs = createShader(gl, gl.VERTEX_SHADER, vss);
         let fs = createShader(gl, gl.FRAGMENT_SHADER, fsFence);
-        if (!vs || !fs){
+        if (!vs || !fs) {
             return
         }
 
@@ -664,12 +665,12 @@ export default class Engine
 
         // binds currently bound array_buffer (positionBuffer) & ebo (elBuff) to this attribPointer
         gl.vertexAttribPointer(fencePosAttrib, // vertex attribute to modify
-                               3, // how many elements per attribute
-                               gl.FLOAT, // type of individual element
-                               false, //normalize
-                               3 * szFLOAT, //stride
-                               0 //offset from start of buffer
-                              );
+            3, // how many elements per attribute
+            gl.FLOAT, // type of individual element
+            false, //normalize
+            3 * szFLOAT, //stride
+            0 //offset from start of buffer
+        );
 
         return {
             program: fenceProgram,
@@ -691,7 +692,7 @@ export default class Engine
                 gl.uniform1f(timeLoc, this.frameTiming.elapsed);
 
                 this.gameLogic.fencePositions.forEach(fence => {
-                    let modelMat = translate (...fence.pos, identity());
+                    let modelMat = translate(...fence.pos, identity());
                     if (fence.orientation == Orientation.Flat)
                         modelMat = rotationYZ(3 * Math.PI / 2, modelMat);
                     if (fence.orientation == Orientation.Vertical)
@@ -705,11 +706,10 @@ export default class Engine
                     gl.drawElements(gl.TRIANGLES, 36, gl.UNSIGNED_SHORT, 0);
                 })
 
-                if ( this.gameLogic.IsMyTurn() && this.gameLogic.cursorMode == "fence")
-                {
-                    let modelMat = translate (...this.gameLogic.cursor.pos, identity());
-                    modelMat = scale (1.01, 1.01, 1.01, modelMat); // prevent z fighting
-                    if (this.gameLogic.cursor.orientation == Orientation.Flat){
+                if (this.gameLogic.IsMyTurn() && this.gameLogic.cursorMode == "fence") {
+                    let modelMat = translate(...this.gameLogic.cursor.pos, identity());
+                    modelMat = scale(1.01, 1.01, 1.01, modelMat); // prevent z fighting
+                    if (this.gameLogic.cursor.orientation == Orientation.Flat) {
                         modelMat = rotationYZ(3 * Math.PI / 2, modelMat);
                     }
                     if (this.gameLogic.cursor.orientation == Orientation.Vertical) {

@@ -10,8 +10,10 @@ create_user AS (
 INSERT INTO auth.identities (id, provider, user_id, identity_data, last_sign_in_at, created_at, updated_at)
   SELECT id, 'email', id, json_build_object('sub', id), NOW(), NOW(), NOW() FROM create_user;
 
-
-
-insert into public."test-game" (p1_id,p2_id,p1_pos,p2_pos,curr_player_id,fences_placed,p1_fences,p2_fences)
+insert into public."games" (id, move_num, p1_id, p2_id)
 values
-  ('13375757-eee0-4e53-9246-2bc83ffcac54','abcdbbfc-577b-4b39-b68d-4b1bc89e4a2f','{1,9,3}','{17,9,3}','13375757-eee0-4e53-9246-2bc83ffcac54','{{1,4,4,0},{2,0,6,0},{3,4,6,2}}',13,14)
+  ('80085757-eee0-4e53-9246-2bc83ffcac54', 0, '13375757-eee0-4e53-9246-2bc83ffcac54','abcdbbfc-577b-4b39-b68d-4b1bc89e4a2f');
+
+insert into public."moves" (id, move_num, p1_pos, p2_pos, p1_fences, p2_fences, fences_placed)
+values
+  ('80085757-eee0-4e53-9246-2bc83ffcac54', 0, '{1,9,3}','{17,9,3}', 13, 14, '{{1,4,4,0},{2,0,6,0},{3,4,6,2}}');

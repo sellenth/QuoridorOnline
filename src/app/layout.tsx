@@ -1,3 +1,4 @@
+/* @ts-ignore */
 import 'server-only'
 
 import SupabaseListener from '../components/supabase-listener'

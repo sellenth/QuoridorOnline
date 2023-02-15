@@ -11,6 +11,9 @@ export default async function Scoreboard() {
     .select('username, elo')
     .order('elo', { ascending: false })
 
+  function wow() {
+  }
+
   return (
     <table>
       <thead>

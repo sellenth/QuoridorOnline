@@ -11,10 +11,12 @@ export default function GameView() {
     const { supabase, session } = useSupabase()
 
     useEffect(() => {
-        let engine = new Engine()
+        let engine: Engine = new Engine(supabase)
         engine.gameLogic.assignId(session?.user.id ?? "NA");
         console.log(session?.user.id)
         engine.startRenderLoop()
+        engine.networkTick('80085757-eee0-4e53-9246-2bc83ffcac54')
+
         /*
         const channel = supabase.channel('room1')
 
@@ -37,28 +39,6 @@ export default function GameView() {
                 }, 1000)
             }
         })*/
-
-        async function getGameState(supabase: SupabaseClient) {
-            // fetch game state
-            const { data } = await supabase
-                .from('test-game')
-                .select('*')
-                .limit(1)
-                .order('move_num', { ascending: true })
-                .single()
-
-            engine.IngestGameState(data)
-
-            /*
-            const { edge_data, error } = await supabase.functions.invoke('hello-world', {
-            body: { name: 'bar' }
-            })
-            console.log(edge_data)
-            */
-        }
-
-        getGameState(supabase)
-
         return () => {
             supabase.removeAllChannels()
             engine.render = false;
