@@ -23,7 +23,7 @@ export class GameLogic {
     players: Player[];
     fencePositions: Cursor[];
 
-    notifyServer: (msg: ClientMessage) => Promise<void>;
+    notifyServer: (msg: [number, number, number, number]) => Promise<void>;
 
     constructor() {
         this.players = [];
@@ -192,59 +192,15 @@ export class GameLogic {
 
     commitPawnMove() {
         let pos = this.cursor.pos;
-        this.notifyServer(
-            {
-                type: MessageType.ClientAction,
-                payload: {
-                    playerId: this.myId,
-                    action: {
-                        heading: [pos[2], pos[0], pos[1]],
-                        fence: undefined,
-                    }
-                }
-            }
-        )
+        console.log('pawn', pos)
+        this.notifyServer([0, ...pos])
     }
 
 
     commitFenceMove() {
         let pos = this.cursor.pos;
-        console.log(pos)
+        console.log('fence', pos)
         let orientation = this.cursor.orientation;
-        this.notifyServer(
-            {
-                type: MessageType.ClientAction,
-                payload: {
-                    playerId: this.myId,
-                    action: {
-                        heading: undefined,
-                        fence: this.convertCursorToServerFence(pos, orientation)
-                    }
-                }
-            }
-        )
-    }
-
-    convertCursorToServerFence(pos: Vec3, orientation: Orientation) {
-        let c: Coordinate;
-        switch (orientation) {
-            case Orientation.Flat:
-                c = { layer: Math.max(0, pos[1] * 2 - 1), row: pos[2] * 2, col: pos[0] * 2 };
-                break;
-            case Orientation.Horizontal:
-                c = { row: Math.max(0, pos[2] * 2 - 1), col: pos[0] * 2, layer: pos[1] * 2 };
-                break;
-            case Orientation.Vertical:
-                c = { col: Math.max(0, pos[0] * 2 - 1), row: pos[2] * 2, layer: pos[1] * 2 };
-                break;
-
-        }
-
-        let serverFence = {
-            coord: c,
-            orientation: orientation
-        }
-
-        return serverFence;
+        this.notifyServer([orientation, ...pos])
     }
 }

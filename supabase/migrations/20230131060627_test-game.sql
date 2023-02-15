@@ -1,22 +1,10 @@
 create table "public"."games" (
     "id" uuid not null,
-    "move_num" integer not null,
+    "move_num" integer default 0,
     "p1_id" uuid,
     "p2_id" uuid,
-    UNIQUE(id, move_num)
+    "moves" smallint[]
 );
-
-create table "public"."moves" (
-    "id" uuid not null,
-    "move_num" integer not null,
-    "p1_pos" smallint[],
-    "p2_pos" smallint[],
-    "p1_fences" smallint,
-    "p2_fences" smallint,
-    "fences_placed" smallint[],
-    FOREIGN KEY (id, move_num) REFERENCES "public"."games" (id, move_num)
-);
-
 
 alter table "public"."games" enable row level security;
 
@@ -33,13 +21,9 @@ alter table "public"."users" enable row level security;
 
 CREATE UNIQUE INDEX "games_pkey" ON public."games" USING btree (id);
 
-CREATE UNIQUE INDEX "moves_pkey" ON public."moves" USING btree (id, move_num);
-
 CREATE UNIQUE INDEX users_pkey ON public.users USING btree (id);
 
 alter table "public"."games" add constraint "games_pkey" PRIMARY KEY using index "games_pkey";
-
-alter table "public"."moves" add constraint "moves_pkey" PRIMARY KEY using index "moves_pkey";
 
 alter table "public"."users" add constraint "users_pkey" PRIMARY KEY using index "users_pkey";
 

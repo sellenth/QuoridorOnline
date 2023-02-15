@@ -106,9 +106,9 @@ export default class Engine {
         this.gameLogic.cameraRef = this.camera
 
         this.dbClient = dbClient
-        this.gameLogic.notifyServer = async () => {
-            const { data, error } = await this.dbClient.functions.invoke('hello-world', {
-                body: { name: 'bar' }
+        this.gameLogic.notifyServer = async (move: [number, number, number, number]) => {
+            const { data, error } = await this.dbClient.functions.invoke('handle-move', {
+                body: { proposed_move: move }
             })
             if (error) {
                 console.error(error)
@@ -177,7 +177,7 @@ export default class Engine {
         // fetch game state
         const { data } = await this.dbClient
             .from('games')
-            .select('*, moves (*)')
+            .select('*')
             .eq('id', game_id)
             .single()
 
@@ -218,22 +218,37 @@ export default class Engine {
 
     IngestGameState(data) {
         // transform game state
-        const fences = data.moves.fences_placed.map(([orientation, x, y, z]: number[]) => {
-            return {
-                pos: [x, y, z],
-                orientation: orientation
+        const fences = []
+        const p1 = { id: data.p1_id, goalY: 17, numFences: 15, pos: [1, 9, 3] };
+        const p2 = { id: data.p2_id, goalY: 1, numFences: 15, pos: [17, 9, 3] }
+
+        data.moves.forEach(([move_type, x, y, z]: number[], idx) => {
+            const p2_move = !!(idx % 2)
+
+            // pawn move
+            if (move_type == 0) {
+                if (p2_move) {
+                    p2.pos = [x, y, z]
+                } else {
+                    p1.pos = [x, y, z]
+                }
+            }
+
+            // fence move
+            else {
+                fences.push({
+                    pos: [x, y, z],
+                    orientation: move_type
+                })
             }
         })
 
-        const players = [
-            { id: data.p1_id, goalY: 16, numFences: data.moves.p1_fences, pos: data.moves.p1_pos },
-            { id: data.p2_id, goalY: 0, numFences: data.moves.p2_fences, pos: data.moves.p2_pos }]
 
         // update engine w/ new game state
         this.gameLogic.updateFences(fences);
-        this.gameLogic.updatePlayers(players);
+        this.gameLogic.updatePlayers([p1, p2]);
         this.gameLogic.setActivePlayer(
-            data.move_num % 2
+            data.moves.length % 2
                 ? data.p2_id
                 : data.p1_id);
 
