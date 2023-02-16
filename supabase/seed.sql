@@ -12,4 +12,4 @@ INSERT INTO auth.identities (id, provider, user_id, identity_data, last_sign_in_
 
 insert into public."games" (id, move_num, p1_id, p2_id, moves)
 values
-  ('80085757-eee0-4e53-9246-2bc83ffcac54', 5,'abcdbbfc-577b-4b39-b68d-4b1bc89e4a2f', '13375757-eee0-4e53-9246-2bc83ffcac54', '{{1,4,4,0},{2,0,6,0},{3,4,6,2},{0,15,9,3},{0,3,9,3}}');
+  ('80085757-eee0-4e53-9246-2bc83ffcac54', 5,'abcdbbfc-577b-4b39-b68d-4b1bc89e4a2f', '13375757-eee0-4e53-9246-2bc83ffcac54', '{{1,4,0,4},{2,6,0,0},{3,6,2,4},{0,15,9,3},{0,3,9,3}}');

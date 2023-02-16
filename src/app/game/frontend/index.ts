@@ -108,7 +108,7 @@ export default class Engine {
         this.dbClient = dbClient
         this.gameLogic.notifyServer = async (move: [number, number, number, number]) => {
             const { data, error } = await this.dbClient.functions.invoke('handle-move', {
-                body: { proposed_move: move }
+                body: { proposed_move: move, game_id: '80085757-eee0-4e53-9246-2bc83ffcac54' }
             })
             if (error) {
                 console.error(error)
@@ -236,6 +236,11 @@ export default class Engine {
 
             // fence move
             else {
+                if (p2_move) {
+                    p2.numFences--
+                } else {
+                    p1.numFences--
+                }
                 fences.push({
                     pos: [x, y, z],
                     orientation: move_type

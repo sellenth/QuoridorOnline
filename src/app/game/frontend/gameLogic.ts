@@ -40,7 +40,7 @@ export class GameLogic {
         fences.forEach((fence) => {
             this.fencePositions.push(
                 {
-                    pos: [fence.pos[1], fence.pos[2], fence.pos[0]],
+                    pos: fence.pos,
                     orientation: fence.orientation
                 }
             )
