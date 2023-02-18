@@ -7,161 +7,355 @@ import { corsHeaders } from '../_shared/cors.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { writeAllSync } from 'https://deno.land/std@0.177.0/streams/write_all.ts'
 
-const fence = new TextEncoder().encode('1')
+const fence = new TextEncoder().encode('F')
 const no_fence = new TextEncoder().encode('0')
-//const player = new TextEncoder().encode('P')
+const player = new TextEncoder().encode('P')
 const empty = new TextEncoder().encode(' ')
 const newline = new TextEncoder().encode('\n')
 const tab = new TextEncoder().encode('\t')
 
+// 1-3 are used for walls
+const VACANT = 0
+const PLAYER = 8
+const EXPLORED = 9
+
+export const extents = {
+    near: 0,
+    far: 18,
+
+    left: 0,
+    right: 18,
+
+    bottom: 0,
+    top: 6,
+}
+
+export enum s {
+    x = 1,
+    y,
+    z,
+}
+
+export enum MoveType {
+    Pawn,
+    Horizontal,
+    Vertical,
+    Flat,
+}
+
+export type Player = { id: string, goalZ: number, numFences: number, pos: [number, number, number] };
+
+export type Pos = [number, number, number]
+export type Move = [MoveType, number, number, number]
+export type GameSpace = number[][][]
+
 serve(async (req: any) => {
-  // required for invoking from browser
-  if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
-  }
-
-  try {
-    // Create a Supabase client with the Auth context of the logged in user.
-    const supabaseClient = createClient(
-      // Supabase API URL - env var exported by default.
-      Deno.env.get('SUPABASE_URL') ?? '',
-      // Supabase API ANON KEY - env var exported by default.
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-      // Create client with Auth context of the user that called the function.
-      // This way your row-level-security (RLS) policies are applied.
-      {
-        global: {
-          headers: { Authorization: req.headers.get('Authorization')! },
-        },
-      }
-    )
-    // Now we can get the session or user object
-    const {
-      data: { user },
-    } = await supabaseClient.auth.getUser()
-
-    if (!user) {
-      return new Response(JSON.stringify({ error: "user doesn't exist" }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 400,
-      })
+    // required for invoking from browser
+    if (req.method === 'OPTIONS') {
+        return new Response('ok', { headers: corsHeaders })
     }
 
-    const body = await req.json()
+    try {
+        // Create a Supabase client with the Auth context of the logged in user.
+        const supabaseClient = createClient(
+            // Supabase API URL - env var exported by default.
+            Deno.env.get('SUPABASE_URL') ?? '',
+            // Supabase API ANON KEY - env var exported by default.
+            Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+            // Create client with Auth context of the user that called the function.
+            // This way your row-level-security (RLS) policies are applied.
+            {
+                global: {
+                    headers: { Authorization: req.headers.get('Authorization')! },
+                },
+            }
+        )
+        // Now we can get the session or user object
+        const {
+            data: { user },
+        } = await supabaseClient.auth.getUser()
 
-    // Get the game record
-    const { data, error } = await supabaseClient
-      .from('games')
-      .select('*')
-      .eq('id', body.game_id)
-      .single()
-    if (error) throw error
-
-    // if the move list length is even, that means it is player 2's turn
-    const p2_move = !!(data.moves.length % 2)
-    console.log(data.moves)
-    console.log(data.moves.length)
-
-    // reject a move from anyone but current player
-    if (
-      (p2_move && data.p2_id != user.id) ||
-      (!p2_move && data.p1_id != user.id)
-    ) {
-      return new Response(
-        JSON.stringify({ error: "you aren't the current player" }),
-        {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 401,
+        if (!user) {
+            return new Response(JSON.stringify({ error: "user doesn't exist" }), {
+                headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+                status: 400,
+            })
         }
-      )
+
+        const body = await req.json()
+
+        // Get the game record
+        const { data, error } = await supabaseClient
+            .from('games')
+            .select('*')
+            .eq('id', body.game_id)
+            .single()
+        if (error) throw error
+
+        // if the move list length is even, that means it is player 2's turn
+        const p2_move = !!(data.moves.length % 2)
+        console.log(data.moves)
+        console.log(data.moves.length)
+
+        // reject a move from anyone but current player
+        if (
+            (p2_move && data.p2_id != user.id) ||
+            (!p2_move && data.p1_id != user.id)
+        ) {
+            return new Response(
+                JSON.stringify({ error: "you aren't the current player" }),
+                {
+                    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+                    status: 401,
+                }
+            )
+        }
+
+        let gameSpace = generateGameSpace()
+        const p1: Player = { id: data.p1_id, goalZ: 17, numFences: 15, pos: [9, 3, 1] };
+        const p2: Player = { id: data.p2_id, goalZ: 1, numFences: 15, pos: [9, 3, 17] }
+
+        data.moves.forEach((move: Move, idx: number) => {
+            const [move_type, x, y, z] = move
+            const p2_move = !!(idx % 2)
+
+            // pawn move
+            if (move_type == 0) {
+                if (p2_move) {
+                    p2.pos = [x, y, z]
+                } else {
+                    p1.pos = [x, y, z]
+                }
+            }
+
+            // fence move
+            if (move_type != 0) {
+                if (p2_move) {
+                    p2.numFences--
+                } else {
+                    p1.numFences--
+                }
+                addFenceToGameSpace(gameSpace, move)
+            }
+        })
+
+        let isValid = false
+
+        // Check proposed fence move
+        if (body.proposed_move[0] != 0) {
+            isValid = spaceExistsForFence(gameSpace, body.proposed_move)
+            if (isValid) {
+                addFenceToGameSpace(gameSpace, body.proposed_move)
+                isValid = pathExistsForPlayer(gameSpace, [0, ...p1.pos], p1.goalZ)
+                    && pathExistsForPlayer(gameSpace, [0, ...p2.pos], p2.goalZ)
+            }
+        }
+
+
+        // Check proposed player move
+        { }
+
+        // Add players to board (for debug logging)
+        [p1, p2].forEach((player: Player) => {
+            const pos = player.pos
+            gameSpace[pos[0]][pos[1]][pos[2]] = PLAYER
+        })
+
+
+        writeGameSpaceToConsole(gameSpace)
+
+        // verify incoming move
+        // if it's a fence, make sure it's in bounds, is aligned to proper grid row, col, layer
+        // make sure path exists for both players post placement
+        //
+        // if it's a player
+        // make sure it's in bounds, in range, and that it doesn't pass through a wall
+        //
+        // if all checks are passed, append this move to database record and increment move_num
+        return new Response(JSON.stringify({ isValid }), {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            status: 200,
+        })
+    } catch (error) {
+        console.log(error)
+        return new Response(JSON.stringify({ error: error.message }), {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            status: 400,
+        })
     }
-
-    let gameSpace = generateGameSpace()
-    data.moves.forEach((move: any) => {
-      if (move[0] != 0) {
-        addFenceToGameSpace(gameSpace, move)
-      }
-    })
-    writeGameSpaceToConsole(gameSpace)
-
-    return new Response(JSON.stringify({ user, data }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 200,
-    })
-  } catch (error) {
-    return new Response(JSON.stringify({ error: error.message }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 400,
-    })
-  }
 })
 
-function generateGameSpace() {
-  let gameSpace: number[][][] = []
-  for (let x = 0; x < 18; ++x) {
-    gameSpace.push([])
-    for (let y = 0; y < 6; ++y) {
-      gameSpace[x].push([])
-      for (let z = 0; z < 18; ++z) {
-        gameSpace[x][y].push(0)
-      }
-    }
-  }
-  return gameSpace
-}
-
-function addFenceToGameSpace(
-  gameState: number[][][],
-  fence: [number, number, number, number]
-) {
-  let orientation = fence[0]
-
-  let offsets = [0, 1, 2]
-  offsets.forEach((offset: number) => {
-    offsets.forEach((offsetPrime: number) => {
-      let x = fence[1]
-      let y = fence[2]
-      let z = fence[3]
-      switch (orientation) {
-        case 1: //horiz
-          x += offset
-          y += offsetPrime
-          break
-        case 2: // vertical
-          y += offset
-          z += offsetPrime
-          break
-        case 3: //flat
-          x += offset
-          z += offsetPrime
-          break
-      }
-
-      gameState[x][y][z] = 1
-    })
-  })
-}
-
-function inBounds([x, y, z]: [number, number, number]) {
-  return x >= 0 && x < 18 && y >= 0 && y < 6 && z >= 0 && z < 18
-}
-
-function writeGameSpaceToConsole(gameSpace: number[][][]) {
-  for (let z = 17; z >= 0; --z) {
-    for (let y = 0; y < 6; ++y) {
-      for (let x = 0; x < 18; ++x) {
-        if (gameSpace[x][y][z] == 1) {
-          writeAllSync(Deno.stdout, fence)
-        } else {
-          if (y % 2 || x % 2 || z % 2) {
-            writeAllSync(Deno.stdout, empty)
-          } else {
-            writeAllSync(Deno.stdout, no_fence)
-          }
+export function generateGameSpace() {
+    let gameSpace: GameSpace = []
+    for (let x = 0; x <= extents.right; ++x) {
+        gameSpace.push([])
+        for (let y = 0; y <= extents.top; ++y) {
+            gameSpace[x].push([])
+            for (let z = 0; z <= extents.far; ++z) {
+                gameSpace[x][y].push(VACANT)
+            }
         }
-      }
-      writeAllSync(Deno.stdout, tab)
     }
-    writeAllSync(Deno.stdout, newline)
-  }
+    return gameSpace
+}
+
+export function spaceExistsForFence(gameSpace: GameSpace, fence: Move) {
+    // odd numbers on the grid can only be occupied by pawns, not fences
+    if (fence[s.x] % 2 || fence[s.y] % 2 || fence[s.z] % 2) return false
+    if (!inBounds(fence)) return false
+
+    switch (fence[0]) {
+        case MoveType.Vertical:
+            if (
+                fence[s.x] == 0 ||
+                fence[s.x] == extents.right ||
+                fence[s.y] >= extents.top - 2 ||
+                fence[s.z] >= extents.far - 2
+            ) {
+                return false
+            }
+            break
+        case MoveType.Flat:
+            if (
+                fence[s.x] >= extents.right - 2 ||
+                fence[s.y] == 0 ||
+                fence[s.y] == extents.top ||
+                fence[s.z] >= extents.far - 2
+            ) {
+                return false
+            }
+            break
+        case MoveType.Horizontal:
+            if (
+                fence[s.x] >= extents.right - 2 ||
+                fence[s.y] >= extents.top - 2 ||
+                fence[s.z] == 0 ||
+                fence[s.z] == extents.far
+            ) {
+                return false
+            }
+            break
+    }
+
+    //test if intersecting with other fences
+
+    return true
+}
+
+export function pathExistsForPlayer(gameSpace: GameSpace, player_pos: Move, player_goalZ: number): boolean {
+    let pathExists = true
+
+    let gameSpaceCopy = JSON.parse(JSON.stringify(gameSpace));
+
+    let stack = [player_pos];
+
+    while (stack.length > 0) {
+        let curr_pos = stack.pop()!;
+        gameSpaceCopy[curr_pos[s.x]][curr_pos[s.y]][curr_pos[s.z]] = EXPLORED
+
+        if (curr_pos[s.z] == player_goalZ) {
+            return true;
+        }
+
+        stack.push(...getAdjacentCells(gameSpaceCopy, curr_pos));
+    }
+
+    pathExists = false;
+
+    return pathExists;
+}
+
+export function validHeading(gameSpace: GameSpace, move: Move, x_offset: number, y_offset: number, z_offset: number) {
+    return (inBounds([0, move[s.x] + x_offset, move[s.y] + y_offset, move[s.z] + z_offset])
+        && gameSpace[move[s.x] + x_offset][move[s.y] + y_offset][move[s.z] + z_offset] == VACANT
+
+        && inBounds([0, move[s.x] + 2 * x_offset, move[s.y] + 2 * y_offset, move[s.z] + 2 * z_offset])
+        && gameSpace[move[s.x] + 2 * x_offset][move[s.y] + 2 * y_offset][move[s.z] + 2 * z_offset] != EXPLORED)
+}
+
+export function getAdjacentCells(gameSpace: GameSpace, move: Move) {
+    let adjacentCells: Move[] = [];
+
+    let testDirection = (x_offset: number, y_offset: number, z_offset: number) => {
+        if (validHeading(gameSpace, move, x_offset, y_offset, z_offset)) {
+            let new_move = move.slice() as Move
+            new_move[s.x] += x_offset * 2
+            new_move[s.y] += y_offset * 2
+            new_move[s.z] += z_offset * 2
+            adjacentCells.push(new_move);
+        }
+    }
+
+    testDirection(-1, 0, 0);
+    testDirection(1, 0, 0);
+    testDirection(0, 1, 0);
+    testDirection(0, -1, 0);
+    testDirection(0, 0, 1);
+    testDirection(0, 0, -1);
+
+    return adjacentCells;
+}
+
+
+export function addFenceToGameSpace(gameSpace: GameSpace, fence: Move) {
+    const orientation = fence[0]
+
+    const offsets = [1, 2, 3]
+    offsets.forEach((offset: number) => {
+        offsets.forEach((offsetPrime: number) => {
+            let x = fence[1]
+            let y = fence[2]
+            let z = fence[3]
+            switch (orientation) {
+                case 1: //horiz
+                    x += offset
+                    y += offsetPrime
+                    break
+                case 2: // vertical
+                    y += offset
+                    z += offsetPrime
+                    break
+                case 3: //flat
+                    x += offset
+                    z += offsetPrime
+                    break
+            }
+
+            gameSpace[x][y][z] = orientation
+        })
+    })
+}
+
+export function inBounds([_, x, y, z]: Move) {
+    return (
+        x >= extents.left &&
+        x <= extents.right &&
+        y >= extents.bottom &&
+        y <= extents.top &&
+        z >= extents.near &&
+        z <= extents.far
+    )
+}
+
+export function writeGameSpaceToConsole(gameSpace: GameSpace) {
+    for (let z = 18; z >= 0; --z) {
+        for (let y = 0; y <= 6; ++y) {
+            for (let x = 0; x <= 18; ++x) {
+                if (gameSpace[x][y][z] == PLAYER) {
+                    writeAllSync(Deno.stdout, player)
+                }
+                else if (gameSpace[x][y][z] != 0) {
+                    writeAllSync(Deno.stdout, fence)
+                } else {
+                    if (y % 2 || x % 2 || z % 2) {
+                        writeAllSync(Deno.stdout, empty)
+                    } else {
+                        writeAllSync(Deno.stdout, no_fence)
+                    }
+                }
+            }
+            writeAllSync(Deno.stdout, tab)
+        }
+        writeAllSync(Deno.stdout, newline)
+    }
 }

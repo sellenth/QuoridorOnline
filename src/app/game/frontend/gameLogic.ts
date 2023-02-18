@@ -53,7 +53,7 @@ export class GameLogic {
             this.players.push(
                 {
                     id: player.id,
-                    pos: [player.pos[1], player.pos[2], player.pos[0]],
+                    pos: player.pos,
                     color: [255, 155, 0],
                     walls: player.numFences,
                 }

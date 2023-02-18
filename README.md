@@ -17,11 +17,11 @@ If all that works, I'd like to implement a scoreboard and friend system. Potenti
 - [x] realtime networked cameras
 - [x] have walls appear from DB
 - [x] have players appear from DB
-- [ ] have wall counts sync with DB
-- [ ] have player turn sync with DB
-- [ ] unify coordinate system for front and back
+- [x] have wall counts sync with DB
+- [x] have player turn sync with DB
+- [x] unify coordinate system for front and back
+- [x] serverless function recreates game state
 - [ ] generate new table per game and initialize with default game state
-- [ ] serverless function recreates game state
 - [ ] serverless function validates move
 - [ ] flesh out email signup so it isn't hardcoded
 - [ ] alert user if signup procces goes wrong (email not confirmed, row not created)

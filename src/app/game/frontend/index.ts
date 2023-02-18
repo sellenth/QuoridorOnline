@@ -113,7 +113,7 @@ export default class Engine {
             if (error) {
                 console.error(error)
             } else {
-                console.log(data.message)
+                console.log(data)
             }
         }
 
@@ -219,8 +219,8 @@ export default class Engine {
     IngestGameState(data) {
         // transform game state
         const fences = []
-        const p1 = { id: data.p1_id, goalY: 17, numFences: 15, pos: [1, 9, 3] };
-        const p2 = { id: data.p2_id, goalY: 1, numFences: 15, pos: [17, 9, 3] }
+        const p1 = { id: data.p1_id, goalY: 17, numFences: 15, pos: [9, 3, 1] };
+        const p2 = { id: data.p2_id, goalY: 1, numFences: 15, pos: [9, 3, 17] }
 
         data.moves.forEach(([move_type, x, y, z]: number[], idx) => {
             const p2_move = !!(idx % 2)
