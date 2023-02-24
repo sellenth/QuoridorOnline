@@ -14,8 +14,8 @@ const empty = new TextEncoder().encode(' ')
 const newline = new TextEncoder().encode('\n')
 const tab = new TextEncoder().encode('\t')
 
-// 1-3 are used for walls
 const VACANT = 0
+const FENCE = 1
 const PLAYER = 8
 const EXPLORED = 9
 
@@ -119,9 +119,15 @@ serve(async (req: any) => {
 
         let isValid = false
 
+
+        // Check proposed player move
+        if (body.proposed_move[0] == MoveType.Pawn) {
+        }
+
         // Check proposed fence move
         if (body.proposed_move[0] != 0) {
             isValid = spaceExistsForFence(gameSpace, body.proposed_move)
+                && !fenceIntersects(gameSpace, body.proposed_move)
             if (isValid) {
                 addFenceToGameSpace(gameSpace, body.proposed_move)
                 isValid = pathExistsForPlayer(gameSpace, [0, ...p1.pos], p1.goalZ)
@@ -129,9 +135,6 @@ serve(async (req: any) => {
             }
         }
 
-
-        // Check proposed player move
-        { }
 
         // Add players to board (for debug logging)
         [p1, p2].forEach((player: Player) => {
@@ -182,6 +185,7 @@ export function spaceExistsForFence(gameSpace: GameSpace, fence: Move) {
     if (fence[s.x] % 2 || fence[s.y] % 2 || fence[s.z] % 2) return false
     if (!inBounds(fence)) return false
 
+    // test if the full length of the fence is in bounds
     switch (fence[0]) {
         case MoveType.Vertical:
             if (
@@ -215,10 +219,53 @@ export function spaceExistsForFence(gameSpace: GameSpace, fence: Move) {
             break
     }
 
-    //test if intersecting with other fences
-
     return true
 }
+
+export function fenceIntersects(gameSpace: GameSpace, fence: Move) {
+    let intersects = false;
+    if (fence[0] == MoveType.Flat) {
+        [1, 2, 3].some((offset: number) => {
+            if ([1, 2, 3].some((offsetPrime: number) => {
+                let x = fence[s.x] + offset;
+                let y = fence[s.y];
+                let z = fence[s.z] + offsetPrime;
+
+                let yAbove = fence[s.y] + 1;
+                let yBelow = fence[s.y] - 1;
+
+                let layerCurrFail = gameSpace[x][y][z] != VACANT;
+                let layerAboveFail = !inBounds([0, x, yAbove, z]) || gameSpace[x][yAbove][z] == FENCE;
+                let layerBelowFail = !inBounds([0, x, yBelow, z]) || gameSpace[x][yBelow][z] == FENCE;
+                if (layerCurrFail || layerAboveFail && layerBelowFail) {
+                    console.log("failing 0n: ", x, " ", y, " ", z, " Offsets are: ", offset, " ", offsetPrime)
+                    intersects = true;
+                    return true;
+                }
+            })) { return true; }
+        });
+
+    }
+    else {
+        [1, 2, 3].some((offset: number) => {
+            if ([1, 2, 3].some((offsetPrime: number) => {
+                let x = fence[s.x] + (fence[0] == MoveType.Horizontal ? offset : 0);
+                let y = fence[s.y] + offsetPrime;
+                let z = fence[s.z] + (fence[0] == MoveType.Vertical ? offset : 0);
+
+                if (gameSpace[x][y][z] != VACANT) {
+                    console.log("failing on: ", x, " ", y, " ", z, " Offsets are: ", offset, " ", offsetPrime)
+                    intersects = true;
+                    return true;
+                }
+            })) { return true; }
+        });
+
+    }
+
+    return intersects;
+}
+
 
 export function pathExistsForPlayer(gameSpace: GameSpace, player_pos: Move, player_goalZ: number): boolean {
     let pathExists = true
@@ -299,7 +346,7 @@ export function addFenceToGameSpace(gameSpace: GameSpace, fence: Move) {
                     break
             }
 
-            gameSpace[x][y][z] = orientation
+            gameSpace[x][y][z] = FENCE
         })
     })
 }
@@ -348,7 +395,7 @@ export function writeGameSpaceToConsole(gameSpace: GameSpace) {
                 if (gameSpace[x][y][z] == PLAYER) {
                     writeAllSync(Deno.stdout, player)
                 }
-                else if (gameSpace[x][y][z] != 0) {
+                else if (gameSpace[x][y][z] == FENCE) {
                     writeAllSync(Deno.stdout, fence)
                 } else {
                     if (y % 2 || x % 2 || z % 2) {

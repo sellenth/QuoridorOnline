@@ -1,5 +1,5 @@
 import { assertEquals } from 'https://deno.land/std@0.177.0/testing/asserts.ts'
-import { Move, MoveType, generateGameSpace, addFenceToGameSpace, spaceExistsForFence, extents, pathExistsForPlayer, Player, applyMovesToGameSpace } from './index.ts'
+import { writeGameSpaceToConsole, fenceIntersects, Move, MoveType, generateGameSpace, addFenceToGameSpace, spaceExistsForFence, extents, pathExistsForPlayer, Player, applyMovesToGameSpace } from './index.ts'
 
 Deno.test('Move validation tests', () => {
     let gameSpace = generateGameSpace()
@@ -77,13 +77,56 @@ Deno.test('Move validation tests', () => {
     )
 })
 
-Deno.test("Can't create wall that blocks path", () => {
+Deno.test('Test fence intersections', () => {
     let ex_moves: Move[] = [
-        [2, 8, 0, 0],
-        [2, 10, 0, 0],
-        [3, 8, 4, 0],
-        [0, 9, 3, 15],
-        [0, 9, 3, 3],
+        [MoveType.Vertical, 8, 0, 0], //f1
+        [MoveType.Vertical, 10, 0, 0], //f2
+        [MoveType.Flat, 8, 4, 0], //f3
+        [MoveType.Pawn, 9, 3, 15],
+        [MoveType.Pawn, 9, 3, 3],
+    ]
+
+
+    const p1: Player = { id: 'player1', goalZ: 17, numFences: 15, pos: [9, 3, 1] };
+    const p2: Player = { id: 'player2', goalZ: 1, numFences: 15, pos: [9, 3, 17] }
+
+    let gameSpace = generateGameSpace()
+
+    applyMovesToGameSpace(gameSpace, ex_moves, p1, p2)
+
+
+    assertEquals(
+        fenceIntersects(gameSpace, [MoveType.Horizontal, 6, 0, 2]),
+        true,
+        "this fence should intersect f1"
+    )
+
+    assertEquals(
+        fenceIntersects(gameSpace, [MoveType.Vertical, 10, 0, 0]),
+        true,
+        "this fence should intersect f2 and f3"
+    )
+
+    assertEquals(
+        fenceIntersects(gameSpace, [MoveType.Flat, 8, 2, 0]),
+        true,
+        "this fence should intersect f1 and f2"
+    )
+
+    assertEquals(
+        fenceIntersects(gameSpace, [MoveType.Flat, 8, 2, 6]),
+        false,
+        "this fence should not intersect anything"
+    )
+})
+
+Deno.test("Can't create fence that blocks path", () => {
+    let ex_moves: Move[] = [
+        [MoveType.Vertical, 8, 0, 0], //f1
+        [MoveType.Vertical, 10, 0, 0], //f2
+        [MoveType.Flat, 8, 4, 0], //f3
+        [MoveType.Pawn, 9, 3, 15],
+        [MoveType.Pawn, 9, 3, 3],
     ]
 
 
@@ -97,13 +140,45 @@ Deno.test("Can't create wall that blocks path", () => {
     addFenceToGameSpace(gameSpace, [MoveType.Horizontal, 6, 0, 4])
 
     assertEquals(
-        pathExistsForPlayer(gameSpace, [0, ...p1.pos], p1.goalZ),
+        pathExistsForPlayer(gameSpace, [MoveType.Pawn, ...p1.pos], p1.goalZ),
         false,
         "Can't block player 1 from reaching end"
     )
 
     assertEquals(
-        pathExistsForPlayer(gameSpace, [0, ...p2.pos], p2.goalZ),
+        pathExistsForPlayer(gameSpace, [MoveType.Pawn, ...p2.pos], p2.goalZ),
+        true,
+        "but player 2 still has a viable path"
+    )
+});
+
+Deno.test("Player can't move through walls", () => {
+    let ex_moves: Move[] = [
+        [MoveType.Vertical, 8, 0, 0], //f1
+        [MoveType.Vertical, 10, 0, 0], //f2
+        [MoveType.Flat, 8, 4, 0], //f3
+        [MoveType.Pawn, 9, 3, 15],
+        [MoveType.Pawn, 9, 3, 3],
+    ]
+
+
+    const p1: Player = { id: 'player1', goalZ: 17, numFences: 15, pos: [9, 3, 1] };
+    const p2: Player = { id: 'player2', goalZ: 1, numFences: 15, pos: [9, 3, 17] }
+
+    let gameSpace = generateGameSpace()
+
+    applyMovesToGameSpace(gameSpace, ex_moves, p1, p2)
+
+    addFenceToGameSpace(gameSpace, [MoveType.Horizontal, 6, 0, 4])
+
+    assertEquals(
+        pathExistsForPlayer(gameSpace, [MoveType.Pawn, ...p1.pos], p1.goalZ),
+        false,
+        "Can't block player 1 from reaching end"
+    )
+
+    assertEquals(
+        pathExistsForPlayer(gameSpace, [MoveType.Pawn, ...p2.pos], p2.goalZ),
         true,
         "but player 2 still has a viable path"
     )
