@@ -117,22 +117,18 @@ serve(async (req: any) => {
 
         applyMovesToGameSpace(gameSpace, data.moves, p1, p1)
 
-        let isValid = false
-
+        let isValid = true
 
         // Check proposed player move
         if (body.proposed_move[0] == MoveType.Pawn) {
+            let curr_player = p2_move ? p2 : p1;
+            isValid = isValidPawnMove(gameSpace, body.proposed_move, curr_player)
         }
 
         // Check proposed fence move
         if (body.proposed_move[0] != 0) {
-            isValid = spaceExistsForFence(gameSpace, body.proposed_move)
-                && !fenceIntersects(gameSpace, body.proposed_move)
-            if (isValid) {
-                addFenceToGameSpace(gameSpace, body.proposed_move)
-                isValid = pathExistsForPlayer(gameSpace, [0, ...p1.pos], p1.goalZ)
-                    && pathExistsForPlayer(gameSpace, [0, ...p2.pos], p2.goalZ)
-            }
+            isValid = isValidFenceMove(gameSpace, body.proposed_move, p1, p2)
+            // Check if player just won
         }
 
 
@@ -145,12 +141,6 @@ serve(async (req: any) => {
 
         writeGameSpaceToConsole(gameSpace)
 
-        // verify incoming move
-        // if it's a fence, make sure it's in bounds, is aligned to proper grid row, col, layer
-        // make sure path exists for both players post placement
-        //
-        // if it's a player
-        // make sure it's in bounds, in range, and that it doesn't pass through a wall
         //
         // if all checks are passed, append this move to database record and increment move_num
         return new Response(JSON.stringify({ isValid }), {
@@ -165,6 +155,50 @@ serve(async (req: any) => {
         })
     }
 })
+
+// Check proposed fence move, make sure it's in bounds, is aligned to proper grid row, col, layer
+// make sure path exists for both players post placement
+export function isValidFenceMove(gameSpace: GameSpace, move: Move, p1: Player, p2: Player) {
+    let isValid = true;
+    isValid = isValidFenceMove(gameSpace, move, p1, p2)
+    isValid = spaceExistsForFence(gameSpace, move)
+        && !fenceIntersects(gameSpace, move)
+    if (isValid) {
+        addFenceToGameSpace(gameSpace, move)
+        isValid = pathExistsForPlayer(gameSpace, [0, ...p1.pos], p1.goalZ)
+            && pathExistsForPlayer(gameSpace, [0, ...p2.pos], p2.goalZ)
+    }
+    return isValid
+}
+
+// Check proposed player move, ensure it only moves in one direction,
+// 2 units, and doesn't go through a wall
+export function isValidPawnMove(gameSpace: GameSpace, move: Move, curr_player: Player) {
+    let isValid = true
+
+    let offsets: [number, number, number] = [
+        move[s.x] - curr_player.pos[0],
+        move[s.y] - curr_player.pos[1],
+        move[s.z] - curr_player.pos[2]
+    ]
+
+    let num_axis_moved = 0
+    for (let i = 0; i < offsets.length; ++i) {
+        // normalize offsets
+        if (offsets[i] != 0) {
+            offsets[i] = Math.sign(offsets[i])
+            num_axis_moved++
+        }
+    }
+    if (num_axis_moved != 1) {
+        return false
+    }
+
+    console.log(curr_player.pos, offsets)
+
+    isValid = isValid && validHeading(gameSpace, [MoveType.Pawn, ...curr_player.pos], ...offsets)
+    return isValid
+}
 
 export function generateGameSpace() {
     let gameSpace: GameSpace = []

@@ -1,5 +1,5 @@
 import { assertEquals } from 'https://deno.land/std@0.177.0/testing/asserts.ts'
-import { writeGameSpaceToConsole, fenceIntersects, Move, MoveType, generateGameSpace, addFenceToGameSpace, spaceExistsForFence, extents, pathExistsForPlayer, Player, applyMovesToGameSpace } from './index.ts'
+import { isValidPawnMove, writeGameSpaceToConsole, fenceIntersects, Move, MoveType, generateGameSpace, addFenceToGameSpace, spaceExistsForFence, extents, pathExistsForPlayer, Player, applyMovesToGameSpace } from './index.ts'
 
 Deno.test('Move validation tests', () => {
     let gameSpace = generateGameSpace()
@@ -152,7 +152,7 @@ Deno.test("Can't create fence that blocks path", () => {
     )
 });
 
-Deno.test("Player can't move through walls", () => {
+Deno.test("Verifying player movement", () => {
     let ex_moves: Move[] = [
         [MoveType.Vertical, 8, 0, 0], //f1
         [MoveType.Vertical, 10, 0, 0], //f2
@@ -169,17 +169,28 @@ Deno.test("Player can't move through walls", () => {
 
     applyMovesToGameSpace(gameSpace, ex_moves, p1, p2)
 
-    addFenceToGameSpace(gameSpace, [MoveType.Horizontal, 6, 0, 4])
-
     assertEquals(
-        pathExistsForPlayer(gameSpace, [MoveType.Pawn, ...p1.pos], p1.goalZ),
+        isValidPawnMove(gameSpace, [MoveType.Pawn, 7, 3, 3], p1),
         false,
-        "Can't block player 1 from reaching end"
+        "Can't move through fence (f1)"
     )
 
     assertEquals(
-        pathExistsForPlayer(gameSpace, [MoveType.Pawn, ...p2.pos], p2.goalZ),
+        isValidPawnMove(gameSpace, [MoveType.Pawn, 9, 3, 3], p1),
+        false,
+        "Can't have zero unit move"
+    )
+
+    assertEquals(
+        isValidPawnMove(gameSpace, [MoveType.Pawn, 9, 3, 1], p1),
         true,
-        "but player 2 still has a viable path"
+        "CAN move backwards into empty space"
+    )
+
+    p1.pos = [9, 3, 1];
+    assertEquals(
+        isValidPawnMove(gameSpace, [MoveType.Pawn, 9, 3, -1], p1),
+        false,
+        "can't move out of bounds"
     )
 });
