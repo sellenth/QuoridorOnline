@@ -115,29 +115,7 @@ serve(async (req: any) => {
         const p1: Player = { id: data.p1_id, goalZ: 17, numFences: 15, pos: [9, 3, 1] };
         const p2: Player = { id: data.p2_id, goalZ: 1, numFences: 15, pos: [9, 3, 17] }
 
-        data.moves.forEach((move: Move, idx: number) => {
-            const [move_type, x, y, z] = move
-            const p2_move = !!(idx % 2)
-
-            // pawn move
-            if (move_type == 0) {
-                if (p2_move) {
-                    p2.pos = [x, y, z]
-                } else {
-                    p1.pos = [x, y, z]
-                }
-            }
-
-            // fence move
-            if (move_type != 0) {
-                if (p2_move) {
-                    p2.numFences--
-                } else {
-                    p1.numFences--
-                }
-                addFenceToGameSpace(gameSpace, move)
-            }
-        })
+        applyMovesToGameSpace(gameSpace, data.moves, p1, p1)
 
         let isValid = false
 
@@ -323,6 +301,32 @@ export function addFenceToGameSpace(gameSpace: GameSpace, fence: Move) {
 
             gameSpace[x][y][z] = orientation
         })
+    })
+}
+
+export function applyMovesToGameSpace(gameSpace: GameSpace, moves: Move[], p1: Player, p2: Player) {
+    moves.forEach((move: Move, idx: number) => {
+        const [move_type, x, y, z] = move
+        const p2_move = !!(idx % 2)
+
+        // pawn move
+        if (move_type == 0) {
+            if (p2_move) {
+                p2.pos = [x, y, z]
+            } else {
+                p1.pos = [x, y, z]
+            }
+        }
+
+        // fence move
+        if (move_type != 0) {
+            if (p2_move) {
+                p2.numFences--
+            } else {
+                p1.numFences--
+            }
+            addFenceToGameSpace(gameSpace, move)
+        }
     })
 }
 

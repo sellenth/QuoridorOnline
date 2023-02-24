@@ -1,5 +1,5 @@
 import { assertEquals } from 'https://deno.land/std@0.177.0/testing/asserts.ts'
-import { Move, MoveType, generateGameSpace, addFenceToGameSpace, spaceExistsForFence, extents, pathExistsForPlayer, Player } from './index.ts'
+import { Move, MoveType, generateGameSpace, addFenceToGameSpace, spaceExistsForFence, extents, pathExistsForPlayer, Player, applyMovesToGameSpace } from './index.ts'
 
 Deno.test('Move validation tests', () => {
     let gameSpace = generateGameSpace()
@@ -77,27 +77,22 @@ Deno.test('Move validation tests', () => {
     )
 })
 
-Deno.test('Move validation tests', () => {
+Deno.test("Can't create wall that blocks path", () => {
     let ex_moves: Move[] = [
         [2, 8, 0, 0],
         [2, 10, 0, 0],
         [3, 8, 4, 0],
-        [0, 15, 9, 3],
-        [0, 3, 9, 3],
+        [0, 9, 3, 15],
+        [0, 9, 3, 3],
     ]
+
 
     const p1: Player = { id: 'player1', goalZ: 17, numFences: 15, pos: [9, 3, 1] };
     const p2: Player = { id: 'player2', goalZ: 1, numFences: 15, pos: [9, 3, 17] }
 
     let gameSpace = generateGameSpace()
 
-    //TODO standardized the incremental state update loop
-    ex_moves.forEach((move: Move) => {
-        if (move[0] != 0) {
-            console.log(move)
-            addFenceToGameSpace(gameSpace, move)
-        }
-    })
+    applyMovesToGameSpace(gameSpace, ex_moves, p1, p2)
 
     addFenceToGameSpace(gameSpace, [MoveType.Horizontal, 6, 0, 4])
 
