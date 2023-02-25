@@ -21,8 +21,17 @@ If all that works, I'd like to implement a scoreboard and friend system. Potenti
 - [x] have player turn sync with DB
 - [x] unify coordinate system for front and back
 - [x] serverless function recreates game state
+- [x] serverless function validates move
+- [x] realtime postgres websockets notify user of move
+
+Sunday 2/25
+
+- [x] handle win state
+- [ ] add friends list
+- [ ] invite friend to game
+- [ ] track what game a player is currently in
 - [ ] generate new table per game and initialize with default game state
-- [ ] serverless function validates move
+
 - [ ] flesh out email signup so it isn't hardcoded
 - [ ] alert user if signup procces goes wrong (email not confirmed, row not created)
 - [ ] update DB policies for table more secure access
@@ -36,7 +45,7 @@ how to create replay system
 ## dev notes
 
 - `npx supabase start` to start docker containers
-- `npx supabase db reset` to reset db
+- `npm run db-reset` to reset db (Note: this causes problems with realtime container, command also restarts realtime)
 - the database will be seeded with supabase/seed.sql
 - local db studio available [here](http://localhost:54323/project/default)
 - create types based on local db `npx supabase gen types typescript --local > src/utils/db-types.ts`

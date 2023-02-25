@@ -30,30 +30,29 @@ export default function GameView() {
                 },
                 () => { engine.networkTick(gid) }
             )
-            .subscribe()
+            .subscribe((status: any) => {
+                console.log('nice:', status)
+            })
 
-        /*
-        const channel = supabase.channel('room1')
-
+        const camChannel = supabase.channel('room1')
         // Subscribe registers your client with the server
-        channel
-        .on('broadcast', { event: 'camera-pos' }, (p) => engine.updateNetworkedCameras(p.payload))
-        .subscribe((status: any) => {
-            if (status === 'SUBSCRIBED') {
-                // now you can start broadcasting cursor positions
-                setInterval(() => {
-                    channel.send({
-                        type: 'broadcast',
-                        event: 'camera-pos',
-                        payload: [
-                            session?.user.id,
-                            engine.PackageCameraAsNetPayload(),
-                        ]
-                    })
-                    console.log(status)
-                }, 1000)
-            }
-        })*/
+        camChannel
+            .on('broadcast', { event: 'camera-pos' }, (p: any) => { engine.updateNetworkedCameras(p.payload) })
+            .subscribe((status: any) => {
+                if (status === 'SUBSCRIBED') {
+                    // now you can start broadcasting cursor positions
+                    setInterval(() => {
+                        camChannel.send({
+                            type: 'broadcast',
+                            event: 'camera-pos',
+                            payload: [
+                                session?.user.id,
+                                engine.PackageCameraAsNetPayload(),
+                            ]
+                        })
+                    }, 1000)
+                }
+            })
         return () => {
             supabase.removeAllChannels()
             engine.render = false;

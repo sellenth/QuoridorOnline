@@ -8,7 +8,9 @@
     "start": "next start",
     "lint": "next lint",
     "format": "prettier --check --ignore-path .gitignore .",
-    "format:fix": "prettier --write --ignore-path .gitignore ."
+    "format:fix": "prettier --write --ignore-path .gitignore .",
+    "edge-move": "npx supabase functions serve handle-move",
+    "db-reset": "npx supabase db reset; docker restart realtime-dev.supabase_realtime_quoridor-online"
   },
   "dependencies": {
     "@next/font": "13.1.5",

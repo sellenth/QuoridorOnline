@@ -76,6 +76,7 @@ serve(async (req: any) => {
         } = await supabaseClient.auth.getUser()
 
         if (!user) {
+            console.log('user doesnt exists')
             return new Response(JSON.stringify({ error: "user doesn't exist" }), {
                 headers: { ...corsHeaders, 'Content-Type': 'application/json' },
                 status: 400,
@@ -91,6 +92,14 @@ serve(async (req: any) => {
             .eq('id', body.game_id)
             .single()
         if (error) throw error
+
+        // Check if this game is over
+        if (data.winner != null) {
+            return new Response(JSON.stringify({ res: `${data.winner} won!` }), {
+                headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+                status: 200,
+            })
+        }
 
         // if the move list length is even, that means it is player 2's turn
         const p2_move = !!(data.moves.length % 2)
@@ -118,6 +127,7 @@ serve(async (req: any) => {
         applyMovesToGameSpace(gameSpace, data.moves, p1, p2)
 
         let isValid = true
+        let winner = null
 
         // Check proposed player move
         if (body.proposed_move[0] == MoveType.Pawn) {
@@ -132,15 +142,13 @@ serve(async (req: any) => {
                 body.proposed_move = [body.proposed_move[0], ...curr_player.pos]
 
                 if (curr_player.pos[2] == curr_player.goalZ) {
-                    console.log('winner')
+                    winner = curr_player.id
                 }
             }
         }
-
         // Check proposed fence move
-        if (body.proposed_move[0] != 0) {
+        else {
             isValid = isValidFenceMove(gameSpace, body.proposed_move, p1, p2)
-            // Check if player just won
         }
 
 
@@ -153,9 +161,10 @@ serve(async (req: any) => {
 
         writeGameSpaceToConsole(gameSpace)
 
-        //
         // if all checks are passed, append this move to database record and increment move_num
-        await writeMoveToDB(supabaseClient, body.game_id, data.moves, body.proposed_move)
+        if (isValid) {
+            await writeMoveToDB(supabaseClient, body.game_id, data.moves, body.proposed_move, winner)
+        }
 
         return new Response(JSON.stringify({ isValid }), {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -170,12 +179,12 @@ serve(async (req: any) => {
     }
 })
 
-async function writeMoveToDB(client: any, gid: string, moves: Move[], proposed_move: Move) {
+async function writeMoveToDB(client: any, gid: string, moves: Move[], proposed_move: Move, winner: string | null) {
     moves.push(proposed_move)
 
     const { data, error } = await client
         .from('games')
-        .update({ move_num: moves.length, moves: moves })
+        .update({ move_num: moves.length, moves: moves, winner: winner })
         .eq('id', gid)
 
     if (error) {

@@ -10,7 +10,7 @@ alter table "public"."games" enable row level security;
 
 create table "public"."users" (
     "id" uuid not null,
-    "username" text not null,
+    "username" text unique not null,
     "member_since" date default CURRENT_DATE,
     "elo" integer default 400,
     "email" text not null

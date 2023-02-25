@@ -1,10 +1,13 @@
 'use client'
 
 import { useSupabase } from './supabase-provider'
+import { useEffect, useRef } from 'react'
 
 // Supabase auth needs to be triggered client-side
 export default function Login() {
   const { supabase, session } = useSupabase()
+  const emailRef = useRef(null)
+  const pwRef = useRef(null)
 
   const handleEmailSignUp = async () => {
     const { data, error } = await supabase.auth.signUp({
@@ -24,8 +27,8 @@ export default function Login() {
 
   const handleEmailLogin = async () => {
     const { error } = await supabase.auth.signInWithPassword({
-      email: 'halston@sellent.in',
-      password: 'password',
+      email: emailRef.current.value,
+      password: 'password' //pwRef.current.value
     })
 
     if (error) {
@@ -40,7 +43,7 @@ export default function Login() {
 
     if (error) {
       console.log({ error })
-    } else { console.log( data ) }
+    } else { console.log(data) }
   }
 
   const handleGitHubLogin = async () => {
@@ -68,6 +71,8 @@ export default function Login() {
     <button onClick={handleLogout}>Logout</button>
   ) : (
     <>
+      <input ref={emailRef} />
+      <input ref={pwRef} />
       <button onClick={handleEmailSignUp}>Email Signup</button>
       <br />
       <button onClick={handleEmailLogin}>Email Login</button>
