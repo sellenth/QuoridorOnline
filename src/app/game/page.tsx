@@ -15,7 +15,22 @@ export default function GameView() {
         engine.gameLogic.assignId(session?.user.id ?? "NA");
         console.log(session?.user.id)
         engine.startRenderLoop()
-        engine.networkTick('80085757-eee0-4e53-9246-2bc83ffcac54')
+        let gid = '80085757-eee0-4e53-9246-2bc83ffcac54'
+        engine.networkTick(gid)
+
+
+        const channel = supabase
+            .channel('value-db-changes')
+            .on(
+                'postgres_changes',
+                {
+                    event: 'UPDATE',
+                    schema: 'public',
+                    table: 'games',
+                },
+                () => { engine.networkTick(gid) }
+            )
+            .subscribe()
 
         /*
         const channel = supabase.channel('room1')

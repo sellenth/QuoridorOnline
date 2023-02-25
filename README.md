@@ -25,6 +25,7 @@ If all that works, I'd like to implement a scoreboard and friend system. Potenti
 - [ ] serverless function validates move
 - [ ] flesh out email signup so it isn't hardcoded
 - [ ] alert user if signup procces goes wrong (email not confirmed, row not created)
+- [ ] update DB policies for table more secure access
 
 ## talking points
 

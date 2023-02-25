@@ -121,7 +121,7 @@ serve(async (req: any) => {
 
         // Check proposed player move
         if (body.proposed_move[0] == MoveType.Pawn) {
-            let curr_player = p2_move ? p2 : p1;
+            const curr_player = p2_move ? p2 : p1;
             isValid = isValidPawnMove(gameSpace, body.proposed_move, curr_player)
             if (isValid) {
                 let offsets = calculateMoveOffets(body.proposed_move, curr_player)
@@ -129,6 +129,7 @@ serve(async (req: any) => {
                 curr_player.pos[1] += offsets[1] * 2
                 curr_player.pos[2] += offsets[2] * 2
 
+                body.proposed_move = [body.proposed_move[0], ...curr_player.pos]
 
                 if (curr_player.pos[2] == curr_player.goalZ) {
                     console.log('winner')
@@ -154,6 +155,8 @@ serve(async (req: any) => {
 
         //
         // if all checks are passed, append this move to database record and increment move_num
+        await writeMoveToDB(supabaseClient, body.game_id, data.moves, body.proposed_move)
+
         return new Response(JSON.stringify({ isValid }), {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
             status: 200,
@@ -166,6 +169,22 @@ serve(async (req: any) => {
         })
     }
 })
+
+async function writeMoveToDB(client: any, gid: string, moves: Move[], proposed_move: Move) {
+    moves.push(proposed_move)
+
+    const { data, error } = await client
+        .from('games')
+        .update({ move_num: moves.length, moves: moves })
+        .eq('id', gid)
+
+    if (error) {
+        console.log(error)
+        throw error
+    }
+    return data
+}
+
 
 // Check proposed fence move, make sure it's in bounds, is aligned to proper grid row, col, layer
 // make sure path exists for both players post placement
