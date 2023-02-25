@@ -115,7 +115,7 @@ serve(async (req: any) => {
         const p1: Player = { id: data.p1_id, goalZ: 17, numFences: 15, pos: [9, 3, 1] };
         const p2: Player = { id: data.p2_id, goalZ: 1, numFences: 15, pos: [9, 3, 17] }
 
-        applyMovesToGameSpace(gameSpace, data.moves, p1, p1)
+        applyMovesToGameSpace(gameSpace, data.moves, p1, p2)
 
         let isValid = true
 
@@ -123,6 +123,17 @@ serve(async (req: any) => {
         if (body.proposed_move[0] == MoveType.Pawn) {
             let curr_player = p2_move ? p2 : p1;
             isValid = isValidPawnMove(gameSpace, body.proposed_move, curr_player)
+            if (isValid) {
+                let offsets = calculateMoveOffets(body.proposed_move, curr_player)
+                curr_player.pos[0] += offsets[0] * 2
+                curr_player.pos[1] += offsets[1] * 2
+                curr_player.pos[2] += offsets[2] * 2
+
+
+                if (curr_player.pos[2] == curr_player.goalZ) {
+                    console.log('winner')
+                }
+            }
         }
 
         // Check proposed fence move
@@ -160,7 +171,6 @@ serve(async (req: any) => {
 // make sure path exists for both players post placement
 export function isValidFenceMove(gameSpace: GameSpace, move: Move, p1: Player, p2: Player) {
     let isValid = true;
-    isValid = isValidFenceMove(gameSpace, move, p1, p2)
     isValid = spaceExistsForFence(gameSpace, move)
         && !fenceIntersects(gameSpace, move)
     if (isValid) {
@@ -171,30 +181,29 @@ export function isValidFenceMove(gameSpace: GameSpace, move: Move, p1: Player, p
     return isValid
 }
 
+function calculateMoveOffets(move: Move, curr_player: Player): [number, number, number] {
+    return [
+        Math.sign(move[1]),
+        Math.sign(move[2]),
+        Math.sign(move[3])
+    ]
+}
+
 // Check proposed player move, ensure it only moves in one direction,
 // 2 units, and doesn't go through a wall
 export function isValidPawnMove(gameSpace: GameSpace, move: Move, curr_player: Player) {
     let isValid = true
 
-    let offsets: [number, number, number] = [
-        move[s.x] - curr_player.pos[0],
-        move[s.y] - curr_player.pos[1],
-        move[s.z] - curr_player.pos[2]
-    ]
+    let offsets = calculateMoveOffets(move, curr_player)
 
     let num_axis_moved = 0
-    for (let i = 0; i < offsets.length; ++i) {
-        // normalize offsets
-        if (offsets[i] != 0) {
-            offsets[i] = Math.sign(offsets[i])
-            num_axis_moved++
-        }
-    }
+    offsets.forEach((offset) => {
+        if (offset != 0) num_axis_moved++;
+    })
+
     if (num_axis_moved != 1) {
         return false
     }
-
-    console.log(curr_player.pos, offsets)
 
     isValid = isValid && validHeading(gameSpace, [MoveType.Pawn, ...curr_player.pos], ...offsets)
     return isValid

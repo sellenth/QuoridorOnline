@@ -120,6 +120,35 @@ Deno.test('Test fence intersections', () => {
     )
 })
 
+Deno.test("Test that applying moves updates player info", () => {
+    let ex_moves: Move[] = [
+        [MoveType.Vertical, 8, 0, 0], //f1
+        [MoveType.Vertical, 10, 0, 0], //f2
+        [MoveType.Flat, 8, 4, 0], //f3
+        [MoveType.Pawn, 9, 3, 15],
+        [MoveType.Pawn, 9, 3, 3],
+    ]
+
+    const p1: Player = { id: 'player1', goalZ: 17, numFences: 15, pos: [9, 3, 1] };
+    const p2: Player = { id: 'player2', goalZ: 1, numFences: 15, pos: [9, 3, 17] }
+
+    let gameSpace = generateGameSpace()
+
+    applyMovesToGameSpace(gameSpace, ex_moves, p1, p2)
+
+    assertEquals(
+        p2.pos[2],
+        15,
+        "p2 should be moved towards the center of the board"
+    )
+
+    assertEquals(
+        p1.numFences,
+        13,
+        "p1 placed f1 and f3"
+    )
+})
+
 Deno.test("Can't create fence that blocks path", () => {
     let ex_moves: Move[] = [
         [MoveType.Vertical, 8, 0, 0], //f1
@@ -170,26 +199,26 @@ Deno.test("Verifying player movement", () => {
     applyMovesToGameSpace(gameSpace, ex_moves, p1, p2)
 
     assertEquals(
-        isValidPawnMove(gameSpace, [MoveType.Pawn, 7, 3, 3], p1),
+        isValidPawnMove(gameSpace, [MoveType.Pawn, -2, 0, 0], p1),
         false,
         "Can't move through fence (f1)"
     )
 
     assertEquals(
-        isValidPawnMove(gameSpace, [MoveType.Pawn, 9, 3, 3], p1),
+        isValidPawnMove(gameSpace, [MoveType.Pawn, 0, 0, 0], p1),
         false,
         "Can't have zero unit move"
     )
 
     assertEquals(
-        isValidPawnMove(gameSpace, [MoveType.Pawn, 9, 3, 1], p1),
+        isValidPawnMove(gameSpace, [MoveType.Pawn, 0, 0, -2], p1),
         true,
         "CAN move backwards into empty space"
     )
 
     p1.pos = [9, 3, 1];
     assertEquals(
-        isValidPawnMove(gameSpace, [MoveType.Pawn, 9, 3, -1], p1),
+        isValidPawnMove(gameSpace, [MoveType.Pawn, 0, 0, -2], p1),
         false,
         "can't move out of bounds"
     )
