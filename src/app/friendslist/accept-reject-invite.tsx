@@ -10,7 +10,7 @@ export default function AcceptRejectInvite( { my_id, requester_id }: props) {
     const accept = async () => {
         console.log('accepting', requester_id)
         let res1 = await supabase.from('friends').update({accepted: true}).match({ 'user_id': requester_id, 'friend_id': my_id })
-        let res2 = await supabase.from('friends').insert({ 'user_id': my_id, 'friend_id': requester_id, 'accepted': true})
+        let res2 = await supabase.from('friends').upsert({ 'user_id': my_id, 'friend_id': requester_id, 'accepted': true})
 
         console.log(res1)
         console.log(res2)
