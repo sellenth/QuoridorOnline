@@ -17,7 +17,7 @@ export async function middleware(req: NextRequest) {
     data: { session },
   } = await supabase.auth.getSession()
 
-  if (!session && req.nextUrl.pathname.startsWith('/required-session')) {
+  if (!session && req.nextUrl.pathname.startsWith('/friendslist')) {
     // Auth condition not met, redirect to home page.
     const redirectUrl = req.nextUrl.clone()
     redirectUrl.pathname = '/'

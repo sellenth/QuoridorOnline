@@ -5,32 +5,42 @@ import { createServerClient } from '../../utils/supabase-server'
 export const revalidate = 0
 
 export default async function Scoreboard() {
-  const supabase = createServerClient()
-  const { data } = await supabase
-    .from('users')
-    .select('username, elo')
-    .order('elo', { ascending: false })
+    const supabase = createServerClient()
 
-  function wow() {
-  }
+    const {
+        data: { session },
+    } = await supabase.auth.getSession()
 
-  return (
-    <table>
-      <thead>
-        <tr>
-          <th>Username</th>
-          <th>Elo</th>
-        </tr>
-      </thead>
-      <tbody>
-        {data &&
-          data.map((user) => (
-            <tr key={user.username}>
-              <td>{user.username}</td>
-              <td>{user.elo}</td>
-            </tr>
-          ))}
-      </tbody>
-    </table>
-  )
+    if (!session)
+        return {
+            redirect: {
+                destination: '/',
+                permanent: false,
+            },
+        }
+
+    const { data, error } = await supabase
+        .from('users')
+        .select('username, elo')
+        .order('elo', { ascending: false })
+
+    return (
+        <table>
+            <thead>
+                <tr>
+                    <th>Username</th>
+                    <th>Elo</th>
+                </tr>
+            </thead>
+            <tbody>
+                {data &&
+                    data.map((user) => (
+                        <tr key={user.username}>
+                            <td>{user.username}</td>
+                            <td>{user.elo}</td>
+                        </tr>
+                    ))}
+            </tbody>
+        </table>
+    )
 }

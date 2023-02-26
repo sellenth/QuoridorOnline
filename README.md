@@ -27,7 +27,9 @@ If all that works, I'd like to implement a scoreboard and friend system. Potenti
 Sunday 2/25
 
 - [x] handle win state
-- [ ] add friends list
+- [x] add friends list
+- [x] create friend request
+- [x] accept/decline request
 - [ ] invite friend to game
 - [ ] track what game a player is currently in
 - [ ] generate new table per game and initialize with default game state
