@@ -15,13 +15,25 @@ create_user AS (
 INSERT INTO auth.identities (id, provider, user_id, identity_data, last_sign_in_at, created_at, updated_at)
   SELECT id, 'email', id, json_build_object('sub', id), NOW(), NOW(), NOW() FROM create_user;
 
+
+-- creating a game
 insert into public."games" (id, move_num, p1_id, p2_id, moves)
 values
   ('80085757-eee0-4e53-9246-2bc83ffcac54', 5,'abcdbbfc-577b-4b39-b68d-4b1bc89e4a2f', '13375757-eee0-4e53-9246-2bc83ffcac54', '{{2,8,0,0},{2,10,0,0},{3,8,4,0},{0,9,3,15},{0,9,3,3}}');
 
+
+-- creating some friend relations
 insert into public."friends" (user_id, friend_id, accepted)
 (values
   ('abcdbbfc-577b-4b39-b68d-4b1bc89e4a2f', '13375757-eee0-4e53-9246-2bc83ffcac54', false),
   ('deadbeef-577b-4b39-b68d-4b1bc89e4a2f', '13375757-eee0-4e53-9246-2bc83ffcac54', true),
   ('13375757-eee0-4e53-9246-2bc83ffcac54', 'deadbeef-577b-4b39-b68d-4b1bc89e4a2f', true)
+);
+
+-- creating some game invites
+insert into public."game-invites" (initiator_id, opponent_id, rows, cols, layers)
+(values
+  ('13375757-eee0-4e53-9246-2bc83ffcac54', 'deadbeef-577b-4b39-b68d-4b1bc89e4a2f', 9, 9, 3),
+
+  ('abcdbbfc-577b-4b39-b68d-4b1bc89e4a2f', '13375757-eee0-4e53-9246-2bc83ffcac54', 9, 9, 3)
 );

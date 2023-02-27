@@ -25,15 +25,25 @@ If all that works, I'd like to implement a scoreboard and friend system. Potenti
 - [x] realtime postgres websockets notify user of move
 
 Sunday 2/25
-
 - [x] handle win state
 - [x] add friends list
 - [x] create friend request
 - [x] accept/decline request
-- [ ] invite friend to game
-- [ ] track what game a player is currently in
-- [ ] generate new table per game and initialize with default game state
+- [x] invite friend to game
+- [x] generate new table per game and initialize with default game state
 
+- [ ] update elo with winner of game 
+- [ ] clean up game invites after game is won
+- [ ] is there a way to enforce uniqueness on two columns as a combination? (game invite table)
+- [ ] allow game invite to specify who is p1
+- [ ] allow games of different dimensions
+- [ ] sanitize inputs
+- [ ] validate row/col/layers game input
+- [ ] warn user when they are searching for friend/user that doens't exist
+- [ ] does move num need to exist on games table?
+- [ ] change game table to use gid instead of id
+
+- [ ] track what game a player is currently in
 - [ ] flesh out email signup so it isn't hardcoded
 - [ ] alert user if signup procces goes wrong (email not confirmed, row not created)
 - [ ] update DB policies for table more secure access

@@ -222,7 +222,7 @@ export default class Engine {
         const p1 = { id: data.p1_id, goalY: 17, numFences: 15, pos: [9, 3, 1] };
         const p2 = { id: data.p2_id, goalY: 1, numFences: 15, pos: [9, 3, 17] }
 
-        data.moves.forEach(([move_type, x, y, z]: number[], idx) => {
+        data.moves?.forEach(([move_type, x, y, z]: number[], idx) => {
             const p2_move = !!(idx % 2)
 
             // pawn move
@@ -253,9 +253,9 @@ export default class Engine {
         this.gameLogic.updateFences(fences);
         this.gameLogic.updatePlayers([p1, p2]);
         this.gameLogic.setActivePlayer(
-            data.moves.length % 2
+            (data.moves?.length % 2
                 ? data.p2_id
-                : data.p1_id);
+                : data.p1_id) ?? data.p1_id);
 
     }
 

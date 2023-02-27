@@ -19,9 +19,15 @@ for select
 to public
 using (true);
 
-CREATE POLICY "can update table"
+CREATE POLICY "can update games table"
 ON "public"."games"
 AS PERMISSIVE FOR UPDATE
 TO authenticated
 USING (true)
-WITH CHECK (true)
+WITH CHECK (true);
+
+CREATE POLICY "can insert games table"
+ON "public"."games"
+AS PERMISSIVE FOR INSERT
+TO authenticated
+WITH CHECK (true);

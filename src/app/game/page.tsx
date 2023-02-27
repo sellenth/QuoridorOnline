@@ -5,6 +5,7 @@
 import Engine from './frontend/index'
 import { useEffect } from 'react'
 import { useSupabase } from '../../components/supabase-provider'
+import { getCookie } from 'cookies-next'
 import type { SupabaseClient } from '@supabase/auth-helpers-nextjs'
 
 export default function GameView() {
@@ -15,7 +16,8 @@ export default function GameView() {
         engine.gameLogic.assignId(session?.user.id ?? "NA");
         console.log(session?.user.id)
         engine.startRenderLoop()
-        let gid = '80085757-eee0-4e53-9246-2bc83ffcac54'
+        let gid = getCookie('current_gid')
+        console.log(gid)
         engine.networkTick(gid)
 
 

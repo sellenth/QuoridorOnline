@@ -4,6 +4,7 @@ import InviteFriend from './invite-friend'
 import { useSupabase } from '../../components/supabase-provider'
 import AcceptRejectInvite from './accept-reject-invite'
 import { useEffect, useState } from 'react'
+import InviteToGame from './invite-to-game'
 
 export const revalidate = 0
 
@@ -53,9 +54,10 @@ export default function FriendsList() {
       console.log(my_friends)
 
       if (my_friends.data) {
-        setAccepted(my_friends.data.filter( (connection: any) => { return connection.accepted } ))
-        setPending(my_friends.data?.filter( (connection: any) => { return !connection.accepted } ))
+        setAccepted(my_friends.data.filter( (friend: any) => { return friend.accepted } ))
+        setPending(my_friends.data?.filter( (friend: any) => { return !friend.accepted } ))
       }
+      console.log(accepted)
 
       const received = await supabase
         .from('friends')
@@ -81,59 +83,68 @@ export default function FriendsList() {
   return (
     <>
     <InviteFriend />
-      <h3 className="mt-10">Invites sent</h3>
-    <table>
-      <thead>
-        <tr>
-          <th>Username</th>
-        </tr>
-      </thead>
-      <tbody>
-        {accepted &&
-         pending.map((user) => (
-            <tr key={user.friend.id}>
-              <td>{user.friend.username}</td>
-            </tr>
-          ))}
-      </tbody>
-    </table>
+    <div className="mt-10 border-2 border-black">
+      <h3>Invites sent</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Username</th>
+          </tr>
+        </thead>
+        <tbody>
+          {accepted &&
+          pending.map((user) => (
+              <tr key={user.friend.id}>
+                <td>{user.friend.username}</td>
+              </tr>
+            ))}
+        </tbody>
+      </table>
+    </div>
 
-      <h3 className="mt-10">Invites received</h3>
-    <table>
-      <thead>
-        <tr>
-          <th>Username</th>
-        </tr>
-      </thead>
-      <tbody>
-        {received_invite &&
-         received_invite.map((user) => (
-            <tr key={user.requester.id}>
-              <td>
-                {user.requester.username}
-                <AcceptRejectInvite my_id={my_id} requester_id={user.requester.id}/>
-              </td>
-            </tr>
-          ))}
-      </tbody>
-    </table>
+    <div className="mt-10 border-2 border-black">
+      <h3>Invites received</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Username</th>
+          </tr>
+        </thead>
+        <tbody>
+          {received_invite &&
+          received_invite.map((user) => (
+              <tr key={user.requester.id}>
+                <td>
+                  {user.requester.username}
+                  <AcceptRejectInvite my_id={my_id} requester_id={user.requester.id}/>
+                </td>
+              </tr>
+            ))}
+        </tbody>
+      </table>
+    </div>
 
-      <h3 className="mt-10">Friends</h3>
-    <table>
-      <thead>
-        <tr>
-          <th>Username</th>
-        </tr>
-      </thead>
-      <tbody>
-        {accepted &&
-         accepted.map((user) => (
-            <tr key={user.friend.id}>
-              <td>{user.friend.username}</td>
-            </tr>
-          ))}
-      </tbody>
-    </table>
+    <div className="mt-10 border-2 border-black">
+      <h3>Friends</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Username</th>
+          </tr>
+        </thead>
+        <tbody>
+          {accepted &&
+          accepted.map((user) => (
+              <tr key={user.friend.id}>
+                <td>
+                  {user.friend.username}
+                  <InviteToGame friend_username={user.friend.username}/>
+                </td>
+              </tr>
+            ))}
+        </tbody>
+      </table>
+    </div>
     </>
   )
 }

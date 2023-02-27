@@ -7,18 +7,6 @@ export const revalidate = 0
 export default async function Scoreboard() {
     const supabase = createServerClient()
 
-    const {
-        data: { session },
-    } = await supabase.auth.getSession()
-
-    if (!session)
-        return {
-            redirect: {
-                destination: '/',
-                permanent: false,
-            },
-        }
-
     const { data, error } = await supabase
         .from('users')
         .select('username, elo')
