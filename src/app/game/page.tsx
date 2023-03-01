@@ -1,23 +1,27 @@
 'use client'
 
-//import './game-logic/index'
-//import { useRef, useCallback } from 'react';
 import Engine from './frontend/index'
-import { useEffect } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useSupabase } from '../../components/supabase-provider'
 import { getCookie } from 'cookies-next'
-import type { SupabaseClient } from '@supabase/auth-helpers-nextjs'
 
 export default function GameView() {
     const { supabase, session } = useSupabase()
+    const fpsCounterRef = useRef(null)
+    const gameInfoRef = useRef(null)
 
     useEffect(() => {
-        let engine: Engine = new Engine(supabase)
+        const gid = getCookie('current_gid') as string
+        const engine = new Engine()
+
+        engine.registerDbClient(supabase, gid)
+
+        fpsCounterRef.current && engine.setFpsCounterElement(fpsCounterRef.current)
+        gameInfoRef.current && engine.setGameInfoElement(gameInfoRef.current)
+
         engine.gameLogic.assignId(session?.user.id ?? "NA");
-        console.log(session?.user.id)
         engine.startRenderLoop()
-        let gid = getCookie('current_gid')
-        console.log(gid)
+        /*
         engine.networkTick(gid)
 
 
@@ -55,6 +59,7 @@ export default function GameView() {
                     }, 1000)
                 }
             })
+        */
         return () => {
             supabase.removeAllChannels()
             engine.render = false;
@@ -63,10 +68,11 @@ export default function GameView() {
     }, [])
 
     return (<>
-        {/*<Script src="js/frontend/index.js" type="module" />*/}
-        <div id="fps" className="absolute">fps: <span></span></div>
+        <div id="fps" className="absolute">fps:
+            <span ref={fpsCounterRef} ></span>
+        </div>
         <main className="h-full flex flex-col items-center justify-center">
-            <div id="gameInfo" className="">
+            <div ref={gameInfoRef} id="gameInfo" className="">
                 <p id="turnIndicator">Player ???&apos;s turn</p>
                 <div id="wallInfo">
                     <p>Walls Remaining</p>

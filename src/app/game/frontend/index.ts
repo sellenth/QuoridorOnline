@@ -1,9 +1,9 @@
 // @ts-nocheck
 
 import vss from "./vs";
-import { fsFence, fsPlayer, fsCamera, fsGrid } from "./fs";
+import { fsFence, fsPlayer, fsCamera, fsGrid} from "./fs";
 import { createShader, createProgram, resizeCanvasToDisplaySize, sleep } from "./utils"
-import { identity, translate, projection, addVec3, rotationYZ, rotationXZ, scale, degreesToRadians } from "./math"
+import { identity, translate, projection, addVec3, rotationYZ, rotationXZ, scale, degreesToRadians, subVec3 } from "./math"
 import { Camera } from "./camera";
 import { GameLogic } from "./gameLogic";
 import {
@@ -22,15 +22,13 @@ type VisualUnit =
     }
 
 class GameStatusHandler {
+    gameInfoElement: HTMLElement;
     myWallsElement: Node;
     theirWallsElement: Node;
     turnIndicatorElement: Node;
     //GameOverModal: Node;
 
     constructor() {
-        this.myWallsElement = document.querySelector("#myWalls")!;
-        this.theirWallsElement = document.querySelector("#theirWalls")!;
-        this.turnIndicatorElement = document.querySelector("#turnIndicator")!;
     }
 
     Update(myID: ID, state: GameStatePayload) {
@@ -41,24 +39,27 @@ class GameStatusHandler {
 
     }
 
-    GameOver(myID: ID, winningID: ID) {
-        const el = document.querySelector("#gameOver")!;
-        el.textContent = myID == winningID ? "You win" : "Better luck next time";
-        el.classList.add("fancy-animation");
-        setTimeout(() => {
-            el.classList.remove("fancy-animation");
-        }, 5000);
-    }
-
     UpdateWalls(myID: ID, player: Player) {
         const who = myID == player.id ? "You" : "Them";
         const indicatorElement = myID == player.id ? this.myWallsElement : this.theirWallsElement;
-        indicatorElement.textContent = `${who} - ${player.numFences}`;
+
+        if (gameInfoElement) {
+            indicatorElement.textContent = `${who} - ${player.numFences}`;
+        }
     }
 
     UpdateTurnIndicator(myID: ID, activePlayerId: ID) {
         let who = myID == activePlayerId ? "your" : "the other player's";
-        this.turnIndicatorElement.textContent = `It's ${who} turn.`
+        if (gameInfoElement) {
+            this.turnIndicatorElement.textContent = `It's ${who} turn.`
+        }
+    }
+
+    SetGameInfoElement(el: HTMLElement) {
+        this.gameInfoElement = el
+        this.myWallsElement = document.querySelector("#myWalls")!;
+        this.theirWallsElement = document.querySelector("#theirWalls")!;
+        this.turnIndicatorElement = document.querySelector("#turnIndicator")!;
     }
 }
 
@@ -67,11 +68,10 @@ class FrameTiming {
     deltaTime: number;
     fps: number;
     elapsed: number;
-    counterElement: Node;
+    counterElement: HTMLElement;
 
     constructor() {
         this.then = new Date().getTime() * .001;
-        this.counterElement = document.querySelector("#fps")!.lastChild!;
         this.elapsed = 0.;
         this.deltaTime = 0;
         this.fps = 0;
@@ -83,45 +83,50 @@ class FrameTiming {
         this.elapsed += this.deltaTime;
         this.then = now;
         this.fps = 1 / this.deltaTime;
-        this.counterElement.textContent = this.fps.toFixed();
+        if (this.counterElement) {
+            this.counterElement.textContent = this.fps.toFixed();
+        }
     }
+}
+
+interface DBClient {
+    from: () => any,
+    select: () => any,
+    eq: () => any,
+    single: () => any,
+    functions: () => any,
+    invoke: () => any
 }
 
 export default class Engine {
     canvas: HTMLCanvasElement
     gameLogic: GameLogic;
-    gl: WebGL2RenderingContext | null;
+    gl: WebGL2RenderingContext;
     sceneObjects: VisualUnit[] = [];
     camera: Camera = new Camera();
     networkedCameras: Record<string, NetworkCamera>
-    frameTiming: FrameTiming = new FrameTiming();
+    frameTiming: FrameTiming;
     //gameStateSocket: WebSocket;
-    gameStatusHandler: GameStatusHandler = new GameStatusHandler();
+    gameStatusHandler: GameStatusHandler;
     render = true
+    fpsCounterElement: HTMLDivElement | null
+    gameInfoElement: HTMLDivElement | null
+    dbClient: DBClient | null
 
-    constructor(dbClient: SupabaseClient) {
+    constructor() {
         this.canvas = document.querySelector("#c")!;
         this.gameLogic = new GameLogic();
         this.gameLogic.players = []
         this.gameLogic.cameraRef = this.camera
 
-        this.dbClient = dbClient
-        this.gameLogic.notifyServer = async (move: [number, number, number, number]) => {
-            const { data, error } = await this.dbClient.functions.invoke('handle-move', {
-                body: { proposed_move: move, game_id: '80085757-eee0-4e53-9246-2bc83ffcac54' }
-            })
-            if (error) {
-                console.error(error)
-            } else {
-                console.log(data)
-            }
-        }
+        let gl_ctx = this.canvas.getContext("webgl2", { premultipliedAlpha: false });
 
-        this.gl = this.canvas.getContext("webgl2", { premultipliedAlpha: false });
-        if (!this.gl) {
+        if (!gl_ctx) {
             alert("You need a webGL compatible browser")
             return;
         }
+
+        this.gl = gl_ctx;
 
         this.gl.enable(this.gl.DEPTH_TEST);
         this.gl.enable(this.gl.BLEND);
@@ -136,6 +141,8 @@ export default class Engine {
 
         this.configurePrograms();
 
+        this.gameLogic.createDemoScene();
+
         this.frameTiming = new FrameTiming();
         this.gameStatusHandler = new GameStatusHandler();
 
@@ -143,35 +150,28 @@ export default class Engine {
 
     }
 
-    /*
-    configureWebsocket()
-    {
-        let connectionURL = location.origin.replace(/^http/, 'ws')
-        this.gameStateSocket = new WebSocket(connectionURL, "gamerzone");
-
-        this.gameStateSocket.onmessage = (msg) => {
-            this.handleServerPayload(JSON.parse(msg.data));
+    registerDbClient(dbClient: SupabaseClient, gid: string) {
+        this.dbClient = dbClient;
+        this.gameLogic.notifyServer = async (move: [number, number, number, number]) => {
+            const { data, error } = await this.dbClient.functions.invoke('handle-move', {
+                body: { proposed_move: move, game_id: gid }
+            })
+            if (error) {
+                console.error(error)
+            } else {
+                console.log(data)
+            }
         }
+    }
 
-        this.gameLogic.notifyServer = (msg: ClientMessage) => {
-            this.gameStateSocket.send(JSON.stringify(msg));
-        };
 
-        setInterval(() => {
-            this.gameStateSocket.send(JSON.stringify(
-                {
-                    type: MessageType.ClientCameraPos,
-                    payload: {
-                        position: this.camera.GetPosition(),
-                        yaw: this.camera.GetYaw(),
-                        pitch: this.camera.GetPitch(),
-                        id: this.gameLogic.myId
-                    }
+    setFpsCounterElement(el: HTMLDivElement) {
+        this.frameTiming.counterElement = el
+    }
 
-                }
-            ))
-        }, 1000)
-    }*/
+    setGameInfoElement(el: HTMLDivElement) {
+        this.gameStatusHandler.SetGameInfoElement(el)
+    }
 
     async networkTick(game_id: string) {
         // fetch game state
@@ -284,10 +284,17 @@ export default class Engine {
 
             // Update camera position
             this.camera.Move(this.frameTiming.deltaTime);
+            { // demo mode
+            this.camera.position[0] = Math.cos(this.frameTiming.elapsed / 7) * 8 + 9
+            this.camera.position[2] = Math.sin(this.frameTiming.elapsed / 7) * 8 + 9
+            }
 
             // Calculate program independent matrices
             let projMat = projection(3.14 / 2, canvas.clientWidth / canvas.clientHeight, 0.1, 50);
-            let viewMat = this.camera.getViewMatrix();
+            let viewMat = this.camera.getViewMatrix()
+            {//demo mode
+            viewMat = this.camera.lookAt( [9, 0, 9], [0, 1, 0]);
+            }
 
             this.sceneObjects.forEach(so => {
                 so.render(projMat, viewMat);

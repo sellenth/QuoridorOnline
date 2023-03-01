@@ -113,6 +113,20 @@ export class Camera {
         return invertMat4(this.getCameraMatrix());
     }
 
+    lookAt(target: Vec3, up: Vec3) {
+        var zAxis = normalizeVec3(
+            subVec3(this.position, target));
+        var xAxis = normalizeVec3(crossProductVec3(up, zAxis));
+        var yAxis = normalizeVec3(crossProductVec3(zAxis, xAxis));
+
+        return invertMat4([
+        ...xAxis,         0,
+        ...yAxis,         0,
+        ...zAxis,         0,
+        ...this.position, 1,
+        ]);
+    }
+
     Look(xOffset: number, yOffset: number)
     {
         xOffset *= this.mouseSens;

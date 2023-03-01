@@ -31,6 +31,25 @@ export class GameLogic {
         this.notifyServer = async () => { }
     }
 
+    createDemoScene() {
+        this.players.push({
+            id: "p1",
+            pos: [5,1,5],
+            color: [1, 1, 1],
+            walls: 15
+        })
+        this.players.push({
+            id: "p2",
+            pos: [7,3,13],
+            color: [1, 1, 1],
+            walls: 15
+        })
+
+        this.fencePositions.push( { pos: [8, 0, 8], orientation: Orientation.Horizontal } )
+        this.fencePositions.push( { pos: [6, 4, 6], orientation: Orientation.Flat } )
+        this.fencePositions.push( { pos: [4, 0, 6], orientation: Orientation.Vertical } )
+    }
+
     assignId(id: ID) {
         this.myId = id;
     }
