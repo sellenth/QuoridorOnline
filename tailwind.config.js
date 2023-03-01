@@ -1,3 +1,5 @@
+const { fontFamily } = require('tailwindcss/defaultTheme')
+
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
@@ -10,6 +12,9 @@ module.exports = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['var(--font-orbitron)', ...fontFamily.sans],
+      },
       colors: {
         transparent: 'transparent',
         current: 'currentColor',
@@ -22,11 +27,12 @@ module.exports = {
         'bubble-gum': '#ff77e9',
         bermuda: '#78dcca',
         theme: {
-          100: '#6b9080ff',
-          200: '#a4c3b2ff',
-          300: '#cce3deff',
-          400: '#eaf4f4ff',
-          500: '#f6fff8ff',
+          100: '#8386f5',
+          200: '#3d43b4',
+          300: '#080e19',
+          400: '#083e12',
+          500: '#1afe49',
+          red: '#de004e'
         },
       },
     },

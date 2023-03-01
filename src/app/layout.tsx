@@ -1,11 +1,13 @@
-/* @ts-ignore */
-import 'server-only'
-
 import SupabaseListener from '../components/supabase-listener'
 import SupabaseProvider from '../components/supabase-provider'
 import Header from '../components/header'
-import './globals.css'
 import { createServerClient } from '../utils/supabase-server'
+
+import { Orbitron } from '@next/font/google'
+export const orbitron = Orbitron({ subsets: ['latin'], variable: '--font-orbitron' })
+
+import './globals.css'
+
 
 // do not cache this layout
 export const revalidate = 0
@@ -22,7 +24,7 @@ export default async function RootLayout({
   } = await supabase.auth.getSession()
 
   return (
-    <html lang="en">
+    <html lang="en" className={`${orbitron.variable}`}>
       {/*
         <head /> will contain the components returned by the nearest parent
         head.tsx. Find out more at https://beta.nextjs.org/docs/api-reference/file-conventions/head
