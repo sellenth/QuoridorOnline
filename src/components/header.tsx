@@ -23,7 +23,7 @@ export default function Header() {
       <HeaderButton link="/scoreboard" text="SCOREBOARD" />
       <HeaderButton link="/friendslist" text="FRIENDS" />
       <HeaderButton link="/game-invites" text="GAMES" />
-      <HeaderButton link="/signup" text={`${username == null ? "LOGIN" : username}`} color="text-theme-red" />
+      <HeaderButton link="/signup" text={`${username == null ? "LOGIN" : username}`} color="text-theme-500 " />
     </div>
   )
 }

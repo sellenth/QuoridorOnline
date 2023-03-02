@@ -17,10 +17,10 @@ export interface Database {
     Functions: {
       graphql: {
         Args: {
-          operationName: string
-          query: string
-          variables: Json
-          extensions: Json
+          operationName?: string
+          query?: string
+          variables?: Json
+          extensions?: Json
         }
         Returns: Json
       }
@@ -34,53 +34,79 @@ export interface Database {
   }
   public: {
     Tables: {
+      friends: {
+        Row: {
+          accepted: boolean | null
+          friend_id: string
+          friends_since: string | null
+          user_id: string
+        }
+        Insert: {
+          accepted?: boolean | null
+          friend_id: string
+          friends_since?: string | null
+          user_id: string
+        }
+        Update: {
+          accepted?: boolean | null
+          friend_id?: string
+          friends_since?: string | null
+          user_id?: string
+        }
+      }
+      "game-invites": {
+        Row: {
+          cols: number
+          gid: string | null
+          initiated: string | null
+          initiator_id: string
+          layers: number
+          opponent_id: string
+          rows: number
+        }
+        Insert: {
+          cols?: number
+          gid?: string | null
+          initiated?: string | null
+          initiator_id: string
+          layers?: number
+          opponent_id: string
+          rows?: number
+        }
+        Update: {
+          cols?: number
+          gid?: string | null
+          initiated?: string | null
+          initiator_id?: string
+          layers?: number
+          opponent_id?: string
+          rows?: number
+        }
+      }
       games: {
         Row: {
           id: string
-          move_num: number
+          move_num: number | null
+          moves: number[] | null
           p1_id: string | null
           p2_id: string | null
+          winner: string | null
         }
         Insert: {
           id: string
-          move_num: number
+          move_num?: number | null
+          moves?: number[] | null
           p1_id?: string | null
           p2_id?: string | null
+          winner?: string | null
         }
         Update: {
           id?: string
-          move_num?: number
+          move_num?: number | null
+          moves?: number[] | null
           p1_id?: string | null
           p2_id?: string | null
-        }
-      }
-      moves: {
-        Row: {
-          fences_placed: number[] | null
-          id: string
-          move_num: number
-          p1_fences: number | null
-          p1_pos: number[] | null
-          p2_fences: number | null
-          p2_pos: number[] | null
-        }
-        Insert: {
-          fences_placed?: number[] | null
-          id: string
-          move_num: number
-          p1_fences?: number | null
-          p1_pos?: number[] | null
-          p2_fences?: number | null
-          p2_pos?: number[] | null
-        }
-        Update: {
-          fences_placed?: number[] | null
-          id?: string
-          move_num?: number
-          p1_fences?: number | null
-          p1_pos?: number[] | null
-          p2_fences?: number | null
-          p2_pos?: number[] | null
+          winner?: string | null
         }
       }
       users: {
@@ -209,31 +235,40 @@ export interface Database {
     }
     Functions: {
       extension: {
-        Args: { name: string }
+        Args: {
+          name: string
+        }
         Returns: string
       }
       filename: {
-        Args: { name: string }
+        Args: {
+          name: string
+        }
         Returns: string
       }
       foldername: {
-        Args: { name: string }
+        Args: {
+          name: string
+        }
         Returns: string[]
       }
       get_size_by_bucket: {
         Args: Record<PropertyKey, never>
-        Returns: { size: number; bucket_id: string }[]
+        Returns: {
+          size: number
+          bucket_id: string
+        }[]
       }
       search: {
         Args: {
           prefix: string
           bucketname: string
-          limits: number
-          levels: number
-          offsets: number
-          search: string
-          sortcolumn: string
-          sortorder: string
+          limits?: number
+          levels?: number
+          offsets?: number
+          search?: string
+          sortcolumn?: string
+          sortorder?: string
         }
         Returns: {
           name: string

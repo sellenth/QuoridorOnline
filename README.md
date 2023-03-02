@@ -15,9 +15,9 @@ If all that works, I'd like to implement a scoreboard and friend system. Potenti
 - [x] render game at some route
 - [x] fix double render bug (strict-mode)
 - [x] realtime networked cameras
-- [x] have walls appear from DB
+- [x] have fences appear from DB
 - [x] have players appear from DB
-- [x] have wall counts sync with DB
+- [x] have fences counts sync with DB
 - [x] have player turn sync with DB
 - [x] unify coordinate system for front and back
 - [x] serverless function recreates game state
@@ -31,6 +31,13 @@ Sunday 2/25
 - [x] accept/decline request
 - [x] invite friend to game
 - [x] generate new table per game and initialize with default game state
+
+- [x] visual pass over home page
+- [x] visual pass over score page
+- [x] visual pass over friends page
+- [ ] visual pass over games page
+- [ ] visual pass over sign up page
+- [ ] sync up turn counter and fence counter
 
 - [ ] update elo with winner of game 
 - [ ] clean up game invites after game is won
