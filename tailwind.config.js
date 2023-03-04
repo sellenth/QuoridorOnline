@@ -13,7 +13,7 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['var(--font-orbitron)', ...fontFamily.sans],
+        'display': ['var(--font-orbitron)']
       },
       colors: {
         transparent: 'transparent',

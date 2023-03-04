@@ -1,6 +1,7 @@
 'use client'
 import { useSupabase } from '../../components/supabase-provider'
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
+
 
 type props = {
     username: string
@@ -10,9 +11,10 @@ type props = {
 export default function CreateInvite( { username, my_id }: props) {
     const { supabase, session } = useSupabase()
     const friendRef = useRef<HTMLInputElement>(null)
-    const rowRef   = useRef<HTMLInputElement>(null)
-    const colRef   = useRef<HTMLInputElement>(null)
-    const layerRef = useRef<HTMLInputElement>(null)
+    const [rows, setRows] = useState(9)
+    const [cols, setCols] = useState(9)
+    const [layers, setLayers] = useState(3)
+    const [fences, setFences] = useState(15)
 
     if (session && session.user.id) {
         const sendInvite = () => {
@@ -46,23 +48,29 @@ export default function CreateInvite( { username, my_id }: props) {
 
         return (
             <>
-                <h3>Invite to game by username</h3>
-                <input type="text" ref={friendRef} placeholder="username" defaultValue={username} />
-                <button onClick={sendInvite}>invite</button>
-                <div className="grid grid-cols-3">
-                    <div>
-                        <h3>Board rows</h3>
-                        <input type="text" ref={rowRef} defaultValue={9} />
+                <h3 className="text-center self-center">Invite to game by username</h3>
+                <input className="bg-transparent border-b-2 outline-none" type="text" ref={friendRef} placeholder="username" defaultValue={username} />
+                <div className="grid grid-rows-3 justify-items-end">
+                    <div className="flex">
+                        <h3 className="text-end justify-self-end self-center">Board rows:</h3>
+                        <NumberUpDown max={15} min={3} curr_val={rows} updater={setRows} increment={1} />
                     </div>
-                    <div>
-                        <h3>Board cols</h3>
-                        <input type="text" ref={colRef} defaultValue={9} />
+                    <div className="flex">
+                        <h3 className="text-end self-center">Board cols:</h3>
+                        <NumberUpDown max={15} min={3} curr_val={cols} updater={setCols} increment={1} />
                     </div>
-                    <div>
-                        <h3>Board layers</h3>
-                        <input type="text" ref={layerRef} defaultValue={3} />
+                    <div className="flex">
+                        <h3 className="text-end self-center">Board layers:</h3>
+                        <NumberUpDown max={15} min={3} curr_val={layers} updater={setLayers} increment={1} />
+                    </div>
+                    <div className="flex">
+                        <h3 className="text-end self-center">Starting fences:</h3>
+                        <NumberUpDown max={20} min={1} curr_val={fences} updater={setFences} increment={1} />
                     </div>
                 </div>
+
+                <button className="font-display w-full mt-2 shadow-lg hover:bg-theme-200 hover:shadow-theme-200/50 border-2 rounded-b-md border-theme-200 py-1 px-2"
+                    onClick={sendInvite}>invite</button>
             </>
         )
     }
@@ -71,4 +79,41 @@ export default function CreateInvite( { username, my_id }: props) {
         return <h1>Halt right there criminal scum!</h1>
     }
 
+}
+
+type NumberUpDownProps = {
+    max: number,
+    min: number,
+    curr_val: number,
+    increment: number,
+    updater: React.Dispatch<React.SetStateAction<number>>
+}
+
+function NumberUpDown({ max, min, curr_val, increment, updater }: NumberUpDownProps) {
+    const increase = () => {
+        updater(Math.min(max, curr_val + increment))
+    }
+
+    const decrease = () => {
+        updater(Math.max(min, curr_val - increment))
+    }
+
+    return (
+        <div className="flex justify-end w-14">
+            <p className="mx-2 self-center justify-self-center">{curr_val}</p>
+            <div className="self-center grid grid-rows-2 h-fit">
+                <button onClick={increase}>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" />
+                    </svg>
+                </button>
+
+                <button onClick={decrease}>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+    )
 }

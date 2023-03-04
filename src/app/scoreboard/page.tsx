@@ -2,6 +2,7 @@ import 'server-only'
 
 import { createServerClient } from '../../utils/supabase-server'
 import AddRightBorder from '../../components/right-border'
+import Login from '../../components/login'
 
 const testing = true
 const sample_scores = {
@@ -39,15 +40,17 @@ export default async function Scoreboard() {
     }
 
     return (
+        <>
+            <Login />
         <div className="mx-auto w-fit">
             <AddRightBorder>
-            <div className="bg-blue-200 bg-opacity-10 backdrop-blur
-                            max-w-fit text-gray-200 pl-4">
+            <div className="mt-10 bg-blue-200 bg-opacity-10 backdrop-blur
+                            w-fit text-gray-200 pl-4">
                 <table className="border-separate border-spacing-y-4">
                     <thead>
-                        <tr className="text-4xl">
+                        <tr className="font-display text-4xl">
                             <th colSpan={2} className="px-8">USERNAME</th>
-                            <th className="px-4">ELO</th>
+                            <th className="font-display px-4">ELO</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -64,5 +67,6 @@ export default async function Scoreboard() {
             </div>
             </AddRightBorder>
         </div>
+        </>
     )
 }

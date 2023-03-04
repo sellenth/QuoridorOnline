@@ -4,25 +4,17 @@ import CreateInvite from './create-invite'
 import { useSupabase } from '../../components/supabase-provider'
 import AcceptRejectInvite from './accept-reject-invite'
 import { useEffect, useState } from 'react'
-import InviteToGame from './invite-to-game'
 import { useSearchParams } from 'next/navigation'
 import JoinGame from './join-game'
-
-export const revalidate = 0
-
-export default function FriendsList() {
-  let searchParams = useSearchParams()
-  let username = searchParams.get('username') ?? ''
-  const { supabase, session } = useSupabase()
-
-  const my_id = session!.user!.id
-
-  const [sent, setSent] = useState([])
-  const [received, setReceived] = useState([])
-  const [inProgress, setInProgress] = useState([])
+import { SupabaseClient } from '@supabase/supabase-js'
+import { Database } from '@/utils/db-types'
+import { mockIncomingGameInvite, mockInProgressGameInvite, mockMyId, mockMyUsername, mockSentGameInvite } from '@/utils/mock-data'
+import { GameInvite } from '@/utils/query-types'
+import AddRightBorder from '@/components/right-border'
+import { DecorativeCircles } from '@/components/decordatives'
 
 
-  useEffect(() => {
+const subscribeToDbChanges = (supabase: SupabaseClient<Database>, id_to_listen_on: string, callback: () => any) => {
     const channel = supabase
         .channel('game-invites-db-changes')
         .on(
@@ -31,9 +23,9 @@ export default function FriendsList() {
                 event: '*',
                 schema: 'public',
                 table: 'game-invites',
-                filter: `initiator_id=eq.${my_id}`
+                filter: `initiator_id=eq.${id_to_listen_on}`
             },
-          () => { update_table() }
+            () => { callback() }
         )
         .on(
             'postgres_changes',
@@ -41,32 +33,52 @@ export default function FriendsList() {
                 event: '*',
                 schema: 'public',
                 table: 'game-invites',
-                filter: `opponent_id=eq.${my_id}`
+                filter: `opponent_id=eq.${id_to_listen_on}`
             },
-          () => { update_table() }
+            () => { callback() }
         )
         .subscribe((status: any) => {
             console.log('subscribed to game-invites table changes')
         })
+}
 
-    const update_table = async () => {
-      const invitesResponse = await supabase
-        .from('game-invites')
-        .select('initiator:initiator_id(username, id), opponent:opponent_id(username, id), gid, rows, cols, layers')
-        .or(`initiator_id.eq.${ my_id },opponent_id.eq.${ my_id }`)
 
-      console.log(invitesResponse)
-      let invites = invitesResponse.data
+export default function FriendsList() {
+  let searchParams = useSearchParams()
+  let username = searchParams.get('username') ?? ''
+  const { supabase, session } = useSupabase()
 
-      if (invites) {
-        setSent(invites.filter( (invite: any) =>       { return invite.initiator.id == my_id && invite.gid == null } ))
-        setReceived(invites.filter( (invite: any) =>   { return invite.opponent.id  == my_id && invite.gid == null } ))
-        setInProgress(invites.filter( (invite: any) => { return invite.gid != null } ))
-      }
+  const my_id = session?.user!.id || ''
 
+  const [sent, setSent] = useState<GameInvite[]>([])
+  const [received, setReceived] = useState<GameInvite[]>([])
+  const [inProgress, setInProgress] = useState<GameInvite[]>([])
+
+  const updateTableFromDB = async () => {
+        const { data, error } = await supabase
+            .from('game-invites')
+            .select('initiator:initiator_id(username, id), opponent:opponent_id(username, id), gid, rows, cols, layers')
+            .or(`initiator_id.eq.${my_id},opponent_id.eq.${my_id}`)
+
+        if (data) {
+            let game_invites = data as GameInvite[]
+            setSent(game_invites.filter((invite) => { return invite.initiator.id == my_id && invite.gid == null }))
+            setReceived(game_invites.filter((invite) => { return invite.opponent.id == my_id && invite.gid == null }))
+            setInProgress(game_invites.filter((invite) => { return invite.gid != null }))
+        }
+  }
+
+
+
+  useEffect(() => {
+    if (process.env.NEXT_PUBLIC_TESTING) {
+      setSent(mockSentGameInvite)
+      setReceived(mockIncomingGameInvite)
+      setInProgress(mockInProgressGameInvite)
+    } else {
+      subscribeToDbChanges(supabase, my_id, updateTableFromDB)
+      updateTableFromDB()
     }
-
-    update_table()
 
       return () => {
           supabase.removeAllChannels()
@@ -75,55 +87,64 @@ export default function FriendsList() {
   }, [])
 
   return (
-    <>
-    <CreateInvite my_id={my_id} username={username} />
-    <div className="mt-10 border-2 border-black">
-      <h3>Game invites sent</h3>
-      <table>
-        <thead>
-          <tr>
-            <th>Username</th>
-          </tr>
-        </thead>
-        <tbody>
-          {sent &&
-          sent.map((game) => (
-              <tr key={game.opponent.id}>
-                <td>{game.opponent.username}</td>
-              </tr>
-            ))}
-        </tbody>
-      </table>
-    </div>
+    <div className="text-gray-200 mx-auto w-fit ">
+      <div className="w-fit align-center mx-auto my-10 bg-blue-200 bg-opacity-10 backdrop-blur p-4 border-2 border-gray-200 rounded-md">
+        <CreateInvite my_id={my_id} username={username} />
+      </div>
 
-    <div className="mt-10 border-2 border-black">
-      <h3>Game invites received</h3>
-      <table>
-        <thead>
-          <tr>
-            <th>Username</th>
-          </tr>
-        </thead>
-        <tbody>
-          {received &&
-          received.map((game) => (
-              <tr key={game.initiator.id}>
-                <td>
-                  {game.initiator.username}
-                  <AcceptRejectInvite initiator_id={game.initiator.id} opponent_id={game.opponent.id}/>
-                </td>
-              </tr>
-            ))}
-        </tbody>
-      </table>
-    </div>
+    <AddRightBorder>
+                <div className="bg-blue-200 bg-opacity-10 backdrop-blur p-4">
+        <table>
+          <thead>
+            <tr>
+              <th className="font-display">GAME INVITES SENT</th>
+            </tr>
+          </thead>
+          <tbody>
+            {sent &&
+            sent.map((game) => (
+                <tr key={game.opponent.id}>
+                  <td>{game.opponent.username}</td>
+                </tr>
+              ))}
+          </tbody>
+        </table>
+      </div>
+    </AddRightBorder>
 
-    <div className="mt-10 border-2 border-black">
-      <h3>Games in progress</h3>
-      <table>
+    <DecorativeCircles />
+
+      <div className="grid grid-cols-2 gap-2">
+        <div className="bg-blue-200 bg-opacity-10 backdrop-blur border-2 border-gray-200 p-2 rounded-l-md">
+          <table className="w-full border-separate border-spacing-y-2">
+              <thead>
+                <tr>
+                  <th className="text-start font-display">GAME INVITES RECEIVED</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                {received &&
+                received.map((game) => (
+                    <tr key={game.initiator.id} className="h-9">
+                      <td>
+                        {game.initiator.username}
+                      </td>
+                      <td className="text-end">
+                        <AcceptRejectInvite initiator_id={game.initiator.id} opponent_id={game.opponent.id}/>
+                      </td>
+                    </tr>
+                  ))}
+              </tbody>
+            </table>
+          </div>
+
+        <div className="bg-blue-200 bg-opacity-10 backdrop-blur border-2 border-gray-200 p-2 rounded-r-md">
+                    <table className="w-full border-separate border-spacing-y-2">
         <thead>
           <tr>
-            <th>Opponent</th>
+            <th className="text-start font-display">ACTIVE GAMES</th>
+            <th></th>
           </tr>
         </thead>
         <tbody>
@@ -134,9 +155,11 @@ export default function FriendsList() {
               let their_name = game.initiator.id == my_id ? game.opponent.username : game.initiator.username
 
             return (
-              <tr key={their_id}>
+              <tr key={their_id} className="h-9">
                 <td>
                   {their_name}
+                </td>
+                <td className="text-end">
                   <JoinGame gid={game.gid} />
                 </td>
               </tr>
@@ -144,7 +167,8 @@ export default function FriendsList() {
           })}
         </tbody>
       </table>
+        </div>
     </div>
-    </>
+    </div>
   )
 }

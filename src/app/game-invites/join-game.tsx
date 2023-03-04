@@ -15,6 +15,10 @@ export default function JoinGame({ gid }: props) {
     }
 
     return (
-            <button className="border-2 rounded-md border-red-500 py-1 px-2" onClick={accept}>join game</button>
+        <button
+            className="font-display shadow-lg hover:bg-theme-500 h-8 hover:shadow-theme-500/50 border-2 rounded-md border-theme-500 py-1 px-2"
+            onClick={accept}>
+            join game
+        </button>
     )
 }

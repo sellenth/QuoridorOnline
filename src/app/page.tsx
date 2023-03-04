@@ -22,7 +22,7 @@ export default function Home() {
 
       <div className="absolute bottom-10 left-0 z-10">
       <AddRightBorder>
-      <h1 className="backdrop-blur bg-blue-200 bg-opacity-10 py-4 pl-40 pr-10 text-gray-200 font-bold text-center text-6xl">
+      <h1 className="font-display backdrop-blur bg-blue-200 bg-opacity-10 py-4 pl-40 pr-10 text-gray-200 font-bold text-center text-6xl">
         QUORIDOR ONLINE
       </h1>
       </AddRightBorder>

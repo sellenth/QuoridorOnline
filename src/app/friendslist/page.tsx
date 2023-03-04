@@ -5,104 +5,11 @@ import { useSupabase } from '../../components/supabase-provider'
 import AcceptRejectInvite from './accept-reject-invite'
 import { useEffect, useState } from 'react'
 import InviteToGame from './invite-to-game'
-import { Database } from '../../utils/db-types'
-import AddRightBorder, { AddBottomBorder, AddFullBorder, AddTopBorder } from '@/components/right-border'
+import AddRightBorder from '@/components/right-border'
 import { DecorativeCircles } from '@/components/decordatives'
+import { mockConnections, mockInvites } from '@/utils/mock-data'
+import { FriendConnection, IncomingFriendInvite } from '@/utils/query-types'
 
-const testing = true
-
-function subscribeToDbChanges(supabase: any, id: string, callback: () => any ){
-    const channel = supabase
-        .channel('friends-db-changes')
-        .on(
-            'postgres_changes',
-            {
-                event: '*',
-                schema: 'public',
-                table: 'friends',
-                filter: `user_id=eq.${id}`
-            },
-          () => { callback() }
-        )
-        .on(
-            'postgres_changes',
-            {
-                event: '*',
-                schema: 'public',
-                table: 'friends',
-                filter: `friend_id=eq.${id}`
-            },
-          () => { callback() }
-        )
-        .subscribe((status: any) => {
-            console.log('subscribed to friends table changes')
-        })
-  //TODO notify on errors from channel
-}
-
-
-type FriendConnection = {
-  friend: {
-    username: string,
-    id: string,
-  },
-  accepted: boolean
-}
-
-const mockConnections = [
-  {
-    friend: {
-      username: 'gamerX',
-      id: '1234',
-    },
-    accepted: true
-  },
-  {
-    friend: {
-      username: 'bigHuntah',
-      id: '1235',
-    },
-    accepted: true
-  },
-  {
-    friend: {
-      username: 'cowboY',
-      id: '1237',
-    },
-    accepted: false
-  },
-  {
-    friend: {
-      username: 'rudolph',
-      id: '1242',
-    },
-    accepted: true
-  },
-]
-
-type IncomingFriendInvite = {
-  requester: {
-    username: string,
-    id: string,
-  },
-  accepted: boolean
-}
-const mockInvites = [
-  {
-    requester: {
-      username: 'howdoyouplayquoridor',
-      id: '1111',
-    },
-    accepted: false
-  },
-  {
-    requester: {
-      username: 'al1c3',
-      id: '9499',
-    },
-    accepted: false
-  },
-]
 
 export default function FriendsList() {
   const { supabase, session } = useSupabase()
@@ -112,6 +19,36 @@ export default function FriendsList() {
   const [accepted, setAccepted] = useState<FriendConnection[]>([])
   const [pending, setPending] = useState<FriendConnection[]>([])
   const [received_invite, setReceived] = useState<IncomingFriendInvite[]>([])
+
+  const subscribeToDbChanges = (callback: () => any) => {
+      const channel = supabase
+          .channel('friends-db-changes')
+          .on(
+              'postgres_changes',
+              {
+                  event: '*',
+                  schema: 'public',
+                  table: 'friends',
+                  filter: `user_id=eq.${my_id}`
+              },
+              () => { callback() }
+          )
+          .on(
+              'postgres_changes',
+              {
+                  event: '*',
+                  schema: 'public',
+                  table: 'friends',
+                  filter: `friend_id=eq.${my_id}`
+              },
+              () => { callback() }
+          )
+          .subscribe((status: any) => {
+              console.log('subscribed to friends table changes')
+          })
+      //TODO notify on errors from channel
+  }
+
 
   const getMyFriendsFromDb = async () => {
         const { data, error } = await supabase
@@ -145,10 +82,10 @@ export default function FriendsList() {
 
   useEffect(() => {
 
-    if (testing) {
+    if (process.env.NEXT_PUBLIC_TESTING) {
       updateFriendsList(mockConnections, mockInvites)
     } else {
-      subscribeToDbChanges(supabase, my_id, updateFriendsListFromDb);
+      subscribeToDbChanges(updateFriendsListFromDb);
       updateFriendsListFromDb()
     }
 
@@ -169,7 +106,7 @@ export default function FriendsList() {
                     <table>
                         <thead>
                             <tr>
-                                <th>INVITES SENT</th>
+                                <th className="font-display">INVITES SENT</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -191,7 +128,7 @@ export default function FriendsList() {
                     <table className="w-full border-separate border-spacing-y-2">
                         <thead>
                             <tr>
-                                <th className="text-start">INVITES RECEIVED</th>
+                                <th className="text-start font-display">INVITES RECEIVED</th>
                                 <th></th>
                             </tr>
                         </thead>
@@ -215,7 +152,7 @@ export default function FriendsList() {
                     <table className="w-full border-separate border-spacing-y-2">
                         <thead>
                             <tr>
-                                <th className="text-start">FRIENDS</th>
+                                <th className="text-start font-display">FRIENDS</th>
                                 <th></th>
                             </tr>
                         </thead>

@@ -36,7 +36,7 @@ export default function InviteFriend() {
             <>
                 <h3 className="text-center self-center">Invite a friend by username</h3>
                 <input className="bg-transparent border-b-2 outline-none" type="text" ref={friendRef} placeholder="username" />
-                <button className="mt-2 shadow-lg hover:bg-theme-200 hover:shadow-theme-200/50 border-2 rounded-b-md border-theme-200 py-1 px-2"
+                <button className="font-display mt-2 shadow-lg hover:bg-theme-200 hover:shadow-theme-200/50 border-2 rounded-b-md border-theme-200 py-1 px-2"
                         onClick={sendInvite}>invite</button>
             </>
         )

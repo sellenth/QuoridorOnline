@@ -10,7 +10,7 @@ export default function InviteToGame( { friend_username }: props) {
             pathname: '/game-invites',
             query: { username: friend_username }
         }}
-            className="shadow-lg hover:bg-theme-500 hover:shadow-theme-500/50 border-2 rounded-md border-theme-500 py-1 px-2"
+            className="font-display shadow-lg hover:bg-theme-500 hover:shadow-theme-500/50 border-2 rounded-md border-theme-500 py-1 px-2"
         >
             challenge
         </Link>
