@@ -41,7 +41,6 @@ export default async function Scoreboard() {
 
     return (
         <>
-            <Login />
         <div className="mx-auto w-fit">
             <AddRightBorder>
             <div className="mt-10 bg-blue-200 bg-opacity-10 backdrop-blur

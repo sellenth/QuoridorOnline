@@ -50,9 +50,9 @@ export default function CreateInvite( { username, my_id }: props) {
             <>
                 <h3 className="text-center self-center">Invite to game by username</h3>
                 <input className="bg-transparent border-b-2 outline-none" type="text" ref={friendRef} placeholder="username" defaultValue={username} />
-                <div className="grid grid-rows-3 justify-items-end">
+                <div className="grid grid-rows-3 mt-2 gap-y-2 justify-items-end">
                     <div className="flex">
-                        <h3 className="text-end justify-self-end self-center">Board rows:</h3>
+                        <h3 className="text-end self-center">Board rows:</h3>
                         <NumberUpDown max={15} min={3} curr_val={rows} updater={setRows} increment={1} />
                     </div>
                     <div className="flex">
@@ -90,6 +90,8 @@ type NumberUpDownProps = {
 }
 
 function NumberUpDown({ max, min, curr_val, increment, updater }: NumberUpDownProps) {
+    const upHidden = curr_val == max
+    const downHidden = curr_val == min
     const increase = () => {
         updater(Math.min(max, curr_val + increment))
     }
@@ -102,13 +104,13 @@ function NumberUpDown({ max, min, curr_val, increment, updater }: NumberUpDownPr
         <div className="flex justify-end w-14">
             <p className="mx-2 self-center justify-self-center">{curr_val}</p>
             <div className="self-center grid grid-rows-2 h-fit">
-                <button onClick={increase}>
+                <button onClick={increase} className={`${upHidden ? 'invisible' : '' }`}>
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" />
                     </svg>
                 </button>
 
-                <button onClick={decrease}>
+                <button onClick={decrease} className={`${downHidden ? 'invisible' : '' }`}>
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
                     </svg>

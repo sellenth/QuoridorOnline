@@ -35,8 +35,8 @@ Sunday 2/25
 - [x] visual pass over home page
 - [x] visual pass over score page
 - [x] visual pass over friends page
-- [ ] visual pass over games page
-- [ ] visual pass over sign up page
+- [x] visual pass over games page
+- [x] visual pass over sign up page
 - [ ] sync up turn counter and fence counter
 
 - [ ] update elo with winner of game 
