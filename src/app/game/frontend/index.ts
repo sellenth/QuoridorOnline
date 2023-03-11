@@ -106,18 +106,19 @@ export default class Engine {
     camera: Camera = new Camera();
     networkedCameras: Record<string, NetworkCamera>
     frameTiming: FrameTiming;
-    //gameStateSocket: WebSocket;
     gameStatusHandler: GameStatusHandler;
     render = true
     fpsCounterElement: HTMLDivElement | null
     gameInfoElement: HTMLDivElement | null
     dbClient: DBClient | null
+    demoMode: boolean
 
     constructor() {
         this.canvas = document.querySelector("#c")!;
         this.gameLogic = new GameLogic();
         this.gameLogic.players = []
         this.gameLogic.cameraRef = this.camera
+        this.demoMode = false;
 
         let gl_ctx = this.canvas.getContext("webgl2", { premultipliedAlpha: false });
 
@@ -146,8 +147,6 @@ export default class Engine {
         this.frameTiming = new FrameTiming();
         this.gameStatusHandler = new GameStatusHandler();
 
-        //this.configureWebsocket();
-
     }
 
     registerDbClient(dbClient: SupabaseClient, gid: string) {
@@ -164,6 +163,9 @@ export default class Engine {
         }
     }
 
+    setDemoMode(b: boolean) {
+        this.demoMode = b
+    }
 
     setFpsCounterElement(el: HTMLDivElement) {
         this.frameTiming.counterElement = el
@@ -182,30 +184,6 @@ export default class Engine {
             .single()
 
         this.IngestGameState(data)
-    }
-
-    handleServerPayload(payload: ServerPayload) {
-        if (this.gameLogic) {
-            switch (payload.type) {
-                case MessageType.Identity:
-                    let id = payload.data as ID;
-                    this.gameLogic.assignId(id);
-                    break;
-                case MessageType.GameState:
-                    let data = payload.data as GameStatePayload;
-                    this.gameLogic.updateFences(data.fences);
-                    this.gameLogic.updatePlayers(data.players);
-                    this.gameLogic.setActivePlayer(data.activePlayerId ?? 'none');
-                    this.gameStatusHandler.Update(this.gameLogic.myId, data);
-                    break;
-                case MessageType.GameOver:
-                    this.gameStatusHandler.GameOver(this.gameLogic.myId, payload.data as ID);
-                    break;
-                case MessageType.Cameras:
-                    this.networkedCameras = payload.data as NetworkCamera[];
-                    break;
-            }
-        }
     }
 
     PackageCameraAsNetPayload() {
@@ -283,18 +261,27 @@ export default class Engine {
             gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
             // Update camera position
-            this.camera.Move(this.frameTiming.deltaTime);
-            { // demo mode
-            this.camera.position[0] = Math.cos(this.frameTiming.elapsed / 7) * 8 + 9
-            this.camera.position[2] = Math.sin(this.frameTiming.elapsed / 7) * 8 + 9
+            if (this.demoMode){
+                // move around a predetermined circle
+                this.camera.position[0] = Math.cos(this.frameTiming.elapsed / 7) * 8 + 9
+                this.camera.position[2] = Math.sin(this.frameTiming.elapsed / 7) * 8 + 9
+            } else {
+                // move based on keyboard input
+                this.camera.Move(this.frameTiming.deltaTime);
             }
 
             // Calculate program independent matrices
             let projMat = projection(3.14 / 2, canvas.clientWidth / canvas.clientHeight, 0.1, 50);
-            let viewMat = this.camera.getViewMatrix()
-            {//demo mode
-            viewMat = this.camera.lookAt( [9, 0, 9], [0, 1, 0]);
+            let viewMat;
+
+            if (this.demoMode) {
+                // get camera such that it is always facing a center point
+                viewMat = this.camera.lookAt( [9, 0, 9], [0, 1, 0]);
+            } else {
+                // get camera based on vectors updated by mouse movement
+                viewMat = this.camera.getViewMatrix()
             }
+
 
             this.sceneObjects.forEach(so => {
                 so.render(projMat, viewMat);

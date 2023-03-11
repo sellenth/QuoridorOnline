@@ -37,8 +37,9 @@ Sunday 2/25
 - [x] visual pass over friends page
 - [x] visual pass over games page
 - [x] visual pass over sign up page
-- [ ] sync up turn counter and fence counter
 
+- [ ] sync up turn counter and fence counter
+- [ ] display row/col/layer info on games page
 - [ ] update elo with winner of game 
 - [ ] clean up game invites after game is won
 - [ ] is there a way to enforce uniqueness on two columns as a combination? (game invite table)

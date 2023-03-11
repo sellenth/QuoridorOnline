@@ -1,7 +1,6 @@
 'use client'
 
 import {useEffect} from 'react'
-import Login from '../components/login'
 import Engine from './game/frontend/index'
 import AddRightBorder from '../components/right-border'
 
@@ -11,6 +10,7 @@ export default function Home() {
   useEffect( () => {
     const engine = new Engine
     engine.startRenderLoop()
+    engine.setDemoMode(true)
 
     return () => {
         engine.render = false;
