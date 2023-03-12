@@ -2,7 +2,7 @@
 
 import { useSupabase } from "@/components/supabase-provider"
 import Link from "next/link"
-import { useRef } from "react"
+import { FormEvent, useRef } from "react"
 import { useRouter } from 'next/navigation';
 
 export default function SignIn() {
@@ -22,16 +22,23 @@ export default function SignIn() {
         }
     }
 
-    const handleEmailLogin = async () => {
-        const { error } = await supabase.auth.signInWithPassword({
-            email: emailRef.current.value,
-            password: 'password' //pwRef.current.value
-        })
+    const handleEmailLogin = async (e: FormEvent<HTMLFormElement>) => {
+        e.preventDefault()
 
-        if (error) {
-            console.log({ error })
+        if (emailRef.current && passwordRef.current) {
+            console.log(emailRef.current.value)
+            console.log(passwordRef.current.value)
+            const { error } = await supabase.auth.signInWithPassword({
+                email: emailRef.current.value,
+                password: passwordRef.current.value
+            })
+
+            if (error) {
+                console.log({ error })
+            } else {
+                router.push('/')
+            }
         }
-        router.push('/')
     }
 
     const handleGoogleLogin = async () => {
@@ -44,21 +51,15 @@ export default function SignIn() {
         } else { console.log(data) }
     }
 
-    const handleLogout = async () => {
-        const { error } = await supabase.auth.signOut()
-
-        if (error) {
-            console.log({ error })
-        }
-    }
-
     return (<div className="text-gray-200">
       <div className="max-w-sm align-center mx-auto my-10 bg-blue-200 bg-opacity-10 backdrop-blur p-4 border-2 border-gray-200 rounded-md">
         <h1 className="font-display">LOG IN</h1>
-        <input className="w-full block bg-transparent border-b-2 outline-none" type="text" placeholder="email" ref={emailRef}/>
-        <input className="w-full block bg-transparent border-b-2 outline-none" type="password" placeholder="password" ref={passwordRef}/>
-        <button onClick={handleEmailLogin} className="font-display w-full my-2 shadow-lg hover:bg-theme-200 hover:shadow-theme-200/50 border-2 rounded-b-md border-theme-200 py-1 px-2"
-            >Submit</button>
+        <form onSubmit={handleEmailLogin}>
+        <input autoFocus required className="w-full block bg-transparent border-b-2 outline-none" type="text" placeholder="email" ref={emailRef}/>
+        <input required className="w-full block bg-transparent border-b-2 outline-none" type="password" placeholder="password" ref={passwordRef}/>
+        <button type="submit" className="font-display w-full my-2 shadow-lg hover:bg-theme-200 hover:shadow-theme-200/50 border-2 rounded-b-md border-theme-200 py-1 px-2"
+        >Submit</button>
+        </form>
         <p>Don't have an account? <span>
             <Link className="underline" href="signup">
                 Sign Up
