@@ -2,24 +2,12 @@ import 'server-only'
 
 import { createServerClient } from '../../utils/supabase-server'
 import AddRightBorder from '../../components/right-border'
-import Login from '../../components/login'
-
-const testing = true
-const sample_scores = {
-    data: [
-        { username: "Player 1", elo: 600 },
-        { username: "GamerX", elo: 550 },
-        { username: "action_adventurer", elo: 500 },
-        { username: "ultraWin", elo: 489 },
-        { username: "howdoiplayquoridor", elo: 300 },
-        ],
-    error: null
-}
+import { mockScores } from '@/utils/mock-data'
 
 export default async function Scoreboard() {
     const supabase = createServerClient()
 
-    const { data, error } = testing ? sample_scores : await supabase
+    const { data, error } = process.env.NEXT_PUBLIC_TESTING ? mockScores : await supabase
         .from('users')
         .select('username, elo')
         .limit(10)

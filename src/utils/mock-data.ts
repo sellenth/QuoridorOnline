@@ -99,3 +99,15 @@ export const mockInProgressGameInvite: GameInvite[] = [
     layers: 3
   },
 ]
+
+
+export const mockScores = {
+    data: [
+        { username: "Player 1", elo: 600 },
+        { username: "GamerX", elo: 550 },
+        { username: "action_adventurer", elo: 500 },
+        { username: "ultraWin", elo: 489 },
+        { username: "howdoiplayquoridor", elo: 300 },
+        ],
+    error: null
+}
