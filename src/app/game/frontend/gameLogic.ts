@@ -1,6 +1,6 @@
 import { Player } from "./types"
 import { addVec3 } from "./math";
-import { Vec3, Cursor, ClientMessage, ID, Orientation, Player as NetworkPlayer, MessageType } from "../shared/types";
+import { Vec3, Cursor, ID, Orientation, Player as NetworkPlayer, } from "../shared/types";
 import { clamp } from "./utils";
 import { Camera } from "./camera"
 
@@ -9,7 +9,8 @@ const UNINITIALIZED = "NA";
 type Fence = Cursor
 
 export class GameLogic {
-    gridSizeXY: number = 18;
+    gridRows: number = 18;
+    gridCols: number = 18;
     gridLayers: number = 6;
     myId: ID = UNINITIALIZED;
     activePlayerId: ID = UNINITIALIZED;
@@ -130,9 +131,9 @@ export class GameLogic {
 
             }
         }
-        this.cursor.pos[0] = clamp(this.cursor.pos[0], 0, this.gridSizeXY - xModifier);
+        this.cursor.pos[0] = clamp(this.cursor.pos[0], 0, this.gridCols - xModifier);
         this.cursor.pos[1] = clamp(this.cursor.pos[1], 0, this.gridLayers - yModifier);
-        this.cursor.pos[2] = clamp(this.cursor.pos[2], 0, this.gridSizeXY - zModifier);
+        this.cursor.pos[2] = clamp(this.cursor.pos[2], 0, this.gridRows - zModifier);
     }
 
     GetNearestAxis(v: Vec3, sign: -1 | 1): Vec3 {

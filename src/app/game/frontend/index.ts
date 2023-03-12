@@ -134,9 +134,9 @@ export default class Engine {
         this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
 
         this.camera.configureCameraListeners(this.canvas, this.gameLogic);
-        this.camera.SetExtents([this.gameLogic.gridSizeXY,
-        this.gameLogic.gridLayers,
-        this.gameLogic.gridSizeXY]);
+        this.camera.SetExtents([this.gameLogic.gridCols,
+                                this.gameLogic.gridLayers,
+                                this.gameLogic.gridRows]);
 
         this.networkedCameras = [];
 
@@ -327,18 +327,18 @@ export default class Engine {
         let gridData = [];
 
         // Create horizontal lines
-        for (let a = 0; a <= this.gameLogic.gridSizeXY; a += 2) {
+        for (let a = 0; a <= this.gameLogic.gridCols; a += 2) {
             for (let b = 0; b <= this.gameLogic.gridLayers; b += 2) {
                 gridData.push(0, b, a,
-                    this.gameLogic.gridSizeXY, b, a);
+                    this.gameLogic.gridCols, b, a);
             }
         }
 
         // Create depth lines
-        for (let a = 0; a <= this.gameLogic.gridSizeXY; a += 2) {
+        for (let a = 0; a <= this.gameLogic.gridRows; a += 2) {
             for (let b = 0; b <= this.gameLogic.gridLayers; b += 2) {
                 gridData.push(a, b, 0,
-                    a, b, this.gameLogic.gridSizeXY);
+                    a, b, this.gameLogic.gridRows);
             }
         }
 
