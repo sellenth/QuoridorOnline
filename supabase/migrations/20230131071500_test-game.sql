@@ -5,6 +5,13 @@ for select
 to public
 using (true);
 
+CREATE POLICY "can update users table"
+ON "public"."users"
+AS PERMISSIVE FOR UPDATE
+TO authenticated
+USING (true)
+WITH CHECK (true);
+
 create policy "enable everything on friends table for authenticated users"
 on "public"."friends"
 as permissive FOR ALL

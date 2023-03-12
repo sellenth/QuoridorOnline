@@ -209,8 +209,9 @@ export default class Engine {
         let cols = data.cols * 2
         let layers = data.layers * 2
 
-        let player_starting_col = data.cols
-        if (data.cols % 2 == 0) { player_starting_col-- }
+        const p2_starting_row = rows - 1
+        const p_start_col = data.cols % 2 ? data.cols : data.cols - 1
+        const p_start_layer = data.layers % 2 ? data.layers : data.layers - 1
 
         this.camera.SetExtents([cols, layers, rows])
 
@@ -222,8 +223,15 @@ export default class Engine {
         // transform game state
 
         const fences = []
-        const p1 = { id: data.p1_id, goalY: 17, numFences: data.start_fences, pos: [player_starting_col, 3, 1] };
-        const p2 = { id: data.p2_id, goalY: 1, numFences: data.start_fences, pos: [player_starting_col, 3, rows - 1] }
+        const p1 = { id: data.p1_id,
+                     goalZ: p2_starting_row,
+                     num_fences: data.start_fences,
+                     pos: [p_start_col, p_start_layer, 1] };
+
+        const p2 = { id: data.p2_id,
+                     goalZ: 1,
+                     numFences: data.start_fences,
+                     pos: [p_start_col, p_start_layer, p2_starting_row] }
 
         data.moves?.forEach(([move_type, x, y, z]: number[], idx) => {
             const p2_move = !!(idx % 2)

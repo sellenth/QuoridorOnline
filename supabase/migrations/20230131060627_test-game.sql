@@ -3,7 +3,7 @@ create table "public"."games" (
     "move_num"    integer default 0,
     "p1_id"       uuid,
     "p2_id"       uuid,
-    "moves"       smallint[],
+    "moves"       smallint[] not null default '{}',
 
     rows          int   not null default 9,
     cols          int   not null default 9,

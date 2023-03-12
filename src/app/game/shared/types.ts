@@ -7,7 +7,7 @@ export type ID = string;
 
 export type Player = {
     id: ID;
-    goalY: number;
+    goalZ: number;
     numFences: number;
     pos: Vec3;
 }

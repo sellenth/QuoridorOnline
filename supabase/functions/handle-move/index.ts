@@ -83,13 +83,13 @@ serve(async (req: any) => {
             })
         }
 
-        const body = await req.json()
+        const { game_id, proposed_move } = await req.json()
 
         // Get the game record
         const { data, error } = await supabaseClient
             .from('games')
             .select('*')
-            .eq('id', body.game_id)
+            .eq('id', game_id)
             .single()
         if (error) throw error
 
@@ -120,35 +120,50 @@ serve(async (req: any) => {
             )
         }
 
+        // set extents for this game space
+        extents.far = data.rows * 2
+        extents.right = data.cols * 2
+        extents.top = data.layers * 2
+
+        // calculate specific positions on the game board for player starts and ends
+        const p2_start_row = data.rows * 2 - 1
+        const p_start_col = data.cols % 2 ? data.cols : data.cols - 1
+        const p_start_layer = data.layers % 2 ? data.layers : data.layers - 1
+
         let gameSpace = generateGameSpace()
-        const p1: Player = { id: data.p1_id, goalZ: 17, numFences: 15, pos: [9, 3, 1] };
-        const p2: Player = { id: data.p2_id, goalZ: 1, numFences: 15, pos: [9, 3, 17] }
+        const p1: Player = { id: data.p1_id, goalZ: p2_start_row, numFences: 15, pos: [p_start_col, p_start_layer, 1] };
+        const p2: Player = { id: data.p2_id, goalZ: 1, numFences: 15, pos: [p_start_col, p_start_layer, p2_start_row] }
 
         applyMovesToGameSpace(gameSpace, data.moves, p1, p2)
 
         let isValid = true
         let winner = null
+        let verified_move;
 
         // Check proposed player move
-        if (body.proposed_move[0] == MoveType.Pawn) {
+        if (proposed_move[0] == MoveType.Pawn) {
             const curr_player = p2_move ? p2 : p1;
-            isValid = isValidPawnMove(gameSpace, body.proposed_move, curr_player)
+            const other_player = p2_move ? p1 : p2;
+
+            isValid = isValidPawnMove(gameSpace, proposed_move, curr_player)
             if (isValid) {
-                let offsets = calculateMoveOffets(body.proposed_move, curr_player)
+                let offsets = calculateMoveOffets(proposed_move, curr_player)
                 curr_player.pos[0] += offsets[0] * 2
                 curr_player.pos[1] += offsets[1] * 2
                 curr_player.pos[2] += offsets[2] * 2
 
-                body.proposed_move = [body.proposed_move[0], ...curr_player.pos]
+                verified_move = [proposed_move[0], ...curr_player.pos]
 
                 if (curr_player.pos[2] == curr_player.goalZ) {
                     winner = curr_player.id
+                    await updateElo(supabaseClient, curr_player, other_player)
                 }
             }
         }
         // Check proposed fence move
         else {
-            isValid = isValidFenceMove(gameSpace, body.proposed_move, p1, p2)
+            isValid = isValidFenceMove(gameSpace, proposed_move, p1, p2)
+            verified_move = proposed_move.slice();
         }
 
 
@@ -163,7 +178,7 @@ serve(async (req: any) => {
 
         // if all checks are passed, append this move to database record and increment move_num
         if (isValid) {
-            await writeMoveToDB(supabaseClient, body.game_id, data.moves, body.proposed_move, winner)
+            await writeMoveToDB(supabaseClient, game_id, data.moves, verified_move, winner)
         }
 
         return new Response(JSON.stringify({ isValid }), {
@@ -172,12 +187,50 @@ serve(async (req: any) => {
         })
     } catch (error) {
         console.log(error)
-        return new Response(JSON.stringify({ error: error.message }), {
+        return new Response(JSON.stringify({ error }), {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
             status: 400,
         })
     }
 })
+
+async function updateElo(supabaseClient: any, winner: Player, loser: Player) {
+    const {data: {elo: winner_elo}, e1 } = await supabaseClient
+        .from('users')
+        .select('elo')
+        .eq('id', winner.id)
+        .single()
+
+    const {data: {elo: loser_elo}, e2 } = await supabaseClient
+        .from('users')
+        .select('elo')
+        .eq('id', loser.id)
+        .single()
+
+    console.log(e1)
+    console.log(e2)
+
+  const diff = loser_elo - winner_elo
+  const ratio = diff / 400
+  const intermediate = Math.pow(10, ratio) + 1
+  const expected = 1 / (intermediate)
+  const elo_amount = Math.ceil(20 * (1 - expected))
+
+    const { d1, e3 } = await supabaseClient
+        .from('users')
+        .update({elo: winner_elo + elo_amount})
+        .eq('id', winner.id)
+
+    const { d2, e4 } = await supabaseClient
+        .from('users')
+        .update({elo: loser_elo - elo_amount})
+        .eq('id', loser.id)
+
+    console.log(e3)
+    console.log(e4)
+
+  console.log('winner new elo =', winner_elo + elo_amount)
+}
 
 async function writeMoveToDB(client: any, gid: string, moves: Move[], proposed_move: Move, winner: string | null) {
     moves.push(proposed_move)
@@ -460,9 +513,9 @@ export function inBounds([_, x, y, z]: Move) {
 }
 
 export function writeGameSpaceToConsole(gameSpace: GameSpace) {
-    for (let z = 18; z >= 0; --z) {
-        for (let y = 0; y <= 6; ++y) {
-            for (let x = 0; x <= 18; ++x) {
+    for (let z = extents.far; z >= 0; --z) {
+        for (let y = 0; y <= extents.top; ++y) {
+            for (let x = 0; x <= extents.right; ++x) {
                 if (gameSpace[x][y][z] == PLAYER) {
                     writeAllSync(Deno.stdout, player)
                 }

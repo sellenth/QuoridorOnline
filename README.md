@@ -38,13 +38,14 @@ Sunday 2/25
 - [x] visual pass over games page
 - [x] visual pass over sign up page
 
+- [x] update elo with winner of game 
+- [x] allow games of different dimensions
+- [x] flesh out email signup so it isn't hardcoded
 - [ ] sync up turn counter and fence counter
 - [ ] display row/col/layer info on games page
-- [ ] update elo with winner of game 
 - [ ] clean up game invites after game is won
 - [ ] is there a way to enforce uniqueness on two columns as a combination? (game invite table)
 - [ ] allow game invite to specify who is p1
-- [ ] allow games of different dimensions
 - [ ] sanitize inputs
 - [ ] validate row/col/layers game input
 - [ ] warn user when they are searching for friend/user that doens't exist
@@ -52,7 +53,6 @@ Sunday 2/25
 - [ ] change game table to use gid instead of id
 
 - [ ] track what game a player is currently in
-- [ ] flesh out email signup so it isn't hardcoded
 - [ ] alert user if signup procces goes wrong (email not confirmed, row not created)
 - [ ] update DB policies for table more secure access
 
@@ -68,4 +68,4 @@ how to create replay system
 - `npm run db-reset` to reset db (Note: this causes problems with realtime container, command also restarts realtime)
 - the database will be seeded with supabase/seed.sql
 - local db studio available [here](http://localhost:54323/project/default)
-- create types based on local db `npx supabase gen types typescript --local > src/utils/db-types.ts`
+- create types based on local db `npm run generate-types`

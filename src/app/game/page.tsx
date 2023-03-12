@@ -22,7 +22,6 @@ export default function GameView() {
         engine.gameLogic.assignId(session?.user.id ?? "NA");
         engine.startRenderLoop()
         engine.networkTick(gid)
-        /*
 
 
         const channel = supabase
@@ -59,7 +58,6 @@ export default function GameView() {
                     }, 1000)
                 }
             })
-        */
         return () => {
             supabase.removeAllChannels()
             engine.render = false;
@@ -68,11 +66,11 @@ export default function GameView() {
     }, [])
 
     return (<>
-        <div id="fps" className="absolute">fps:
+        <div id="fps" className="absolute text-gray-200">fps:
             <span ref={fpsCounterRef} ></span>
         </div>
         <main className="h-full flex flex-col items-center justify-center">
-            <div ref={gameInfoRef} id="gameInfo" className="">
+            <div ref={gameInfoRef} id="gameInfo" className="text-gray-200">
                 <p id="turnIndicator">Player ???&apos;s turn</p>
                 <div id="wallInfo">
                     <p>Walls Remaining</p>
