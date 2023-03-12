@@ -1,9 +1,13 @@
 create table "public"."games" (
-    "id" uuid not null,
-    "move_num" integer default 0,
-    "p1_id" uuid,
-    "p2_id" uuid,
-    "moves" smallint[]
+    "id"          uuid not null,
+    "move_num"    integer default 0,
+    "p1_id"       uuid,
+    "p2_id"       uuid,
+    "moves"       smallint[],
+
+    rows          int   not null default 9,
+    cols          int   not null default 9,
+    layers        int   not null default 3
 );
 alter table "public"."games" enable row level security;
 

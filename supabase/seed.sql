@@ -3,7 +3,7 @@ WITH credentials(uid, mail, pass, extra_data) AS (
   -- PUT YOUR EMAILS AND PASSWORDS HERE.
   SELECT * FROM (VALUES
   ('13375757-eee0-4e53-9246-2bc83ffcac54'::uuid, 'halston@sellent.in', 'password', '{ "preferred_username": "gamer" }'::jsonb),
-  ('abcdbbfc-577b-4b39-b68d-4b1bc89e4a2f'::uuid, 'halstonsellentin@gmail.com', 'password', '{ "preferred_username": "player one" }'::jsonb),
+  ('abcdbbfc-577b-4b39-b68d-4b1bc89e4a2f'::uuid, 'bobo@gmail.com', 'password', '{ "preferred_username": "player one" }'::jsonb),
   ('deadbeef-577b-4b39-b68d-4b1bc89e4a2f'::uuid, 'tmp@gmail.com', 'password', '{ "preferred_username": "placeholder" }'::jsonb)
   ) AS users
 ),
