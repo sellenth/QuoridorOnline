@@ -3,17 +3,28 @@ import React from 'react'
 import { useSupabase } from '../../components/supabase-provider'
 import { v4 as uuidv4 } from 'uuid';
 
-type props = {initiator_id: string, opponent_id: string}
+type props = {
+    initiator_id: string,
+    opponent_id: string
+    rows: number,
+    cols: number,
+    layers: number,
+    start_fences: number
+}
 
-export default function AcceptRejectInvite( { initiator_id, opponent_id }: props) {
+
+export default function AcceptRejectInvite( { initiator_id, opponent_id, rows, cols, layers, start_fences }: props) {
     const { supabase, session } = useSupabase()
 
     const accept = async () => {
         console.log('accepting')
         let gid = uuidv4();
+
         // create a game in the games table with this gid
+        // NOTE: the rows, cols, layers would be better suited as information fetched from the game-invites table
+        // but I opted to save a query. :shrug:
         let res2 = await supabase.from('games')
-                                 .insert({id: gid, move_num: 0, p1_id: initiator_id, p2_id: opponent_id})
+                                 .insert({id: gid, move_num: 0, p1_id: initiator_id, p2_id: opponent_id, rows, cols, layers, start_fences})
         // add gid to this game-invite
         let res1 = await supabase.from('game-invites')
                                  .update({gid: gid})

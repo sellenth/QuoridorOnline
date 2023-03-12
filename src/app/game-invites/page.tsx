@@ -131,7 +131,13 @@ export default function FriendsList() {
                         {game.initiator.username}
                       </td>
                       <td className="text-end">
-                        <AcceptRejectInvite initiator_id={game.initiator.id} opponent_id={game.opponent.id}/>
+                        <AcceptRejectInvite initiator_id={game.initiator.id}
+                                            opponent_id={game.opponent.id}
+                                            rows={game.rows}
+                                            cols={game.cols}
+                                            layers={game.layers}
+                                            start_fences={game.start_fences}
+                        />
                       </td>
                     </tr>
                   ))}

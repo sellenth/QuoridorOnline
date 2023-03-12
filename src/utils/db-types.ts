@@ -63,6 +63,7 @@ export interface Database {
           layers: number
           opponent_id: string
           rows: number
+          start_fences: number
         }
         Insert: {
           cols?: number
@@ -72,6 +73,7 @@ export interface Database {
           layers?: number
           opponent_id: string
           rows?: number
+          start_fences?: number
         }
         Update: {
           cols?: number
@@ -81,31 +83,44 @@ export interface Database {
           layers?: number
           opponent_id?: string
           rows?: number
+          start_fences?: number
         }
       }
       games: {
         Row: {
+          cols: number
           id: string
+          layers: number
           move_num: number | null
           moves: number[] | null
           p1_id: string | null
           p2_id: string | null
+          rows: number
+          start_fences: number
           winner: string | null
         }
         Insert: {
+          cols?: number
           id: string
+          layers?: number
           move_num?: number | null
           moves?: number[] | null
           p1_id?: string | null
           p2_id?: string | null
+          rows?: number
+          start_fences?: number
           winner?: string | null
         }
         Update: {
+          cols?: number
           id?: string
+          layers?: number
           move_num?: number | null
           moves?: number[] | null
           p1_id?: string | null
           p2_id?: string | null
+          rows?: number
+          start_fences?: number
           winner?: string | null
         }
       }
@@ -150,7 +165,10 @@ export interface Database {
     Tables: {
       buckets: {
         Row: {
+          allowed_mime_types: string[] | null
+          avif_autodetection: boolean | null
           created_at: string | null
+          file_size_limit: number | null
           id: string
           name: string
           owner: string | null
@@ -158,7 +176,10 @@ export interface Database {
           updated_at: string | null
         }
         Insert: {
+          allowed_mime_types?: string[] | null
+          avif_autodetection?: boolean | null
           created_at?: string | null
+          file_size_limit?: number | null
           id: string
           name: string
           owner?: string | null
@@ -166,7 +187,10 @@ export interface Database {
           updated_at?: string | null
         }
         Update: {
+          allowed_mime_types?: string[] | null
+          avif_autodetection?: boolean | null
           created_at?: string | null
+          file_size_limit?: number | null
           id?: string
           name?: string
           owner?: string | null

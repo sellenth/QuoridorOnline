@@ -14,7 +14,7 @@ export default function CreateInvite( { username, my_id }: props) {
     const [rows, setRows] = useState(9)
     const [cols, setCols] = useState(9)
     const [layers, setLayers] = useState(3)
-    const [fences, setFences] = useState(15)
+    const [start_fences, setStartFences] = useState(15)
 
     if (session && session.user.id) {
         const sendInvite = () => {
@@ -28,12 +28,9 @@ export default function CreateInvite( { username, my_id }: props) {
 
             // we have their id, create a game invite
             if (data && data.length > 0) {
-                let rows = rowRef.current?.value ?? 9
-                let cols = rowRef.current?.value ?? 9
-                let layers = rowRef.current?.value ?? 3
                 const { error } = await supabase
                     .from('game-invites')
-                    .insert({ initiator_id: my_id, opponent_id: data[0].id, rows: rows, cols: cols, layers: layers })
+                    .insert({ initiator_id: my_id, opponent_id: data[0].id, rows, cols, layers, start_fences})
 
                 if (error) {
                     console.log(error)
@@ -65,7 +62,7 @@ export default function CreateInvite( { username, my_id }: props) {
                     </div>
                     <div className="flex">
                         <h3 className="text-end self-center">Starting fences:</h3>
-                        <NumberUpDown max={20} min={1} curr_val={fences} updater={setFences} increment={1} />
+                        <NumberUpDown max={20} min={1} curr_val={start_fences} updater={setStartFences} increment={1} />
                     </div>
                 </div>
 

@@ -27,4 +27,5 @@ export type GameInvite = {
   rows: number,
   cols: number,
   layers: number,
+  start_fences: number
 }

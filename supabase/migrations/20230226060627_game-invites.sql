@@ -5,6 +5,7 @@ CREATE TABLE "public"."game-invites" (
     rows          int   not null default 9,
     cols          int   not null default 9,
     layers        int   not null default 3,
+    start_fences  int   not null default 15,
     gid           uuid      default null REFERENCES games,
     initiated DATE      default CURRENT_DATE,
     --

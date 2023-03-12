@@ -7,7 +7,8 @@ create table "public"."games" (
 
     rows          int   not null default 9,
     cols          int   not null default 9,
-    layers        int   not null default 3
+    layers        int   not null default 3,
+    start_fences  int   not null default 15
 );
 alter table "public"."games" enable row level security;
 
