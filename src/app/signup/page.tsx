@@ -1,22 +1,13 @@
 'use client'
 import { useSupabase } from "@/components/supabase-provider"
 import { useRef } from "react"
+import Link from "next/link"
 
 export default function SignUn() {
     const { supabase, session } = useSupabase()
     const usernameRef = useRef<HTMLInputElement>(null)
     const emailRef = useRef<HTMLInputElement>(null)
     const passwordRef = useRef<HTMLInputElement>(null)
-
-    const handleGitHubLogin = async () => {
-        const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'github',
-        })
-
-        if (error) {
-        console.log({ error })
-        }
-    }
 
     const handleEmailSignUp = async () => {
 
@@ -45,19 +36,15 @@ export default function SignUn() {
             <h1 className="font-display">SIGN UP</h1>
             <input className="w-full block bg-transparent border-b-2 outline-none" type="text" maxLength={18} placeholder="username" ref={usernameRef} />
             <input className="w-full block bg-transparent border-b-2 outline-none" type="text" placeholder="email" ref={emailRef} />
-            <input className="w-full block bg-transparent border-b-2 outline-none" type="text" placeholder="password" ref={passwordRef} />
-            <button onClick={handleEmailSignUp} className="font-display w-full mt-2 shadow-lg hover:bg-theme-200 hover:shadow-theme-200/50 border-2 rounded-b-md border-theme-200 py-1 px-2"
+            <input className="w-full block bg-transparent border-b-2 outline-none" type="password" placeholder="password" ref={passwordRef} />
+            <button onClick={handleEmailSignUp} className="font-display w-full my-2 shadow-lg hover:bg-theme-200 hover:shadow-theme-200/50 border-2 rounded-b-md border-theme-200 py-1 px-2"
             >Submit</button>
-            <div className="inline-flex items-center justify-center w-full">
-                <hr className="w-64 h-px my-8 bg-gray-200 border-0" />
-                <span className="absolute px-3 font-medium text-gray-200 -translate-x-1/2 bg-[#192331] left-1/2">OR</span>
-            </div>
-            <div className="inline-flex items-center justify-center w-full">
-                <button onClick={handleGitHubLogin} className="font-display mt-2 shadow-lg hover:bg-theme-200 hover:shadow-theme-200/50 border-2 rounded-md border-theme-200 py-1 px-2"
-                >
-                    Github Login
-            </button>
-            </div>
+            <p>Already have an account? <span>
+                <Link className="underline" href="signin">
+                    Sign In
+                </Link>
+            </span>
+            </p>
         </div>
     </div>)
 }

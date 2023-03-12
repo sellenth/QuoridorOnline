@@ -9,22 +9,6 @@ export default function Login() {
   const emailRef = useRef(null)
   const pwRef = useRef(null)
 
-  const handleEmailSignUp = async () => {
-    const { data, error } = await supabase.auth.signUp({
-      email: 'halston@sellent.in',
-      password: 'password',
-      options: {
-        data: {
-          preferred_username: 'gamer'
-        }
-      },
-    })
-
-    if (error) {
-      console.log({ error })
-    }
-  }
-
   const handleEmailLogin = async () => {
     const { error } = await supabase.auth.signInWithPassword({
       email: emailRef.current.value,
@@ -44,16 +28,6 @@ export default function Login() {
     if (error) {
       console.log({ error })
     } else { console.log(data) }
-  }
-
-  const handleGitHubLogin = async () => {
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'github',
-    })
-
-    if (error) {
-      console.log({ error })
-    }
   }
 
   const handleLogout = async () => {

@@ -25,7 +25,7 @@ export default function Header() {
       <HeaderButton link="/game-invites" text="GAMES" />
       {
         username == null ?
-          <HeaderButton link="/signup" text="LOGIN" color="text-theme-500" />
+          <HeaderButton link="/signin" text="LOGIN" color="text-theme-500" />
         :
           <HeaderButton link="/account" text={username} color="text-theme-500" />
       }
