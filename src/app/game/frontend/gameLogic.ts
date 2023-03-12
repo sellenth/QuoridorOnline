@@ -33,6 +33,8 @@ export class GameLogic {
     }
 
     createDemoScene() {
+        this.players = []
+        this.fencePositions = []
         this.players.push({
             id: "p1",
             pos: [5,1,5],

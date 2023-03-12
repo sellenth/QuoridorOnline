@@ -31,9 +31,9 @@ insert into public."friends" (user_id, friend_id, accepted)
 );
 
 -- creating some game invites
-insert into public."game-invites" (initiator_id, opponent_id, rows, cols, layers)
+insert into public."game-invites" (initiator_id, opponent_id, rows, cols, layers, start_fences)
 (values
-  ('13375757-eee0-4e53-9246-2bc83ffcac54', 'deadbeef-577b-4b39-b68d-4b1bc89e4a2f', 9, 9, 3),
+  ('13375757-eee0-4e53-9246-2bc83ffcac54', 'deadbeef-577b-4b39-b68d-4b1bc89e4a2f', 9, 9, 3, 15),
 
-  ('abcdbbfc-577b-4b39-b68d-4b1bc89e4a2f', '13375757-eee0-4e53-9246-2bc83ffcac54', 9, 9, 3)
+  ('abcdbbfc-577b-4b39-b68d-4b1bc89e4a2f', '13375757-eee0-4e53-9246-2bc83ffcac54', 6, 6, 2, 12)
 );

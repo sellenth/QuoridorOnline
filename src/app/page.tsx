@@ -11,6 +11,7 @@ export default function Home() {
     const engine = new Engine
     engine.startRenderLoop()
     engine.setDemoMode(true)
+    engine.gameLogic.createDemoScene()
 
     return () => {
         engine.render = false;

@@ -3,9 +3,11 @@
 import { useSupabase } from "@/components/supabase-provider"
 import Link from "next/link"
 import { useRef } from "react"
+import { useRouter } from 'next/navigation';
 
 export default function SignIn() {
     const { supabase, session } = useSupabase()
+    const router = useRouter()
     const emailRef = useRef<HTMLInputElement>(null)
     const passwordRef = useRef<HTMLInputElement>(null)
 
@@ -29,6 +31,7 @@ export default function SignIn() {
         if (error) {
             console.log({ error })
         }
+        router.push('/')
     }
 
     const handleGoogleLogin = async () => {

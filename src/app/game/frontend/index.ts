@@ -16,6 +16,7 @@ const szFLOAT = 4;
 
 type VisualUnit =
     {
+        name: string
         program: WebGLProgram;
         VAO: WebGLVertexArrayObject;
         render: (projMat: Mat4, viewMat: Mat4) => void;
@@ -112,6 +113,7 @@ export default class Engine {
     gameInfoElement: HTMLDivElement | null
     dbClient: DBClient | null
     demoMode: boolean
+    firstTick: boolean = true
 
     constructor() {
         this.canvas = document.querySelector("#c")!;
@@ -141,8 +143,6 @@ export default class Engine {
         this.networkedCameras = [];
 
         this.configurePrograms();
-
-        this.gameLogic.createDemoScene();
 
         this.frameTiming = new FrameTiming();
         this.gameStatusHandler = new GameStatusHandler();
@@ -184,6 +184,16 @@ export default class Engine {
             .single()
 
         this.IngestGameState(data)
+        this.firstTick = false;
+    }
+
+    UpdateGridProgram() {
+        let gridSceneObjectIdx = this.sceneObjects.findIndex( (vUnit) => {
+            return vUnit.name == "grid"
+        } )
+
+        this.sceneObjects[gridSceneObjectIdx] = this.createGridProgram()
+
     }
 
     PackageCameraAsNetPayload() {
@@ -195,10 +205,25 @@ export default class Engine {
     }
 
     IngestGameState(data) {
+        let rows = data.rows * 2
+        let cols = data.cols * 2
+        let layers = data.layers * 2
+
+        let player_starting_col = data.cols
+        if (data.cols % 2 == 0) { player_starting_col-- }
+
+        this.camera.SetExtents([cols, layers, rows])
+
+        // set extents of game space
+        this.gameLogic.gridRows = rows
+        this.gameLogic.gridCols = cols
+        this.gameLogic.gridLayers = layers
+
         // transform game state
+
         const fences = []
-        const p1 = { id: data.p1_id, goalY: 17, numFences: 15, pos: [9, 3, 1] };
-        const p2 = { id: data.p2_id, goalY: 1, numFences: 15, pos: [9, 3, 17] }
+        const p1 = { id: data.p1_id, goalY: 17, numFences: data.start_fences, pos: [player_starting_col, 3, 1] };
+        const p2 = { id: data.p2_id, goalY: 1, numFences: data.start_fences, pos: [player_starting_col, 3, rows - 1] }
 
         data.moves?.forEach(([move_type, x, y, z]: number[], idx) => {
             const p2_move = !!(idx % 2)
@@ -234,6 +259,9 @@ export default class Engine {
             (data.moves?.length % 2
                 ? data.p2_id
                 : data.p1_id) ?? data.p1_id);
+        if (this.firstTick) {
+            this.UpdateGridProgram()
+        }
 
     }
 
@@ -327,7 +355,7 @@ export default class Engine {
         let gridData = [];
 
         // Create horizontal lines
-        for (let a = 0; a <= this.gameLogic.gridCols; a += 2) {
+        for (let a = 0; a <= this.gameLogic.gridRows; a += 2) {
             for (let b = 0; b <= this.gameLogic.gridLayers; b += 2) {
                 gridData.push(0, b, a,
                     this.gameLogic.gridCols, b, a);
@@ -335,7 +363,7 @@ export default class Engine {
         }
 
         // Create depth lines
-        for (let a = 0; a <= this.gameLogic.gridRows; a += 2) {
+        for (let a = 0; a <= this.gameLogic.gridCols; a += 2) {
             for (let b = 0; b <= this.gameLogic.gridLayers; b += 2) {
                 gridData.push(a, b, 0,
                     a, b, this.gameLogic.gridRows);
@@ -356,6 +384,7 @@ export default class Engine {
         );
 
         return {
+            name: "grid",
             program: gridProgram,
             VAO: gridVAO,
             render: (projMat: Mat4, viewMat: Mat4) => {
@@ -455,6 +484,7 @@ export default class Engine {
         );
 
         return {
+            name: "player",
             program: playerProgram,
             VAO: playerVAO,
             render: (projMat: Mat4, viewMat: Mat4) => {
@@ -584,6 +614,7 @@ export default class Engine {
         );
 
         return {
+            name: "camera",
             program: cameraProgram,
             VAO: cameraVAO,
             render: (projMat: Mat4, viewMat: Mat4) => {
@@ -687,6 +718,7 @@ export default class Engine {
         );
 
         return {
+            name: "fence",
             program: fenceProgram,
             VAO: fenceVAO,
             render: (projMat: Mat4, viewMat: Mat4) => {

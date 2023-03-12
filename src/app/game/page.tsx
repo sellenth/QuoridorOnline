@@ -21,8 +21,8 @@ export default function GameView() {
 
         engine.gameLogic.assignId(session?.user.id ?? "NA");
         engine.startRenderLoop()
-        /*
         engine.networkTick(gid)
+        /*
 
 
         const channel = supabase
