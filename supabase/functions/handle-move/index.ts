@@ -157,6 +157,7 @@ serve(async (req: any) => {
                 if (curr_player.pos[2] == curr_player.goalZ) {
                     winner = curr_player.id
                     await updateElo(supabaseClient, curr_player, other_player)
+                    await deleteGameInvite(supabaseClient, game_id)
                 }
             }
         }
@@ -193,6 +194,15 @@ serve(async (req: any) => {
         })
     }
 })
+
+async function deleteGameInvite(supabaseClient: any, game_id: string) {
+    const { error } = await supabaseClient
+        .from('game-invites')
+        .delete()
+        .eq('gid', game_id)
+
+    console.log(error)
+}
 
 async function updateElo(supabaseClient: any, winner: Player, loser: Player) {
     const {data: {elo: winner_elo}, e1 } = await supabaseClient

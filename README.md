@@ -42,9 +42,9 @@ Sunday 2/25
 - [x] allow games of different dimensions
 - [x] flesh out email signup so it isn't hardcoded
 - [x] basic replay system with forward/backwards
+- [x] clean up game invites after game is won
 - [ ] sync up turn counter and fence counter
 - [ ] display row/col/layer info on games page
-- [ ] clean up game invites after game is won
 - [ ] is there a way to enforce uniqueness on two columns as a combination? (game invite table)
 - [ ] allow game invite to specify who is p1
 - [ ] sanitize inputs
