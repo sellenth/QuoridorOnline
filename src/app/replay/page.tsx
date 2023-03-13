@@ -26,7 +26,7 @@ export default function Replay() {
 
     function forward(){
         if (gameData) {
-            let newMoveNum = Math.min(endGameData.moves.length - 1, moveNum + 1)
+            let newMoveNum = Math.min(endGameData.moves.length, moveNum + 1)
             let moves = endGameData.moves.slice(0, newMoveNum)
             setMoveNum(newMoveNum)
 
