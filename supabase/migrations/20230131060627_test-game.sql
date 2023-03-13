@@ -1,17 +1,3 @@
-create table "public"."games" (
-    "id"          uuid not null,
-    "move_num"    integer default 0,
-    "p1_id"       uuid,
-    "p2_id"       uuid,
-    "moves"       smallint[] not null default '{}',
-
-    rows          int   not null default 9,
-    cols          int   not null default 9,
-    layers        int   not null default 3,
-    start_fences  int   not null default 15
-);
-alter table "public"."games" enable row level security;
-
 create table "public"."users" (
     "id" uuid unique not null,
     "username" text unique not null,
@@ -20,6 +6,20 @@ create table "public"."users" (
     "email" text not null
 );
 alter table "public"."users" enable row level security;
+
+create table "public"."games" (
+    "id"          uuid not null,
+    "move_num"    integer default 0,
+    "p1_id"       uuid references users (id),
+    "p2_id"       uuid references users (id),
+    "moves"       smallint[] not null default '{}',
+
+    rows          int   not null default 9,
+    cols          int   not null default 9,
+    layers        int   not null default 3,
+    start_fences  int   not null default 15
+);
+alter table "public"."games" enable row level security;
 
 
 CREATE TABLE "public"."friends" (

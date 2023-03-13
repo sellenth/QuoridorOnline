@@ -8,7 +8,7 @@ import AddRightBorder from '../components/right-border'
 export default function Home() {
 
   useEffect( () => {
-    const engine = new Engine
+    const engine = new Engine()
     engine.startRenderLoop()
     engine.setDemoMode(true)
     engine.gameLogic.createDemoScene()

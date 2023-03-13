@@ -17,9 +17,12 @@ INSERT INTO auth.identities (id, provider, user_id, identity_data, last_sign_in_
 
 
 -- creating a game
-insert into public."games" (id, move_num, p1_id, p2_id, moves)
+insert into public."games" (id, move_num, p1_id, p2_id, moves, winner)
+(
 values
-  ('80085757-eee0-4e53-9246-2bc83ffcac54', 5,'abcdbbfc-577b-4b39-b68d-4b1bc89e4a2f', '13375757-eee0-4e53-9246-2bc83ffcac54', '{{2,8,0,0},{2,10,0,0},{3,8,4,0},{0,9,3,15},{0,9,3,3}}');
+  ('80085757-eee0-4e53-9246-2bc83ffcac54', 5,'abcdbbfc-577b-4b39-b68d-4b1bc89e4a2f', '13375757-eee0-4e53-9246-2bc83ffcac54', '{{2,8,0,0},{2,10,0,0},{3,8,4,0},{0,9,3,15},{0,9,3,3}}', null),
+  ('a3a33757-eee0-4e53-9246-2bc83ffcac54', 5,'abcdbbfc-577b-4b39-b68d-4b1bc89e4a2f', '13375757-eee0-4e53-9246-2bc83ffcac54', '{{2,8,0,0},{2,10,0,0},{3,8,4,0},{0,9,3,15},{0,9,3,3}}', '13375757-eee0-4e53-9246-2bc83ffcac54')
+);
 
 
 -- creating some friend relations

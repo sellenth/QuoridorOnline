@@ -19,6 +19,7 @@ export async function middleware(req: NextRequest) {
 
   if (!process.env.NEXT_PUBLIC_TESTING && !session && (
           req.nextUrl.pathname.startsWith('/friendslist')
+      ||  req.nextUrl.pathname.startsWith('/account')
       ||  req.nextUrl.pathname.startsWith('/game-invites')
   )) {
     // Auth condition not met, redirect to home page.

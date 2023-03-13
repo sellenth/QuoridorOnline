@@ -233,7 +233,7 @@ export default class Engine {
                      numFences: data.start_fences,
                      pos: [p_start_col, p_start_layer, p2_starting_row] }
 
-        data.moves?.forEach(([move_type, x, y, z]: number[], idx) => {
+        data.moves.forEach(([move_type, x, y, z]: number[], idx) => {
             const p2_move = !!(idx % 2)
 
             // pawn move

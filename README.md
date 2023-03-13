@@ -41,6 +41,7 @@ Sunday 2/25
 - [x] update elo with winner of game 
 - [x] allow games of different dimensions
 - [x] flesh out email signup so it isn't hardcoded
+- [x] basic replay system with forward/backwards
 - [ ] sync up turn counter and fence counter
 - [ ] display row/col/layer info on games page
 - [ ] clean up game invites after game is won
