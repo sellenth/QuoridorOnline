@@ -68,7 +68,7 @@ export default function SignIn() {
         </p>
         <div className="inline-flex items-center justify-center w-full">
             <hr className="w-64 h-px my-8 bg-gray-200 border-0" />
-            <span className="absolute px-3 font-medium text-gray-200 -translate-x-1/2 bg-[#192331] left-1/2">OR</span>
+            <span className="absolute px-3 font-medium text-gray-200 -translate-x-1/2 bg-[#30343b] left-1/2">OR</span>
         </div>
         <div className="inline-flex items-center justify-center w-full gap-x-2">
             <button onClick={handleGitHubLogin} className="font-display mt-2 shadow-lg hover:bg-theme-200 hover:shadow-theme-200/50 border-2 rounded-md border-theme-200 py-1 px-2"
