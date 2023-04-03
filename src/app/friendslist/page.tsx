@@ -9,6 +9,7 @@ import AddRightBorder from '@/components/right-border'
 import { DecorativeCircles } from '@/components/decordatives'
 import { mockConnections, mockInvites } from '@/utils/mock-data'
 import { FriendConnection, IncomingFriendInvite } from '@/utils/query-types'
+import { RealtimeChannel } from '@supabase/supabase-js'
 
 
 export default function FriendsList() {
@@ -20,34 +21,34 @@ export default function FriendsList() {
   const [pending, setPending] = useState<FriendConnection[]>([])
   const [received_invite, setReceived] = useState<IncomingFriendInvite[]>([])
 
-  const subscribeToDbChanges = (callback: () => any) => {
-      const channel = supabase
-          .channel('friends-db-changes')
-          .on(
-              'postgres_changes',
-              {
-                  event: '*',
-                  schema: 'public',
-                  table: 'friends',
-                  filter: `user_id=eq.${my_id}`
-              },
-              () => { callback() }
-          )
-          .on(
-              'postgres_changes',
-              {
-                  event: '*',
-                  schema: 'public',
-                  table: 'friends',
-                  filter: `friend_id=eq.${my_id}`
-              },
-              () => { callback() }
-          )
-          .subscribe((status: any) => {
-              console.log('subscribed to friends table changes')
-          })
-      //TODO notify on errors from channel
-  }
+    const subscribeToDbChanges = (callback: () => any) => {
+        const channel = supabase
+            .channel('friends-db-changes')
+            .on(
+                'postgres_changes',
+                {
+                    event: '*',
+                    schema: 'public',
+                    table: 'friends',
+                    filter: `user_id=eq.${my_id}`
+                },
+                () => { callback() }
+            )
+            .on(
+                'postgres_changes',
+                {
+                    event: '*',
+                    schema: 'public',
+                    table: 'friends',
+                    filter: `friend_id=eq.${my_id}`
+                },
+                () => { callback() }
+            )
+            .subscribe((status: any) => {
+              console.log('friends table status:', status)
+            })
+        return channel
+    }
 
 
   const getMyFriendsFromDb = async () => {
@@ -81,17 +82,20 @@ export default function FriendsList() {
   }
 
   useEffect(() => {
+    let channel: null | RealtimeChannel = null
 
     if (process.env.NEXT_PUBLIC_TESTING) {
       updateFriendsList(mockConnections, mockInvites)
     } else {
-      subscribeToDbChanges(updateFriendsListFromDb);
+      channel = subscribeToDbChanges(updateFriendsListFromDb);
       updateFriendsListFromDb()
     }
 
     return () => {
-        supabase.removeAllChannels()
-    }
+        if (channel) {
+            supabase.removeChannel(channel)
+        }
+  }
 
   }, [])
 

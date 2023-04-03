@@ -6,7 +6,7 @@ import AcceptRejectInvite from './accept-reject-invite'
 import { useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import JoinGame from './join-game'
-import { SupabaseClient } from '@supabase/supabase-js'
+import { RealtimeChannel, SupabaseClient } from '@supabase/supabase-js'
 import { Database } from '@/utils/db-types'
 import { mockIncomingGameInvite, mockInProgressGameInvite, mockMyId, mockMyUsername, mockSentGameInvite } from '@/utils/mock-data'
 import { GameInvite } from '@/utils/query-types'
@@ -38,8 +38,9 @@ const subscribeToDbChanges = (supabase: SupabaseClient<Database>, id_to_listen_o
             () => { callback() }
         )
         .subscribe((status: any) => {
-            console.log('subscribed to game-invites table changes')
+              console.log('game-invites table status:', status)
         })
+    return channel
 }
 
 
@@ -71,17 +72,20 @@ export default function FriendsList() {
 
 
   useEffect(() => {
+    let channel: null | RealtimeChannel = null
     if (process.env.NEXT_PUBLIC_TESTING) {
       setSent(mockSentGameInvite)
       setReceived(mockIncomingGameInvite)
       setInProgress(mockInProgressGameInvite)
     } else {
-      subscribeToDbChanges(supabase, my_id, updateTableFromDB)
+      channel = subscribeToDbChanges(supabase, my_id, updateTableFromDB)
       updateTableFromDB()
     }
 
       return () => {
-          supabase.removeAllChannels()
+        if (channel) {
+          supabase.removeChannel(channel)
+        }
       }
 
   }, [])

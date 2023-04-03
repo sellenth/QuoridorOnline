@@ -59,7 +59,7 @@ export default function GameView() {
                 }
             })
         return () => {
-            supabase.removeAllChannels()
+            supabase.removeChannel(channel)
             engine.render = false;
         }
 
