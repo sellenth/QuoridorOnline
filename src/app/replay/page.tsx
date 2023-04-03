@@ -48,7 +48,7 @@ export default function Replay() {
             const effectAction = async () => {
                 const { data } = await supabase
                     .from('games')
-                    .select('*')
+                    .select('*, p1:p1_id(id, username), p2:p2_id(id, username)')
                     .eq('id', gid)
                     .single()
 

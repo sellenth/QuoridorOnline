@@ -32,26 +32,30 @@ class GameStatusHandler {
     constructor() {
     }
 
-    Update(myID: ID, state: GameStatePayload) {
-        state.players.forEach((player) => {
-            this.UpdateWalls(myID, player);
-        })
-        this.UpdateTurnIndicator(myID, state.activePlayerId!);
+    Update( my_id,
+            active_player_id,
+            p1_id, p1_username,
+            p2_id, p2_username,
+            p1_num_fences, p2_num_fences) {
+
+        this.UpdateWalls(my_id, p1_id, p1_username, p1_num_fences)
+        this.UpdateWalls(my_id, p2_id, p2_username, p2_num_fences)
+
+        this.UpdateTurnIndicator(my_id, active_player_id);
 
     }
 
-    UpdateWalls(myID: ID, player: Player) {
-        const who = myID == player.id ? "You" : "Them";
-        const indicatorElement = myID == player.id ? this.myWallsElement : this.theirWallsElement;
+    UpdateWalls(my_id, id, username, fences) {
+        const indicatorElement = my_id == id ? this.myWallsElement : this.theirWallsElement;
 
-        if (gameInfoElement) {
-            indicatorElement.textContent = `${who} - ${player.numFences}`;
+        if (this.gameInfoElement) {
+            indicatorElement.textContent = `${username} - ${fences}`;
         }
     }
 
     UpdateTurnIndicator(myID: ID, activePlayerId: ID) {
         let who = myID == activePlayerId ? "your" : "the other player's";
-        if (gameInfoElement) {
+        if (this.gameInfoElement) {
             this.turnIndicatorElement.textContent = `It's ${who} turn.`
         }
     }
@@ -61,6 +65,12 @@ class GameStatusHandler {
         this.myWallsElement = document.querySelector("#myWalls")!;
         this.theirWallsElement = document.querySelector("#theirWalls")!;
         this.turnIndicatorElement = document.querySelector("#turnIndicator")!;
+    }
+
+    SetGameWon(username) {
+        if (this.gameInfoElement) {
+            this.turnIndicatorElement.textContent = `${username} won!`
+        }
     }
 }
 
@@ -117,6 +127,7 @@ export default class Engine {
 
     constructor() {
         this.canvas = document.querySelector("#c")!;
+        this.gameInfoElement = document.querySelector("#gameInfo")!;
         this.gameLogic = new GameLogic();
         this.gameLogic.players = []
         this.gameLogic.cameraRef = this.camera
@@ -179,7 +190,7 @@ export default class Engine {
         // fetch game state
         const { data } = await this.dbClient
             .from('games')
-            .select('*')
+            .select('*, p1:p1_id(id, username), p2:p2_id(id, username)')
             .eq('id', game_id)
             .single()
 
@@ -230,7 +241,7 @@ export default class Engine {
 
         const p2 = { id: data.p2_id,
                      goalZ: 1,
-                     numFences: data.start_fences,
+                     num_fences: data.start_fences,
                      pos: [p_start_col, p_start_layer, p2_starting_row] }
 
         data.moves.forEach(([move_type, x, y, z]: number[], idx) => {
@@ -248,9 +259,9 @@ export default class Engine {
             // fence move
             else {
                 if (p2_move) {
-                    p2.numFences--
+                    p2.num_fences--
                 } else {
-                    p1.numFences--
+                    p1.num_fences--
                 }
                 fences.push({
                     pos: [x, y, z],
@@ -267,6 +278,24 @@ export default class Engine {
             (data.moves?.length % 2
                 ? data.p2_id
                 : data.p1_id) ?? data.p1_id);
+
+        console.log(p1)
+        console.log(p2)
+
+        // update the fence counter and turn indicator
+        this.gameStatusHandler.Update(this.gameLogic.myId,
+                                      this.gameLogic.activePlayerId,
+                                      data.p1.id, data.p1.username,
+                                      data.p2.id, data.p2.username,
+                                      p1.num_fences, p2.num_fences
+                                     )
+
+        if (p1.goalZ == p1.pos[2]) {
+           this.gameStatusHandler.SetGameWon(data.p1.username)
+        } else if (p2.goalZ == p2.pos[2]) {
+           this.gameStatusHandler.SetGameWon(data.p2.username)
+        }
+
         if (this.firstTick) {
             this.UpdateGridProgram()
         }
