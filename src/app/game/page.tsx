@@ -66,11 +66,11 @@ export default function GameView() {
     }, [])
 
     return (<>
-        <div id="fps" className="absolute text-gray-200">fps:
+        <div id="fps" className="absolute left-5 bottom-5 text-gray-200">fps:
             <span ref={fpsCounterRef} ></span>
         </div>
-        <main className="h-full flex flex-col items-center justify-center">
-            <div ref={gameInfoRef} id="gameInfo" className="text-gray-200">
+        <main className="h-fit w-5/6 flex flex-col items-center justify-center mx-auto my-10 ">
+            <div ref={gameInfoRef} id="gameInfo" className="text-gray-200 self-start mb-5">
                 <p id="turnIndicator">Player ???&apos;s turn</p>
                 <div id="wallInfo">
                     <p>Walls Remaining</p>
@@ -78,7 +78,7 @@ export default function GameView() {
                     <p id="theirWalls">Them - ???</p>
                 </div>
             </div>
-            <canvas id="c" className="border border-black h-1/2 w-5/6" tabIndex={0}></canvas>
+            <canvas id="c" className="border border-gray-200 outline-green h-100 w-full" tabIndex={0}></canvas>
         </main>
     </>)
 }
