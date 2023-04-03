@@ -7,15 +7,13 @@ import type { NextRequest } from 'next/server'
 export async function middleware(req: NextRequest) {
   const res = NextResponse.next()
 
-  // ignoring as I believe this is failing due to v12 vs v13
-  // NextRequest and NextResponse types being slightly different
-  // TODO Remove this ignore when we upgrade Next.js to v13
-  // @ts-ignore
   const supabase = createMiddlewareSupabaseClient({ req, res })
 
   const {
     data: { session },
   } = await supabase.auth.getSession()
+
+  console.log(req.nextUrl.pathname)
 
   if (!process.env.NEXT_PUBLIC_TESTING && !session && (
           req.nextUrl.pathname.startsWith('/friendslist')
@@ -24,7 +22,7 @@ export async function middleware(req: NextRequest) {
   )) {
     // Auth condition not met, redirect to home page.
     const redirectUrl = req.nextUrl.clone()
-    redirectUrl.pathname = '/'
+    redirectUrl.pathname = '/signin'
     redirectUrl.searchParams.set(`redirectedFrom`, req.nextUrl.pathname)
     return NextResponse.redirect(redirectUrl)
   }

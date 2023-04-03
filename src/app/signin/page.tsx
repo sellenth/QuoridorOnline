@@ -26,8 +26,6 @@ export default function SignIn() {
         e.preventDefault()
 
         if (emailRef.current && passwordRef.current) {
-            console.log(emailRef.current.value)
-            console.log(passwordRef.current.value)
             const { error } = await supabase.auth.signInWithPassword({
                 email: emailRef.current.value,
                 password: passwordRef.current.value
@@ -36,7 +34,14 @@ export default function SignIn() {
             if (error) {
                 console.log({ error })
             } else {
-                router.push('/')
+                const queryString = window.location.search
+                const urlParams = new URLSearchParams(queryString)
+                const redirectUrl = urlParams.get('redirectedFrom')
+                if (redirectUrl) {
+                   router.push(redirectUrl)
+                } else {
+                    router.push('/')
+                }
             }
         }
     }

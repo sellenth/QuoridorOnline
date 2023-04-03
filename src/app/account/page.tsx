@@ -76,7 +76,8 @@ export default function AccountPage (){
   const { supabase, session } = useSupabase()
   const my_id = session?.user!.id || ''
   const [ pastGames, setPastGames ] = useState<PastGame[]>([])
-  const router = useRouter()
+
+  let username = session?.user.user_metadata.preferred_username ?? null
 
   useEffect( () => {
     const effectAction = async () => {
@@ -86,9 +87,7 @@ export default function AccountPage (){
             .or(`p1_id.eq.${my_id},p2_id.eq.${my_id}`)
             .not('winner', 'is', null)
 
-      console.log(error)
       if (data) {
-        console.log(data)
         setPastGames( data as PastGame[] )
       }
     }
@@ -103,10 +102,8 @@ export default function AccountPage (){
           console.log({ error })
       }
 
-    router.push('/signin')
+    window.location.href = "/"
   }
-
-  let username = session?.user.user_metadata.preferred_username ?? null
 
 return <div className="text-gray-200">
         <div className="max-w-sm align-center mx-auto my-10 bg-blue-200 bg-opacity-10 backdrop-blur p-4 border-2 border-gray-200 rounded-md">
