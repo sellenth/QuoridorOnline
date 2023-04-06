@@ -145,7 +145,7 @@ export class Camera {
 
     configureCameraListeners(canvas: HTMLCanvasElement, gameLogic: GameLogic)
     {
-        canvas.addEventListener('keydown', e => {
+        canvas.addEventListener('keydown', (e: KeyboardEvent) => {
             if (e.key == "w")
                 this.keysDown.w = true;
             if (e.key == "a")
@@ -178,7 +178,7 @@ export class Camera {
                 gameLogic.nextCursorOrientation();
         })
 
-        canvas.addEventListener('keyup', e => {
+        canvas.addEventListener('keyup', (e: KeyboardEvent) => {
             if (e.key == "w")
                 this.keysDown.w = false;
             if (e.key == "a")
@@ -192,6 +192,14 @@ export class Camera {
             if (e.key == " ")
                 this.keysDown.space = false;
         })
+        canvas.addEventListener('mousedown', (e: MouseEvent) => {
+            if (e.button === 0) {
+                gameLogic.NextPlayerCursor();
+            }
+            else if (e.button === 2) {
+                gameLogic.PreviousPlayerCursor();
+            }
+        })
 
         canvas.addEventListener('click', (_) => {
             this.firstLook = true;
@@ -203,7 +211,7 @@ export class Camera {
             canvas.requestPointerLock();
         })
 
-        canvas.addEventListener('mousemove', e => {
+        canvas.addEventListener('mousemove', (e: MouseEvent) => {
             if (document.pointerLockElement == canvas) {
                 if (this.firstLook) {
                     this.firstLook = false;

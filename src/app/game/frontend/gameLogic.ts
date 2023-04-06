@@ -1,17 +1,14 @@
 import { Player } from "./types"
 import { addVec3 } from "./math";
-import { Vec3, Cursor, ID, Orientation, Player as NetworkPlayer, } from "../shared/types";
+import { Vec3, Cursor, ID, Orientation } from "../shared/types";
 import { clamp } from "./utils";
 import { Camera } from "./camera"
+import {  isValidPawnMove, applyMovesToGameSpace, Extents, FENCE, GameSpace, generateGameSpace, Player as NetworkPlayer, PLAYER, generateValidCursors, } from "../../../../supabase/functions/_shared/game-space";
 
 const UNINITIALIZED = "NA";
-
 type Fence = Cursor
 
 export class GameLogic {
-    gridRows: number = 18;
-    gridCols: number = 18;
-    gridLayers: number = 6;
     myId: ID = UNINITIALIZED;
     activePlayerId: ID = UNINITIALIZED;
     cameraRef: Camera | null = null
@@ -20,9 +17,13 @@ export class GameLogic {
         pos: [2, 0, 0],
         orientation: Orientation.Vertical
     }
+    validCursorPositions: Vec3[] = []
+    cursorIdx: number = 0
     cursorMode = "fence";
     players: Player[];
     fencePositions: Cursor[];
+    gameSpace: GameSpace;
+    extents: Extents;
 
     notifyServer: (msg: [number, number, number, number]) => Promise<void>;
 
@@ -30,6 +31,24 @@ export class GameLogic {
         this.players = [];
         this.fencePositions = [];
         this.notifyServer = async () => { }
+        this.extents = {
+            near: 0,
+            far: 18,
+
+            left: 0,
+            right: 18,
+
+            bottom: 0,
+            top: 6,
+        }
+
+        this.gameSpace = generateGameSpace(this.extents)
+    }
+
+    SetExtents(rows: number, cols: number, layers: number) {
+        this.extents.far = rows;
+        this.extents.right = cols;
+        this.extents.top = layers;
     }
 
     createDemoScene() {
@@ -55,6 +74,81 @@ export class GameLogic {
 
     assignId(id: ID) {
         this.myId = id;
+    }
+
+    refreshGameSpace(data: any) {
+        // set extents for this game space
+        this.extents.far = data.rows * 2
+        this.extents.right = data.cols * 2
+        this.extents.top = data.layers * 2
+
+        // calculate specific positions on the game board for player starts and ends
+        const p2_start_row: number = data.rows * 2 - 1
+        const p_start_col: number = data.cols % 2 ? data.cols : data.cols - 1
+        const p_start_layer: number = data.layers % 2 ? data.layers : data.layers - 1
+
+        this.gameSpace = generateGameSpace(this.extents)
+        console.log(this.gameSpace)
+
+
+        const fences: Fence[] = []
+        const p1: NetworkPlayer = { id: data.p1_id,
+                     goalZ: p2_start_row,
+                     numFences: data.start_fences,
+                     pos: [p_start_col, p_start_layer, 1] };
+
+        const p2: NetworkPlayer = { id: data.p2_id,
+                     goalZ: 1,
+                     numFences: data.start_fences,
+                     pos: [p_start_col, p_start_layer, p2_start_row] }
+
+        applyMovesToGameSpace(this.gameSpace, data.moves, p1, p2)
+
+        data.moves.forEach(([move_type, x, y, z]: number[]) => {
+            // fence move
+            if (move_type != 0) {
+                fences.push({
+                    pos: [x, y, z],
+                    orientation: move_type
+                })
+            }
+        })
+
+        this.updateFences(fences)
+        this.updatePlayers([p1, p2])
+
+        const p2_move = !!(data.moves.length % 2)
+        if (p2_move) {
+            this.validCursorPositions = generateValidCursors(this.gameSpace, this.extents, p2, p1)
+        } else {
+            this.validCursorPositions = generateValidCursors(this.gameSpace, this.extents, p1, p2)
+        }
+    }
+
+    drawGameState() {
+        let str = ""
+        for (let z = this.extents.far; z >= 0; --z) {
+            for (let y = 0; y <= this.extents.top; ++y) {
+                for (let x = 0; x <= this.extents.right; ++x) {
+                    if (this.gameSpace[x][y][z] == PLAYER) {
+                        str += 'p'
+                    }
+                    else if (this.gameSpace[x][y][z] == FENCE) {
+                        str += 'X'
+                    } else {
+                        if (y % 2 || x % 2 || z % 2) {
+                            str += ' '
+                        } else {
+                            str += '0'
+                        }
+                    }
+                }
+                str += '\t'
+            }
+            str += '\n'
+        }
+
+        console.log(str)
     }
 
     updateFences(fences: Fence[]) {
@@ -101,11 +195,7 @@ export class GameLogic {
     }
 
     MoveCursor(v: Vec3) {
-        if (this.cursorMode == "pawn") {
-            this.cursor.pos = v;
-
-        }
-        else if (this.cursorMode == "fence") {
+        if (this.cursorMode == "fence") {
             this.cursor.pos = addVec3(this.cursor.pos, v);
             this.ClampCursorToBoard();
         }
@@ -133,9 +223,9 @@ export class GameLogic {
 
             }
         }
-        this.cursor.pos[0] = clamp(this.cursor.pos[0], 0, this.gridCols - xModifier);
-        this.cursor.pos[1] = clamp(this.cursor.pos[1], 0, this.gridLayers - yModifier);
-        this.cursor.pos[2] = clamp(this.cursor.pos[2], 0, this.gridRows - zModifier);
+        this.cursor.pos[0] = clamp(this.cursor.pos[0], 0, this.extents.right - xModifier);
+        this.cursor.pos[1] = clamp(this.cursor.pos[1], 0, this.extents.top - yModifier);
+        this.cursor.pos[2] = clamp(this.cursor.pos[2], 0, this.extents.far - zModifier);
     }
 
     GetNearestAxis(v: Vec3, sign: -1 | 1): Vec3 {
@@ -177,10 +267,31 @@ export class GameLogic {
         this.MoveCursor(this.GetNearestAxis(this.cameraRef!.rightVec, 1));
     }
 
+    PreviousPlayerCursor() {
+        if (this.cursorMode == "pawn") {
+            this.cursorIdx--
+            if (this.cursorIdx < 0) {
+                this.cursorIdx = Math.max(0, this.validCursorPositions.length - 1)
+            }
+            this.cursor.pos = this.validCursorPositions[this.cursorIdx].slice() as Vec3
+        }
+    }
+
+    NextPlayerCursor() {
+        if (this.cursorMode == "pawn") {
+            this.cursorIdx++
+            if (this.cursorIdx >= this.validCursorPositions.length) {
+                this.cursorIdx = 0
+            }
+            this.cursor.pos = this.validCursorPositions[this.cursorIdx].slice() as Vec3
+
+        }
+    }
+
     switchCursorMode() {
         if (this.cursorMode == "fence") {
             this.cursorMode = "pawn";
-            this.cursor.pos = [2, 0, 0];
+            this.NextPlayerCursor()
         }
         else if (this.cursorMode == "pawn") {
             this.cursorMode = "fence";

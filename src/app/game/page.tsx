@@ -36,7 +36,7 @@ export default function GameView() {
                 () => { engine.networkTick(gid) }
             )
             .subscribe((status: any) => {
-                console.log('nice:', status)
+                console.log('game realtime channel:', status)
             })
 
         const camChannel = supabase.channel('room1')

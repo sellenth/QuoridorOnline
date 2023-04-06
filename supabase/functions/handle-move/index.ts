@@ -6,6 +6,7 @@ import { serve } from 'https://deno.land/std@0.177.0/http/server.ts'
 import { corsHeaders } from '../_shared/cors.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { writeAllSync } from 'https://deno.land/std@0.177.0/streams/write_all.ts'
+import {  calculateMoveOffets, inBounds, isValidPawnMove, validHeading, addFenceToGameSpace, EXPLORED, Extents, FENCE, generateGameSpace, GameSpace, PLAYER, VACANT, applyMovesToGameSpace, MoveType, s, Move, Player  } from '../_shared/game-space.ts'
 
 const fence = new TextEncoder().encode('F')
 const no_fence = new TextEncoder().encode('0')
@@ -14,12 +15,7 @@ const empty = new TextEncoder().encode(' ')
 const newline = new TextEncoder().encode('\n')
 const tab = new TextEncoder().encode('\t')
 
-const VACANT = 0
-const FENCE = 1
-const PLAYER = 8
-const EXPLORED = 9
-
-export const extents = {
+export const extents: Extents = {
     near: 0,
     far: 18,
 
@@ -29,25 +25,6 @@ export const extents = {
     bottom: 0,
     top: 6,
 }
-
-export enum s {
-    x = 1,
-    y,
-    z,
-}
-
-export enum MoveType {
-    Pawn,
-    Horizontal,
-    Vertical,
-    Flat,
-}
-
-export type Player = { id: string, goalZ: number, numFences: number, pos: [number, number, number] };
-
-export type Pos = [number, number, number]
-export type Move = [MoveType, number, number, number]
-export type GameSpace = number[][][]
 
 serve(async (req: any) => {
     // required for invoking from browser
@@ -130,7 +107,7 @@ serve(async (req: any) => {
         const p_start_col = data.cols % 2 ? data.cols : data.cols - 1
         const p_start_layer = data.layers % 2 ? data.layers : data.layers - 1
 
-        let gameSpace = generateGameSpace()
+        let gameSpace = generateGameSpace(extents)
         const p1: Player = { id: data.p1_id, goalZ: p2_start_row, numFences: 15, pos: [p_start_col, p_start_layer, 1] };
         const p2: Player = { id: data.p2_id, goalZ: 1, numFences: 15, pos: [p_start_col, p_start_layer, p2_start_row] }
 
@@ -145,12 +122,11 @@ serve(async (req: any) => {
             const curr_player = p2_move ? p2 : p1;
             const other_player = p2_move ? p1 : p2;
 
-            isValid = isValidPawnMove(gameSpace, proposed_move, curr_player)
+            isValid = isValidPawnMove(gameSpace, extents, proposed_move, curr_player, other_player)
             if (isValid) {
-                let offsets = calculateMoveOffets(proposed_move, curr_player)
-                curr_player.pos[0] += offsets[0] * 2
-                curr_player.pos[1] += offsets[1] * 2
-                curr_player.pos[2] += offsets[2] * 2
+                curr_player.pos[0] += proposed_move[s.x]
+                curr_player.pos[1] += proposed_move[s.y]
+                curr_player.pos[2] += proposed_move[s.z]
 
                 verified_move = [proposed_move[0], ...curr_player.pos]
 
@@ -272,52 +248,10 @@ export function isValidFenceMove(gameSpace: GameSpace, move: Move, p1: Player, p
     return isValid
 }
 
-function calculateMoveOffets(move: Move, curr_player: Player): [number, number, number] {
-    return [
-        Math.sign(move[1]),
-        Math.sign(move[2]),
-        Math.sign(move[3])
-    ]
-}
-
-// Check proposed player move, ensure it only moves in one direction,
-// 2 units, and doesn't go through a wall
-export function isValidPawnMove(gameSpace: GameSpace, move: Move, curr_player: Player) {
-    let isValid = true
-
-    let offsets = calculateMoveOffets(move, curr_player)
-
-    let num_axis_moved = 0
-    offsets.forEach((offset) => {
-        if (offset != 0) num_axis_moved++;
-    })
-
-    if (num_axis_moved != 1) {
-        return false
-    }
-
-    isValid = isValid && validHeading(gameSpace, [MoveType.Pawn, ...curr_player.pos], ...offsets)
-    return isValid
-}
-
-export function generateGameSpace() {
-    let gameSpace: GameSpace = []
-    for (let x = 0; x <= extents.right; ++x) {
-        gameSpace.push([])
-        for (let y = 0; y <= extents.top; ++y) {
-            gameSpace[x].push([])
-            for (let z = 0; z <= extents.far; ++z) {
-                gameSpace[x][y].push(VACANT)
-            }
-        }
-    }
-    return gameSpace
-}
-
 export function spaceExistsForFence(gameSpace: GameSpace, fence: Move) {
     // odd numbers on the grid can only be occupied by pawns, not fences
     if (fence[s.x] % 2 || fence[s.y] % 2 || fence[s.z] % 2) return false
-    if (!inBounds(fence)) return false
+    if (!inBounds(extents, fence)) return false
 
     // test if the full length of the fence is in bounds
     switch (fence[0]) {
@@ -369,8 +303,8 @@ export function fenceIntersects(gameSpace: GameSpace, fence: Move) {
                 let yBelow = fence[s.y] - 1;
 
                 let layerCurrFail = gameSpace[x][y][z] != VACANT;
-                let layerAboveFail = !inBounds([0, x, yAbove, z]) || gameSpace[x][yAbove][z] == FENCE;
-                let layerBelowFail = !inBounds([0, x, yBelow, z]) || gameSpace[x][yBelow][z] == FENCE;
+                let layerAboveFail = !inBounds(extents, [0, x, yAbove, z]) || gameSpace[x][yAbove][z] == FENCE;
+                let layerBelowFail = !inBounds(extents, [0, x, yBelow, z]) || gameSpace[x][yBelow][z] == FENCE;
                 if (layerCurrFail || layerAboveFail && layerBelowFail) {
                     console.log("failing 0n: ", x, " ", y, " ", z, " Offsets are: ", offset, " ", offsetPrime)
                     intersects = true;
@@ -424,19 +358,11 @@ export function pathExistsForPlayer(gameSpace: GameSpace, player_pos: Move, play
     return pathExists;
 }
 
-export function validHeading(gameSpace: GameSpace, move: Move, x_offset: number, y_offset: number, z_offset: number) {
-    return (inBounds([0, move[s.x] + x_offset, move[s.y] + y_offset, move[s.z] + z_offset])
-        && gameSpace[move[s.x] + x_offset][move[s.y] + y_offset][move[s.z] + z_offset] == VACANT
-
-        && inBounds([0, move[s.x] + 2 * x_offset, move[s.y] + 2 * y_offset, move[s.z] + 2 * z_offset])
-        && gameSpace[move[s.x] + 2 * x_offset][move[s.y] + 2 * y_offset][move[s.z] + 2 * z_offset] != EXPLORED)
-}
-
 export function getAdjacentCells(gameSpace: GameSpace, move: Move) {
     let adjacentCells: Move[] = [];
 
     let testDirection = (x_offset: number, y_offset: number, z_offset: number) => {
-        if (validHeading(gameSpace, move, x_offset, y_offset, z_offset)) {
+        if (validHeading(gameSpace, extents, move, x_offset, y_offset, z_offset)) {
             let new_move = move.slice() as Move
             new_move[s.x] += x_offset * 2
             new_move[s.y] += y_offset * 2
@@ -455,72 +381,6 @@ export function getAdjacentCells(gameSpace: GameSpace, move: Move) {
     return adjacentCells;
 }
 
-
-export function addFenceToGameSpace(gameSpace: GameSpace, fence: Move) {
-    const orientation = fence[0]
-
-    const offsets = [1, 2, 3]
-    offsets.forEach((offset: number) => {
-        offsets.forEach((offsetPrime: number) => {
-            let x = fence[1]
-            let y = fence[2]
-            let z = fence[3]
-            switch (orientation) {
-                case 1: //horiz
-                    x += offset
-                    y += offsetPrime
-                    break
-                case 2: // vertical
-                    y += offset
-                    z += offsetPrime
-                    break
-                case 3: //flat
-                    x += offset
-                    z += offsetPrime
-                    break
-            }
-
-            gameSpace[x][y][z] = FENCE
-        })
-    })
-}
-
-export function applyMovesToGameSpace(gameSpace: GameSpace, moves: Move[], p1: Player, p2: Player) {
-    moves.forEach((move: Move, idx: number) => {
-        const [move_type, x, y, z] = move
-        const p2_move = !!(idx % 2)
-
-        // pawn move
-        if (move_type == 0) {
-            if (p2_move) {
-                p2.pos = [x, y, z]
-            } else {
-                p1.pos = [x, y, z]
-            }
-        }
-
-        // fence move
-        if (move_type != 0) {
-            if (p2_move) {
-                p2.numFences--
-            } else {
-                p1.numFences--
-            }
-            addFenceToGameSpace(gameSpace, move)
-        }
-    })
-}
-
-export function inBounds([_, x, y, z]: Move) {
-    return (
-        x >= extents.left &&
-        x <= extents.right &&
-        y >= extents.bottom &&
-        y <= extents.top &&
-        z >= extents.near &&
-        z <= extents.far
-    )
-}
 
 export function writeGameSpaceToConsole(gameSpace: GameSpace) {
     for (let z = extents.far; z >= 0; --z) {

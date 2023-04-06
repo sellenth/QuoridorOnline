@@ -43,17 +43,25 @@ Sunday 2/25
 - [x] flesh out email signup so it isn't hardcoded
 - [x] basic replay system with forward/backwards
 - [x] clean up game invites after game is won
-- [ ] sync up turn counter and fence counter
+- [x] sync up turn counter and fence counter
+
+Wednesday 4/5
+- [ ] rework player move logic to support leap frog
+
+Thursday 4/6
+- [ ] work on 2d mode which disables certain move types
+- [ ] create new pawn model
+- [ ] make the player colors more distinct
+
 - [ ] display row/col/layer info on games page
 - [ ] is there a way to enforce uniqueness on two columns as a combination? (game invite table)
 - [ ] allow game invite to specify who is p1
 - [ ] sanitize inputs
 - [ ] validate row/col/layers game input
-- [ ] warn user when they are searching for friend/user that doens't exist
 - [ ] does move num need to exist on games table?
 - [ ] change game table to use gid instead of id
 
-- [ ] track what game a player is currently in
+- [ ] warn user when they are searching for friend/user that doesn't exist
 - [ ] alert user if signup procces goes wrong (email not confirmed, row not created)
 - [ ] update DB policies for table more secure access
 

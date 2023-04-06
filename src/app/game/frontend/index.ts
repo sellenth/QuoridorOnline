@@ -147,9 +147,9 @@ export default class Engine {
         this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
 
         this.camera.configureCameraListeners(this.canvas, this.gameLogic);
-        this.camera.SetExtents([this.gameLogic.gridCols,
-                                this.gameLogic.gridLayers,
-                                this.gameLogic.gridRows]);
+        this.camera.SetExtents([this.gameLogic.extents.right,
+                                this.gameLogic.extents.top,
+                                this.gameLogic.extents.far]);
 
         this.networkedCameras = [];
 
@@ -220,74 +220,27 @@ export default class Engine {
         let cols = data.cols * 2
         let layers = data.layers * 2
 
-        const p2_starting_row = rows - 1
-        const p_start_col = data.cols % 2 ? data.cols : data.cols - 1
-        const p_start_layer = data.layers % 2 ? data.layers : data.layers - 1
-
-        this.camera.SetExtents([cols, layers, rows])
-
         // set extents of game space
-        this.gameLogic.gridRows = rows
-        this.gameLogic.gridCols = cols
-        this.gameLogic.gridLayers = layers
+        this.camera.SetExtents([cols, layers, rows])
+        this.gameLogic.SetExtents(rows, cols, layers)
 
-        // transform game state
-
-        const fences = []
-        const p1 = { id: data.p1_id,
-                     goalZ: p2_starting_row,
-                     num_fences: data.start_fences,
-                     pos: [p_start_col, p_start_layer, 1] };
-
-        const p2 = { id: data.p2_id,
-                     goalZ: 1,
-                     num_fences: data.start_fences,
-                     pos: [p_start_col, p_start_layer, p2_starting_row] }
-
-        data.moves.forEach(([move_type, x, y, z]: number[], idx) => {
-            const p2_move = !!(idx % 2)
-
-            // pawn move
-            if (move_type == 0) {
-                if (p2_move) {
-                    p2.pos = [x, y, z]
-                } else {
-                    p1.pos = [x, y, z]
-                }
-            }
-
-            // fence move
-            else {
-                if (p2_move) {
-                    p2.num_fences--
-                } else {
-                    p1.num_fences--
-                }
-                fences.push({
-                    pos: [x, y, z],
-                    orientation: move_type
-                })
-            }
-        })
-
-
-        // update engine w/ new game state
-        this.gameLogic.updateFences(fences);
-        this.gameLogic.updatePlayers([p1, p2]);
+        // active player
         this.gameLogic.setActivePlayer(
             (data.moves?.length % 2
                 ? data.p2_id
                 : data.p1_id) ?? data.p1_id);
 
-        console.log(p1)
-        console.log(p2)
+        // update engine w/ new game state
+        this.gameLogic.refreshGameSpace(data)
 
         // update the fence counter and turn indicator
+        const p1 = this.gameLogic.players[0]
+        const p2 = this.gameLogic.players[1]
         this.gameStatusHandler.Update(this.gameLogic.myId,
                                       this.gameLogic.activePlayerId,
                                       data.p1.id, data.p1.username,
                                       data.p2.id, data.p2.username,
-                                      p1.num_fences, p2.num_fences
+                                      p1.walls, p2.walls
                                      )
 
         if (p1.goalZ == p1.pos[2]) {
@@ -392,18 +345,18 @@ export default class Engine {
         let gridData = [];
 
         // Create horizontal lines
-        for (let a = 0; a <= this.gameLogic.gridRows; a += 2) {
-            for (let b = 0; b <= this.gameLogic.gridLayers; b += 2) {
+        for (let a = 0; a <= this.gameLogic.extents.far; a += 2) {
+            for (let b = 0; b <= this.gameLogic.extents.top; b += 2) {
                 gridData.push(0, b, a,
-                    this.gameLogic.gridCols, b, a);
+                    this.gameLogic.extents.right, b, a);
             }
         }
 
         // Create depth lines
-        for (let a = 0; a <= this.gameLogic.gridCols; a += 2) {
-            for (let b = 0; b <= this.gameLogic.gridLayers; b += 2) {
+        for (let a = 0; a <= this.gameLogic.extents.right; a += 2) {
+            for (let b = 0; b <= this.gameLogic.extents.top; b += 2) {
                 gridData.push(a, b, 0,
-                    a, b, this.gameLogic.gridRows);
+                    a, b, this.gameLogic.extents.far);
             }
         }
 

@@ -1,8 +1,9 @@
+import { isValidPawnMove, addFenceToGameSpace, EXPLORED, Extents, FENCE, generateGameSpace, GameSpace, PLAYER, VACANT, applyMovesToGameSpace, MoveType, s, Move, Player  } from '../_shared/game-space.ts'
 import { assertEquals } from 'https://deno.land/std@0.177.0/testing/asserts.ts'
-import { isValidPawnMove, writeGameSpaceToConsole, fenceIntersects, Move, MoveType, generateGameSpace, addFenceToGameSpace, spaceExistsForFence, extents, pathExistsForPlayer, Player, applyMovesToGameSpace } from './index.ts'
+import { fenceIntersects, spaceExistsForFence, extents, pathExistsForPlayer } from './index.ts'
 
 Deno.test('Move validation tests', () => {
-    let gameSpace = generateGameSpace()
+    let gameSpace = generateGameSpace(extents)
 
     assertEquals(
         spaceExistsForFence(gameSpace, [MoveType.Horizontal, 0, 0, extents.near]),
@@ -90,7 +91,7 @@ Deno.test('Test fence intersections', () => {
     const p1: Player = { id: 'player1', goalZ: 17, numFences: 15, pos: [9, 3, 1] };
     const p2: Player = { id: 'player2', goalZ: 1, numFences: 15, pos: [9, 3, 17] }
 
-    let gameSpace = generateGameSpace()
+    let gameSpace = generateGameSpace(extents)
 
     applyMovesToGameSpace(gameSpace, ex_moves, p1, p2)
 
@@ -132,7 +133,7 @@ Deno.test("Test that applying moves updates player info", () => {
     const p1: Player = { id: 'player1', goalZ: 17, numFences: 15, pos: [9, 3, 1] };
     const p2: Player = { id: 'player2', goalZ: 1, numFences: 15, pos: [9, 3, 17] }
 
-    let gameSpace = generateGameSpace()
+    let gameSpace = generateGameSpace(extents)
 
     applyMovesToGameSpace(gameSpace, ex_moves, p1, p2)
 
@@ -162,7 +163,7 @@ Deno.test("Can't create fence that blocks path", () => {
     const p1: Player = { id: 'player1', goalZ: 17, numFences: 15, pos: [9, 3, 1] };
     const p2: Player = { id: 'player2', goalZ: 1, numFences: 15, pos: [9, 3, 17] }
 
-    let gameSpace = generateGameSpace()
+    let gameSpace = generateGameSpace(extents)
 
     applyMovesToGameSpace(gameSpace, ex_moves, p1, p2)
 
@@ -194,32 +195,39 @@ Deno.test("Verifying player movement", () => {
     const p1: Player = { id: 'player1', goalZ: 17, numFences: 15, pos: [9, 3, 1] };
     const p2: Player = { id: 'player2', goalZ: 1, numFences: 15, pos: [9, 3, 17] }
 
-    let gameSpace = generateGameSpace()
+    let gameSpace = generateGameSpace(extents)
 
     applyMovesToGameSpace(gameSpace, ex_moves, p1, p2)
 
     assertEquals(
-        isValidPawnMove(gameSpace, [MoveType.Pawn, -2, 0, 0], p1),
+        isValidPawnMove(gameSpace, extents, [MoveType.Pawn, -2, 0, 0], p1, p2),
         false,
         "Can't move through fence (f1)"
     )
 
     assertEquals(
-        isValidPawnMove(gameSpace, [MoveType.Pawn, 0, 0, 0], p1),
+        isValidPawnMove(gameSpace, extents, [MoveType.Pawn, 0, 0, 0], p1, p2),
         false,
         "Can't have zero unit move"
     )
 
     assertEquals(
-        isValidPawnMove(gameSpace, [MoveType.Pawn, 0, 0, -2], p1),
+        isValidPawnMove(gameSpace, extents, [MoveType.Pawn, 0, 0, -2], p1, p2),
         true,
         "CAN move backwards into empty space"
     )
 
     p1.pos = [9, 3, 1];
     assertEquals(
-        isValidPawnMove(gameSpace, [MoveType.Pawn, 0, 0, -2], p1),
+        isValidPawnMove(gameSpace, extents, [MoveType.Pawn, 0, 0, -2], p1, p2),
         false,
         "can't move out of bounds"
+    )
+
+    p2.pos = [9, 3, 3]
+    assertEquals(
+        isValidPawnMove(gameSpace, extents, [MoveType.Pawn, 0, 0, 4], p1, p2),
+        true,
+        "can leap frog adjacent player"
     )
 });
