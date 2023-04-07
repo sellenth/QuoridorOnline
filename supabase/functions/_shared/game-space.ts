@@ -125,11 +125,18 @@ export function isValidPawnMove(gameSpace: GameSpace, extents: Extents, _3dMode:
 export function generateValidCursors(gameSpace: GameSpace, extents: Extents, _3dMode: boolean, curr_player: Player, other_player: Player) {
     let validCursors: Pos[] = []
 
-    let playersAdjacent = false
-    let playerOffset: Pos = [other_player.pos[0] - curr_player.pos[0],
+    let faceToFace = false
+    let playerOffset: Pos = [
+                        other_player.pos[0] - curr_player.pos[0],
                         other_player.pos[1] - curr_player.pos[1],
                         other_player.pos[2] - curr_player.pos[2]
                        ]
+
+    let straightAcrossLeap: Pos = [
+                                    playerOffset[0] * 2,
+                                    playerOffset[1] * 2,
+                                    playerOffset[2] * 2,
+                                  ]
 
     generateCursorsAboutPoint(gameSpace, extents, _3dMode, curr_player.pos).forEach( (pos) => {
        if (curr_player.pos[0] + pos[0] != other_player.pos[0] ||
@@ -137,22 +144,35 @@ export function generateValidCursors(gameSpace: GameSpace, extents: Extents, _3d
            curr_player.pos[2] + pos[2] != other_player.pos[2]) {
            validCursors.push(pos.slice() as Pos)
        } else {
-           playersAdjacent = true
+           faceToFace = true
        }
     } )
 
-    if (playersAdjacent) {
-        generateCursorsAboutPoint(gameSpace, extents, _3dMode, other_player.pos).forEach( (pos) => {
-            if (other_player.pos[0] + pos[0] != curr_player.pos[0] ||
-                other_player.pos[1] + pos[1] != curr_player.pos[1] ||
-                other_player.pos[2] + pos[2] != curr_player.pos[2]) {
-                validCursors.push([
-                    playerOffset[0] + pos[0],
-                    playerOffset[1] + pos[1],
-                    playerOffset[2] + pos[2],
-                ])
-            }
-        } )
+    if (faceToFace) {
+
+        // ultra scuffed way of adhering to validHeading reqs
+        const offsetToCheck: Pos = [
+                                    playerOffset[0] / 2 * 3,
+                                    playerOffset[1] / 2 * 3,
+                                    playerOffset[2] / 2 * 3,
+                                   ]
+
+        if (validHeading(gameSpace, extents, [MoveType.Pawn, ...curr_player.pos], ...offsetToCheck)) {
+            validCursors.push(straightAcrossLeap)
+        } else {
+            generateCursorsAboutPoint(gameSpace, extents, _3dMode, other_player.pos).forEach((pos) => {
+                if (other_player.pos[0] + pos[0] != curr_player.pos[0] ||
+                    other_player.pos[1] + pos[1] != curr_player.pos[1] ||
+                    other_player.pos[2] + pos[2] != curr_player.pos[2]) {
+                    validCursors.push([
+                        playerOffset[0] + pos[0],
+                        playerOffset[1] + pos[1],
+                        playerOffset[2] + pos[2],
+                    ])
+                }
+            })
+
+        }
 
     }
 

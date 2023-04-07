@@ -117,8 +117,6 @@ export class GameLogic {
         this.updateFences(fences)
         this.updatePlayers([p1, p2])
 
-        console.log(this._3dMode)
-
         const p2_move = !!(data.moves.length % 2)
         if (p2_move) {
             this.validCursorPositions = generateValidCursors(this.gameSpace, this.extents, this._3dMode, p2, p1)

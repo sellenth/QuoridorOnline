@@ -1,6 +1,6 @@
 import { isValidPawnMove, addFenceToGameSpace, EXPLORED, Extents, FENCE, generateGameSpace, GameSpace, PLAYER, VACANT, applyMovesToGameSpace, MoveType, s, Move, Player  } from '../_shared/game-space.ts'
 import { assertEquals } from 'https://deno.land/std@0.177.0/testing/asserts.ts'
-import { fenceIntersects, spaceExistsForFence, extents, pathExistsForPlayer } from './index.ts'
+import { writeGameSpaceToConsole, fenceIntersects, spaceExistsForFence, extents, pathExistsForPlayer } from './index.ts'
 
 Deno.test('Move validation tests', () => {
     let gameSpace = generateGameSpace(extents)
@@ -220,11 +220,10 @@ Deno.test("Verifying player movement", () => {
         "CAN move backwards into empty space"
     )
 
-    p1.pos = [9, 3, 1];
     assertEquals(
-        isValidPawnMove(gameSpace, extents, _3dMode, [MoveType.Pawn, 0, 0, -2], p1, p2),
-        false,
-        "can't move out of bounds"
+        isValidPawnMove(gameSpace, extents, _3dMode, [MoveType.Pawn, 0, -2, 0], p1, p2),
+        true,
+        "when in 3d mode, allow moving to other layers"
     )
 
     assertEquals(
@@ -233,7 +232,34 @@ Deno.test("Verifying player movement", () => {
         "when not in 3d mode, disallow moving to other layers"
     )
 
+    p1.pos = [9, 3, 1];
+    assertEquals(
+        isValidPawnMove(gameSpace, extents, _3dMode, [MoveType.Pawn, 0, 0, -2], p1, p2),
+        false,
+        "can't move out of bounds"
+    )
+
+});
+
+Deno.test("Verifying leap frog mechanic", () => {
+    const _3dMode = true
+    const _2dMode = false
+
+
+    const p1: Player = { id: 'player1', goalZ: 17, numFences: 15, pos: [9, 3, 1] };
+    const p2: Player = { id: 'player2', goalZ: 1, numFences: 15, pos: [9, 3, 17] }
+
+    let gameSpace = generateGameSpace(extents)
+
+    assertEquals(
+        isValidPawnMove(gameSpace, extents, _3dMode, [MoveType.Pawn, 0, 0, 4], p1, p2),
+        false,
+        "can't leap frog unless face to face"
+    )
+
+    // this brings p2 to be face to face with p1
     p2.pos = [9, 3, 3]
+
     assertEquals(
         isValidPawnMove(gameSpace, extents, _3dMode, [MoveType.Pawn, 0, 0, 4], p1, p2),
         true,
@@ -242,8 +268,23 @@ Deno.test("Verifying player movement", () => {
 
     assertEquals(
         isValidPawnMove(gameSpace, extents, _3dMode, [MoveType.Pawn, 0, -2, 2], p1, p2),
+        false,
+        "alternate leap frogs are blocked if direct leap is possible"
+    )
+
+    // place fence behind p2
+    addFenceToGameSpace(gameSpace, [1, 8, 0, 4] )
+
+    assertEquals(
+        isValidPawnMove(gameSpace, extents, _3dMode, [MoveType.Pawn, 0, 0, 4], p1, p2),
+        false,
+        "can't leap frog through fence"
+    )
+
+    assertEquals(
+        isValidPawnMove(gameSpace, extents, _3dMode, [MoveType.Pawn, 0, -2, 2], p1, p2),
         true,
-        "can leap frog adjacent player"
+        "alternate leap frogs are allowed if direct leap not possible"
     )
 
     assertEquals(
@@ -251,4 +292,5 @@ Deno.test("Verifying player movement", () => {
         false,
         "can't leap frog down when in _2dMode"
     )
-});
+
+})
