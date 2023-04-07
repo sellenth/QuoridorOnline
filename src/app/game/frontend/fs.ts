@@ -46,9 +46,8 @@ export const fsPlayer = `#version 300 es
     in vec4 worldCoord;
 
     void main() {
-
-        float z = (worldCoord.z - 5.) / 20.;
-        outColor = vec4(0.3 - z, 0., .75 - z, 1.);
+        float d = modelCoord.y / 3.;
+        outColor = vec4(color.rg, color.b + d, 1.);
     }
 `;
 

@@ -428,16 +428,25 @@ export default class Engine {
         gl.bindBuffer(gl.ARRAY_BUFFER, buff);
 
         let cubeData = [
-            0, 0, 0, 255, 0, 0,
-            2, 0, 0, 255, 0, 0,
-            2, 2, 0, 255, 0, 0,
-            0, 2, 0, 255, 0, 0,
+            0.80, 0.00, 0.80,
+            0.80, 0.00, 1.20,
+            1.20, 0.00, 1.20,
+            1.20, 0.00, 0.80,
 
-            0, 0, 2, 0, 255, 0,
-            2, 0, 2, 0, 255, 0,
-            2, 2, 2, 0, 255, 0,
-            0, 2, 2, 0, 255, 0,
+            0.80, 1.20, 0.80,
+            0.80, 1.20, 1.20,
+            1.20, 1.20, 1.20,
+            1.20, 1.20, 0.80,
 
+            0.50, 1.20, 0.50, // 8
+            0.50, 1.20, 1.50,
+            1.50, 1.20, 1.50,
+            1.50, 1.20, 0.50,
+
+            0.80, 1.90, 0.80,
+            0.80, 1.90, 1.20,
+            1.20, 1.90, 1.20,
+            1.20, 1.90, 0.80,
 
         ];
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(cubeData), gl.STATIC_DRAW);
@@ -448,20 +457,36 @@ export default class Engine {
             0, 1, 2,
             0, 2, 3,
 
-            4, 5, 6,
-            4, 6, 7,
+            0, 1, 5,
+            0, 4, 5,
 
-            0, 3, 4,
-            3, 4, 7,
-
-            1, 5, 6,
             1, 2, 6,
-
-            0, 1, 4,
-            1, 4, 5,
+            1, 5, 6,
 
             2, 3, 6,
-            3, 6, 7
+            3, 6, 7,
+
+            0, 3, 7,
+            0, 4, 7,
+
+            8, 9, 10,
+            8, 10, 11,
+
+            8, 9, 12,
+            12, 13, 9,
+
+            9, 10, 13,
+            13, 14, 10,
+
+            10, 11, 14,
+            14, 15, 11,
+
+            8, 11, 15,
+            8, 12, 15,
+
+            12, 13, 14,
+            12, 14, 15
+
         ]
         gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(elements), gl.STATIC_DRAW);
 
@@ -473,7 +498,7 @@ export default class Engine {
             3, // how many elements per attribute
             gl.FLOAT, // type of individual element
             false, //normalize
-            6 * szFLOAT, //stride
+            3 * szFLOAT, //stride
             0 //offset from start of buffer
         );
 
@@ -491,7 +516,7 @@ export default class Engine {
                 let camLoc = gl.getUniformLocation(playerProgram!, "camera");
                 gl.uniformMatrix4fv(camLoc, false, viewMat);
 
-                this.gameLogic.players.forEach(player => {
+                this.gameLogic.players.forEach((player) => {
                     let modelMat = translate(...player.pos, identity());
                     modelMat = scale(0.8, 0.8, 0.8, modelMat);
                     modelMat = translate(-1, -1, -1, modelMat);
@@ -502,7 +527,7 @@ export default class Engine {
                     let modelLoc = gl.getUniformLocation(playerProgram!, "model");
                     gl.uniformMatrix4fv(modelLoc, false, modelMat);
 
-                    gl.drawElements(gl.TRIANGLES, 36, gl.UNSIGNED_SHORT, 0);
+                    gl.drawElements(gl.TRIANGLES, elements.length, gl.UNSIGNED_SHORT, 0);
                 })
 
                 if (this.gameLogic.IsMyTurn() && this.gameLogic.cursorMode == "pawn") {
@@ -512,12 +537,12 @@ export default class Engine {
                     modelMat = translate(-1, -1, -1, modelMat);
 
                     let colorLoc = gl.getUniformLocation(playerProgram!, "color");
-                    gl.uniform3fv(colorLoc, [0, 0, 255]);
+                    gl.uniform3fv(colorLoc, this.gameLogic.getActivePlayer()?.color ?? [0, 0, 0]);
 
                     let modelLoc = gl.getUniformLocation(playerProgram!, "model");
                     gl.uniformMatrix4fv(modelLoc, false, modelMat);
 
-                    gl.drawElements(gl.TRIANGLES, 36, gl.UNSIGNED_SHORT, 0);
+                    gl.drawElements(gl.TRIANGLES, elements.length, gl.UNSIGNED_SHORT, 0);
                 }
             }
         };
@@ -587,6 +612,7 @@ export default class Engine {
 
             8, 9, 10,
             8, 10, 11,
+
             8, 11, 12,
             8, 9, 12,
 

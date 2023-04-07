@@ -25,6 +25,11 @@ export class GameLogic {
     gameSpace: GameSpace;
     extents: Extents;
     _3dMode: boolean = true
+    colorPicker: Vec3[] = [
+        [.1, .9, .3],
+        [.92, 0, .4]
+    ]
+
 
     notifyServer: (msg: [number, number, number, number]) => Promise<void>;
 
@@ -58,13 +63,13 @@ export class GameLogic {
         this.players.push({
             id: "p1",
             pos: [5,1,5],
-            color: [1, 1, 1],
+            color: this.colorPicker[0],
             walls: 15
         })
         this.players.push({
             id: "p2",
             pos: [7,3,13],
-            color: [1, 1, 1],
+            color: this.colorPicker[1],
             walls: 15
         })
 
@@ -165,12 +170,12 @@ export class GameLogic {
 
     updatePlayers(players: NetworkPlayer[]) {
         this.players.length = 0;
-        players.forEach((player) => {
+        players.forEach((player, idx) => {
             this.players.push(
                 {
                     id: player.id,
                     pos: player.pos,
-                    color: [255, 155, 0],
+                    color: this.colorPicker[idx],
                     walls: player.numFences,
                 }
             )

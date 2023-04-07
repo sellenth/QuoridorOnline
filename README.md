@@ -46,12 +46,16 @@ Sunday 2/25
 - [x] sync up turn counter and fence counter
 
 Wednesday 4/5
-- [ ] rework player move logic to support leap frog
+- [x] rework player move logic to support leap frog
 
 Thursday 4/6
-- [ ] work on 2d mode which disables certain move types
-- [ ] create new pawn model
-- [ ] make the player colors more distinct
+- [x] work on 2d mode which disables certain move types
+- [x] create new pawn model
+- [x] make the player colors more distinct
+
+Next time 4/??
+- [ ] host on internet
+- [ ] indicate direction that player is headed towards
 
 - [ ] display row/col/layer info on games page
 - [ ] is there a way to enforce uniqueness on two columns as a combination? (game invite table)
