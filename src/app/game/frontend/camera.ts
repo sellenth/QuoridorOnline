@@ -24,6 +24,7 @@ export class Camera {
         ctrl: false
     };
     firstLook = true;
+    _3dMode: boolean = true
 
     constructor()
     {

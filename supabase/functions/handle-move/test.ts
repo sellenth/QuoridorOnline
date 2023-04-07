@@ -183,6 +183,9 @@ Deno.test("Can't create fence that blocks path", () => {
 });
 
 Deno.test("Verifying player movement", () => {
+    const _3dMode = true
+    const _2dMode = false
+
     let ex_moves: Move[] = [
         [MoveType.Vertical, 8, 0, 0], //f1
         [MoveType.Vertical, 10, 0, 0], //f2
@@ -200,34 +203,52 @@ Deno.test("Verifying player movement", () => {
     applyMovesToGameSpace(gameSpace, ex_moves, p1, p2)
 
     assertEquals(
-        isValidPawnMove(gameSpace, extents, [MoveType.Pawn, -2, 0, 0], p1, p2),
+        isValidPawnMove(gameSpace, extents, _3dMode, [MoveType.Pawn, -2, 0, 0], p1, p2),
         false,
         "Can't move through fence (f1)"
     )
 
     assertEquals(
-        isValidPawnMove(gameSpace, extents, [MoveType.Pawn, 0, 0, 0], p1, p2),
+        isValidPawnMove(gameSpace, extents, _3dMode, [MoveType.Pawn, 0, 0, 0], p1, p2),
         false,
         "Can't have zero unit move"
     )
 
     assertEquals(
-        isValidPawnMove(gameSpace, extents, [MoveType.Pawn, 0, 0, -2], p1, p2),
+        isValidPawnMove(gameSpace, extents, _3dMode, [MoveType.Pawn, 0, 0, -2], p1, p2),
         true,
         "CAN move backwards into empty space"
     )
 
     p1.pos = [9, 3, 1];
     assertEquals(
-        isValidPawnMove(gameSpace, extents, [MoveType.Pawn, 0, 0, -2], p1, p2),
+        isValidPawnMove(gameSpace, extents, _3dMode, [MoveType.Pawn, 0, 0, -2], p1, p2),
         false,
         "can't move out of bounds"
     )
 
+    assertEquals(
+        isValidPawnMove(gameSpace, extents, _2dMode, [MoveType.Pawn, 0, -2, 0], p1, p2),
+        false,
+        "when not in 3d mode, disallow moving to other layers"
+    )
+
     p2.pos = [9, 3, 3]
     assertEquals(
-        isValidPawnMove(gameSpace, extents, [MoveType.Pawn, 0, 0, 4], p1, p2),
+        isValidPawnMove(gameSpace, extents, _3dMode, [MoveType.Pawn, 0, 0, 4], p1, p2),
         true,
         "can leap frog adjacent player"
+    )
+
+    assertEquals(
+        isValidPawnMove(gameSpace, extents, _3dMode, [MoveType.Pawn, 0, -2, 2], p1, p2),
+        true,
+        "can leap frog adjacent player"
+    )
+
+    assertEquals(
+        isValidPawnMove(gameSpace, extents, _2dMode, [MoveType.Pawn, 0, -2, 2], p1, p2),
+        false,
+        "can't leap frog down when in _2dMode"
     )
 });

@@ -230,6 +230,10 @@ export default class Engine {
                 ? data.p2_id
                 : data.p1_id) ?? data.p1_id);
 
+        // rough design choices :/
+        this.gameLogic._3dMode = data.layers > 2
+        this.camera._3dMode = data.layers > 2
+
         // update engine w/ new game state
         this.gameLogic.refreshGameSpace(data)
 

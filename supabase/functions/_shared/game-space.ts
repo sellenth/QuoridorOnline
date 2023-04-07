@@ -105,11 +105,10 @@ export function inBounds(extents: Extents, [_, x, y, z]: Move) {
 }
 
 
-// Check proposed player move, ensure it only moves in one direction,
-// 2 units, and doesn't go through a wall
-export function isValidPawnMove(gameSpace: GameSpace, extents: Extents, move: Move, curr_player: Player, other_player: Player) {
-    // move is one of the valid cursor positions
-    let validCursors = generateValidCursors(gameSpace, extents, curr_player, other_player)
+
+// ensure move is one of the valid cursor positions
+export function isValidPawnMove(gameSpace: GameSpace, extents: Extents, _3dMode: boolean, move: Move, curr_player: Player, other_player: Player) {
+    let validCursors = generateValidCursors(gameSpace, extents, _3dMode, curr_player, other_player)
 
     for (let i = 0; i < validCursors.length; ++i) {
         let valid_move = validCursors[i]
@@ -123,7 +122,7 @@ export function isValidPawnMove(gameSpace: GameSpace, extents: Extents, move: Mo
     return false
 }
 
-export function generateValidCursors(gameSpace: GameSpace, extents: Extents, curr_player: Player, other_player: Player) {
+export function generateValidCursors(gameSpace: GameSpace, extents: Extents, _3dMode: boolean, curr_player: Player, other_player: Player) {
     let validCursors: Pos[] = []
 
     let playersAdjacent = false
@@ -132,7 +131,7 @@ export function generateValidCursors(gameSpace: GameSpace, extents: Extents, cur
                         other_player.pos[2] - curr_player.pos[2]
                        ]
 
-    generateCursorsAboutPoint(gameSpace, extents, curr_player.pos).forEach( (pos) => {
+    generateCursorsAboutPoint(gameSpace, extents, _3dMode, curr_player.pos).forEach( (pos) => {
        if (curr_player.pos[0] + pos[0] != other_player.pos[0] ||
            curr_player.pos[1] + pos[1] != other_player.pos[1] ||
            curr_player.pos[2] + pos[2] != other_player.pos[2]) {
@@ -143,7 +142,7 @@ export function generateValidCursors(gameSpace: GameSpace, extents: Extents, cur
     } )
 
     if (playersAdjacent) {
-        generateCursorsAboutPoint(gameSpace, extents, other_player.pos).forEach( (pos) => {
+        generateCursorsAboutPoint(gameSpace, extents, _3dMode, other_player.pos).forEach( (pos) => {
             if (other_player.pos[0] + pos[0] != curr_player.pos[0] ||
                 other_player.pos[1] + pos[1] != curr_player.pos[1] ||
                 other_player.pos[2] + pos[2] != curr_player.pos[2]) {
@@ -161,29 +160,30 @@ export function generateValidCursors(gameSpace: GameSpace, extents: Extents, cur
     return validCursors;
 }
 
-function generateCursorsAboutPoint(gameSpace: GameSpace, extents: Extents, pos: Pos) {
+function generateCursorsAboutPoint(gameSpace: GameSpace, extents: Extents, _3dMode: boolean, pos: Pos) {
     let cursors: Pos[] = []
-        // x motion
-        let proposed_move: Pos = [-1, 0, 0]
-        if (validHeading(gameSpace, extents, [MoveType.Pawn, ...pos], ...proposed_move)) {
-            cursors.push([-2, 0, 0])
-        }
-        proposed_move = [+1, 0, 0]
-        if (validHeading(gameSpace, extents, [MoveType.Pawn, ...pos], ...proposed_move)) {
-            cursors.push([+2, 0, 0])
-        }
+    // x motion
+    let proposed_move: Pos = [-1, 0, 0]
+    if (validHeading(gameSpace, extents, [MoveType.Pawn, ...pos], ...proposed_move)) {
+        cursors.push([-2, 0, 0])
+    }
+    proposed_move = [+1, 0, 0]
+    if (validHeading(gameSpace, extents, [MoveType.Pawn, ...pos], ...proposed_move)) {
+        cursors.push([+2, 0, 0])
+    }
 
-        // z motion
-        proposed_move = [0, 0, -1]
-        if (validHeading(gameSpace, extents, [MoveType.Pawn, ...pos], ...proposed_move)) {
-            cursors.push([0, 0, -2])
-        }
-        proposed_move = [0, 0, +1]
-        if (validHeading(gameSpace, extents, [MoveType.Pawn, ...pos], ...proposed_move)) {
-            cursors.push([0, 0, +2])
-        }
+    // z motion
+    proposed_move = [0, 0, -1]
+    if (validHeading(gameSpace, extents, [MoveType.Pawn, ...pos], ...proposed_move)) {
+        cursors.push([0, 0, -2])
+    }
+    proposed_move = [0, 0, +1]
+    if (validHeading(gameSpace, extents, [MoveType.Pawn, ...pos], ...proposed_move)) {
+        cursors.push([0, 0, +2])
+    }
 
-        // y motion (should be disabled in 2d mode)
+    // y motion (should be disabled in 2d mode)
+    if (_3dMode) {
         proposed_move = [0, -1, 0]
         if (validHeading(gameSpace, extents, [MoveType.Pawn, ...pos], ...proposed_move)) {
             cursors.push([0, -2, 0])
@@ -192,7 +192,9 @@ function generateCursorsAboutPoint(gameSpace: GameSpace, extents: Extents, pos: 
         if (validHeading(gameSpace, extents, [MoveType.Pawn, ...pos], ...proposed_move)) {
             cursors.push([0, +2, 0])
         }
-   return cursors
+    }
+
+    return cursors
 }
 
 export function applyMovesToGameSpace(gameSpace: GameSpace, moves: Move[], p1: Player, p2: Player) {

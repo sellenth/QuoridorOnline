@@ -6,7 +6,7 @@ import { serve } from 'https://deno.land/std@0.177.0/http/server.ts'
 import { corsHeaders } from '../_shared/cors.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { writeAllSync } from 'https://deno.land/std@0.177.0/streams/write_all.ts'
-import {  calculateMoveOffets, inBounds, isValidPawnMove, validHeading, addFenceToGameSpace, EXPLORED, Extents, FENCE, generateGameSpace, GameSpace, PLAYER, VACANT, applyMovesToGameSpace, MoveType, s, Move, Player  } from '../_shared/game-space.ts'
+import { inBounds, isValidPawnMove, validHeading, addFenceToGameSpace, EXPLORED, Extents, FENCE, generateGameSpace, GameSpace, PLAYER, VACANT, applyMovesToGameSpace, MoveType, s, Move, Player  } from '../_shared/game-space.ts'
 
 const fence = new TextEncoder().encode('F')
 const no_fence = new TextEncoder().encode('0')
@@ -113,6 +113,7 @@ serve(async (req: any) => {
 
         applyMovesToGameSpace(gameSpace, data.moves, p1, p2)
 
+        const _3dMode = data.layers > 2
         let isValid = true
         let winner = null
         let verified_move;
@@ -122,7 +123,7 @@ serve(async (req: any) => {
             const curr_player = p2_move ? p2 : p1;
             const other_player = p2_move ? p1 : p2;
 
-            isValid = isValidPawnMove(gameSpace, extents, proposed_move, curr_player, other_player)
+            isValid = isValidPawnMove(gameSpace, extents, _3dMode, proposed_move, curr_player, other_player)
             if (isValid) {
                 curr_player.pos[0] += proposed_move[s.x]
                 curr_player.pos[1] += proposed_move[s.y]

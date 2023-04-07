@@ -24,6 +24,7 @@ export class GameLogic {
     fencePositions: Cursor[];
     gameSpace: GameSpace;
     extents: Extents;
+    _3dMode: boolean = true
 
     notifyServer: (msg: [number, number, number, number]) => Promise<void>;
 
@@ -88,7 +89,6 @@ export class GameLogic {
         const p_start_layer: number = data.layers % 2 ? data.layers : data.layers - 1
 
         this.gameSpace = generateGameSpace(this.extents)
-        console.log(this.gameSpace)
 
 
         const fences: Fence[] = []
@@ -117,11 +117,13 @@ export class GameLogic {
         this.updateFences(fences)
         this.updatePlayers([p1, p2])
 
+        console.log(this._3dMode)
+
         const p2_move = !!(data.moves.length % 2)
         if (p2_move) {
-            this.validCursorPositions = generateValidCursors(this.gameSpace, this.extents, p2, p1)
+            this.validCursorPositions = generateValidCursors(this.gameSpace, this.extents, this._3dMode, p2, p1)
         } else {
-            this.validCursorPositions = generateValidCursors(this.gameSpace, this.extents, p1, p2)
+            this.validCursorPositions = generateValidCursors(this.gameSpace, this.extents, this._3dMode, p1, p2)
         }
     }
 
@@ -273,7 +275,7 @@ export class GameLogic {
             if (this.cursorIdx < 0) {
                 this.cursorIdx = Math.max(0, this.validCursorPositions.length - 1)
             }
-            this.cursor.pos = this.validCursorPositions[this.cursorIdx].slice() as Vec3
+            this.cursor.pos = this.validCursorPositions[this.cursorIdx] as Vec3
         }
     }
 
@@ -283,7 +285,7 @@ export class GameLogic {
             if (this.cursorIdx >= this.validCursorPositions.length) {
                 this.cursorIdx = 0
             }
-            this.cursor.pos = this.validCursorPositions[this.cursorIdx].slice() as Vec3
+            this.cursor.pos = this.validCursorPositions[this.cursorIdx] as Vec3
 
         }
     }
@@ -302,9 +304,10 @@ export class GameLogic {
 
     nextCursorOrientation() {
         this.cursor.orientation++;
-        if (this.cursor.orientation > Orientation.Flat) {
+        if (this.cursor.orientation > (this._3dMode ? Orientation.Flat : Orientation.Vertical)) {
             this.cursor.orientation = Orientation.Horizontal;
         }
+
         this.ClampCursorToBoard();
     }
 
