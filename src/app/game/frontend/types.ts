@@ -4,5 +4,6 @@ export type Player = {
     id: string
     pos: Vec3,
     color: Vec3,
-    walls: number
+    fences: number
+    goalZ: number
 }

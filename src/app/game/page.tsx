@@ -72,10 +72,10 @@ export default function GameView() {
         <main className="h-fit w-fit flex flex-col items-center justify-center mx-auto my-10 ">
             <div ref={gameInfoRef} id="gameInfo" className="text-gray-200 self-start mb-5">
                 <p id="turnIndicator">Player ???&apos;s turn</p>
-                <div id="wallInfo">
-                    <p>Walls Remaining</p>
-                    <p id="myWalls">Me - ???</p>
-                    <p id="theirWalls">Them - ???</p>
+                <div id="fenceInfo">
+                    <p>Fences Remaining</p>
+                    <p id="myFences">Me - ???</p>
+                    <p id="theirFences">Them - ???</p>
                 </div>
             </div>
             <canvas id="c" className="border border-gray-200 outline-green square" tabIndex={0}></canvas>

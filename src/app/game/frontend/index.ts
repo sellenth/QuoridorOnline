@@ -24,8 +24,8 @@ type VisualUnit =
 
 class GameStatusHandler {
     gameInfoElement: HTMLElement;
-    myWallsElement: Node;
-    theirWallsElement: Node;
+    myFencesElement: Node;
+    theirFencesElement: Node;
     turnIndicatorElement: Node;
     //GameOverModal: Node;
 
@@ -38,15 +38,15 @@ class GameStatusHandler {
             p2_id, p2_username,
             p1_num_fences, p2_num_fences) {
 
-        this.UpdateWalls(my_id, p1_id, p1_username, p1_num_fences)
-        this.UpdateWalls(my_id, p2_id, p2_username, p2_num_fences)
+        this.UpdateFences(my_id, p1_id, p1_username, p1_num_fences)
+        this.UpdateFences(my_id, p2_id, p2_username, p2_num_fences)
 
         this.UpdateTurnIndicator(my_id, active_player_id);
 
     }
 
-    UpdateWalls(my_id, id, username, fences) {
-        const indicatorElement = my_id == id ? this.myWallsElement : this.theirWallsElement;
+    UpdateFences(my_id, id, username, fences) {
+        const indicatorElement = my_id == id ? this.myFencesElement : this.theirFencesElement;
 
         if (this.gameInfoElement) {
             indicatorElement.textContent = `${username} - ${fences}`;
@@ -62,8 +62,8 @@ class GameStatusHandler {
 
     SetGameInfoElement(el: HTMLElement) {
         this.gameInfoElement = el
-        this.myWallsElement = document.querySelector("#myWalls")!;
-        this.theirWallsElement = document.querySelector("#theirWalls")!;
+        this.myFencesElement = document.querySelector("#myFences")!;
+        this.theirFencesElement = document.querySelector("#theirFences")!;
         this.turnIndicatorElement = document.querySelector("#turnIndicator")!;
     }
 
@@ -244,13 +244,15 @@ export default class Engine {
                                       this.gameLogic.activePlayerId,
                                       data.p1.id, data.p1.username,
                                       data.p2.id, data.p2.username,
-                                      p1.walls, p2.walls
+                                      p1.fences, p2.fences
                                      )
 
         if (p1.goalZ == p1.pos[2]) {
            this.gameStatusHandler.SetGameWon(data.p1.username)
+            this.gameLogic.gameOver = true
         } else if (p2.goalZ == p2.pos[2]) {
            this.gameStatusHandler.SetGameWon(data.p2.username)
+            this.gameLogic.gameOver = true
         }
 
         if (this.firstTick) {
