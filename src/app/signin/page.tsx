@@ -65,7 +65,7 @@ export default function SignIn() {
                 <button type="submit" className="font-display w-full my-2 shadow-lg hover:bg-theme-200 hover:shadow-theme-200/50 border-2 rounded-b-md border-theme-200 py-1 px-2"
                 >Submit</button>
             </form>
-            <p>Don&apost have an account? <span>
+            <p>Don&apos;t have an account? <span>
                 <Link className="underline" href="signup">
                     Sign Up
                 </Link>
