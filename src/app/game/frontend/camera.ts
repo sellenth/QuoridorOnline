@@ -159,36 +159,47 @@ export class Camera {
     configureCameraListeners(canvas: HTMLCanvasElement, gameLogic: GameLogic)
     {
         canvas.addEventListener('keydown', (e: KeyboardEvent) => {
-            if (e.key == "w")
-                this.keysDown.w = true;
-            if (e.key == "a")
-                this.keysDown.a = true;
-            if (e.key == "s")
-                this.keysDown.s = true;
-            if (e.key == "d")
-                this.keysDown.d = true;
-            if (e.key == "ArrowRight")
-                gameLogic.MoveCursorRight();
-            if (e.key == "ArrowLeft")
-                gameLogic.MoveCursorLeft();
-            if (e.key == "ArrowUp")
-                gameLogic.MoveCursorFront();
-            if (e.key == "ArrowDown")
-                gameLogic.MoveCursorBack();
-            if (e.key == "q")
-                gameLogic.MoveCursorDown();
-            if (e.key == "e")
-                gameLogic.MoveCursorUp();
-            if (e.key == "Control")
-                this.keysDown.ctrl = true;
-            if (e.key == " ")
-                this.keysDown.space = true;
+            if (gameLogic.cursorMode == 'pawn') {
+                // camera controls
+                if (e.key == "w")
+                    this.keysDown.w = true;
+                if (e.key == "a")
+                    this.keysDown.a = true;
+                if (e.key == "s")
+                    this.keysDown.s = true;
+                if (e.key == "d")
+                    this.keysDown.d = true;
+                if (e.key == "Control")
+                    this.keysDown.ctrl = true;
+                if (e.key == " ")
+                    this.keysDown.space = true;
+
+            }
+
+            // game logic controls
+            if (gameLogic.cursorMode == 'fence') {
+                if (e.key == "w")
+                    gameLogic.MoveCursorFront();
+                if (e.key == "s")
+                    gameLogic.MoveCursorBack();
+                if (e.key == "d")
+                    gameLogic.MoveCursorRight();
+                if (e.key == "a")
+                    gameLogic.MoveCursorLeft();
+                if (e.key == "q")
+                    gameLogic.MoveCursorDown();
+                if (e.key == "e")
+                    gameLogic.MoveCursorUp();
+            }
             if (e.key == "Enter")
                 gameLogic.commitMove();
             if (e.key == "c")
                 gameLogic.switchCursorMode();
-            if (e.key == "r")
+            if (e.key == "r"){
+                // these methods have internal checks to verify cursor mode
+                gameLogic.NextPlayerCursor();
                 gameLogic.nextCursorOrientation();
+            }
         })
 
         canvas.addEventListener('keyup', (e: KeyboardEvent) => {
@@ -204,14 +215,6 @@ export class Camera {
                 this.keysDown.ctrl = false;
             if (e.key == " ")
                 this.keysDown.space = false;
-        })
-        canvas.addEventListener('mousedown', (e: MouseEvent) => {
-            if (e.button === 0) {
-                gameLogic.NextPlayerCursor();
-            }
-            else if (e.button === 2) {
-                gameLogic.PreviousPlayerCursor();
-            }
         })
 
         canvas.addEventListener('click', (_) => {
