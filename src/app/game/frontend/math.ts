@@ -1,3 +1,4 @@
+import { Extents } from "supabase/functions/_shared/game-space";
 import { Vec3, Mat4 } from "../shared/types"
 
 export function addVec3(a: Vec3, b: Vec3): Vec3
@@ -156,6 +157,15 @@ export function projection(fieldOfViewInRadians: number, aspect: number, near: n
       0, 0, (near + far) * rangeInv, -1,
       0, 0, near * far * rangeInv * 2, 0
     ];
+}
+
+export function q_projection(extents: Extents): Mat4 {
+        return [
+            2 / extents.right, 0, 0, 0,
+            0, 2 / extents.far, 0, 0,
+            0, 0, 2 / extents.top, 0,
+            0, 0, 0, 1
+        ]
 }
 
 export function invertMat4(m: Mat4): Mat4

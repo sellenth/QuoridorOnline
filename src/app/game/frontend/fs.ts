@@ -77,7 +77,7 @@ export const fsGrid = `#version 300 es
     uniform vec3 camPos;
     uniform vec3 color;
     uniform vec2 u_resolution;
-    uniform float u_time;
+    uniform float _3dMode;
     out vec4 outColor;
 
     in vec4 modelCoord;
@@ -86,8 +86,8 @@ export const fsGrid = `#version 300 es
     void main() {
         vec2 st = gl_FragCoord.xy / u_resolution;
 
-        float a = (10. - distance(camPos.xyz, worldCoord.xyz)) / 5.;
-        outColor = vec4(0., .5, 0., a);
+        float a = clamp((10. - distance(camPos.xyz, worldCoord.xyz)) / 5., 0., 1.);
+        outColor = vec4(0., .5, 0., a + (1. - _3dMode ));
     }
 `;
 

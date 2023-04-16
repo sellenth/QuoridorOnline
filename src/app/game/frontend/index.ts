@@ -3,7 +3,7 @@
 import vss from "./vs";
 import { fsFence, fsPlayer, fsCamera, fsGrid} from "./fs";
 import { createShader, createProgram, resizeCanvasToDisplaySize, sleep } from "./utils"
-import { identity, translate, projection, addVec3, rotationYZ, rotationXZ, scale, degreesToRadians, subVec3 } from "./math"
+import { identity, translate, projection, addVec3, rotationYZ, rotationXZ, scale, degreesToRadians, subVec3, q_projection } from "./math"
 import { Camera } from "./camera";
 import { GameLogic } from "./gameLogic";
 import {
@@ -293,20 +293,27 @@ export default class Engine {
             }
 
             // Calculate program independent matrices
-            let projMat = projection(3.14 / 2, canvas.clientWidth / canvas.clientHeight, 0.1, 50);
+            let projMat = this.gameLogic._3dMode ?
+                projection(3.14 / 2, canvas.clientWidth / canvas.clientHeight, 0.1, 50)
+                :
+                q_projection(this.gameLogic.extents);
+
             let viewMat;
 
             if (this.demoMode) {
                 // get camera such that it is always facing a center point
                 viewMat = this.camera.lookAt( [9, 0, 9], [0, 1, 0]);
+            } else if (!this.gameLogic._3dMode) {
+                viewMat = this.camera.topDown(this.gameLogic.extents)
             } else {
                 // get camera based on vectors updated by mouse movement
                 viewMat = this.camera.getViewMatrix()
             }
 
-
             this.sceneObjects.forEach(so => {
-                so.render(projMat, viewMat);
+                if (so.name != "camera" || this.gameLogic._3dMode) {
+                    so.render(projMat, viewMat);
+                }
             });
 
             await sleep(Math.max(0, 32 - this.frameTiming.deltaTime));
@@ -393,6 +400,9 @@ export default class Engine {
 
                 let camLoc = gl.getUniformLocation(gridProgram!, "camera");
                 gl.uniformMatrix4fv(camLoc, false, viewMat);
+
+                let _3dModeLoc = gl.getUniformLocation(gridProgram!, "_3dMode");
+                gl.uniform1f(_3dModeLoc, this.gameLogic._3dMode);
 
                 let modelMat = identity();
                 let modelLoc = gl.getUniformLocation(gridProgram!, "model");

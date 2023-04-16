@@ -2,6 +2,7 @@ import { GameLogic } from "./gameLogic"
 import { Vec3 } from "../shared/types"
 import { clamp } from "./utils"
 import {crossProductVec3, subVec3, addVec3, scaleVec3, normalizeVec3, cos_d, sin_d, invertMat4} from "./math"
+import { Extents } from "../../../../supabase/functions/_shared/game-space";
 
 //let audio = new Audio("/static/jakesTrack.m4a");
 
@@ -114,7 +115,18 @@ export class Camera {
         return invertMat4(this.getCameraMatrix());
     }
 
-    lookAt(target: Vec3, up: Vec3) {
+    topDown(extents: Extents)
+    {
+        return [
+            1, 0, 0, 0,
+            0, 0, 1, 0,
+            0, 1, 0, 0,
+            -.5 * extents.right, -.5 * extents.far, -.5 * extents.top, 1
+        ]
+    }
+
+    lookAt(target: Vec3, up: Vec3)
+    {
         var zAxis = normalizeVec3(
             subVec3(this.position, target));
         var xAxis = normalizeVec3(crossProductVec3(up, zAxis));
