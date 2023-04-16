@@ -9,3 +9,8 @@ body {
   background-color: theme('colors.theme.300');
   overflow-x: hidden;
 }
+
+.square {
+  width: 65vmin;
+  height: 65vmin;
+}
