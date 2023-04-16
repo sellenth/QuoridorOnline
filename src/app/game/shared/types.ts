@@ -36,19 +36,6 @@ export enum Orientation {
 
 export enum MessageType { GameState, Identity, GameOver, Cameras, ClientCameraPos, ClientAction };
 
-export type Payload = ID | GameStatePayload | NetworkCamera[];
-
-export type ServerPayload = {
-    type: MessageType,
-    data: Payload
-}
-
-export type GameStatePayload = {
-    fences: Fence[],
-    players: Player[],
-    activePlayerId: ID | undefined
-}
-
 export type ClientAction = {
     playerId: ID,
     action: Action

@@ -21,6 +21,8 @@ export default function FriendsList() {
   const [pending, setPending] = useState<FriendConnection[]>([])
   const [received_invite, setReceived] = useState<IncomingFriendInvite[]>([])
 
+
+  useEffect(() => {
     const subscribeToDbChanges = (callback: () => any) => {
         const channel = supabase
             .channel('friends-db-changes')
@@ -50,38 +52,38 @@ export default function FriendsList() {
         return channel
     }
 
+      const getMyFriendsFromDb = async () => {
+          const { data, error } = await supabase
+              .from('friends')
+              .select('friend:friend_id(username, id), accepted')
+              .eq('user_id', my_id)
 
-  const getMyFriendsFromDb = async () => {
-        const { data, error } = await supabase
-          .from('friends')
-          .select('friend:friend_id(username, id), accepted')
-          .eq('user_id', my_id )
+          return data as FriendConnection[]
+      }
 
-      return data as FriendConnection[]
-  }
+      const getFriendRequestsFromDb = async () => {
+          const { data, error } = await supabase
+              .from('friends')
+              .select('requester:user_id(username, id), accepted')
+              .match({ friend_id: my_id, accepted: false })
 
-  const getFriendRequestsFromDb = async () => {
-    const {data, error} = await supabase
-      .from('friends')
-      .select('requester:user_id(username, id), accepted')
-      .match({friend_id: my_id, accepted: false})
+          return data as IncomingFriendInvite[]
+      }
 
-    return data as IncomingFriendInvite[]
-  }
+      const updateFriendsList = (my_friends: FriendConnection[], my_invites: IncomingFriendInvite[]) => {
+          setAccepted(my_friends.filter((friend) => { return friend.accepted }))
+          setPending(my_friends.filter((friend) => { return !friend.accepted }))
+          setReceived(my_invites)
+      }
 
-  const updateFriendsList = (my_friends: FriendConnection[], my_invites: IncomingFriendInvite[] ) => {
-    setAccepted(my_friends.filter( (friend) => { return friend.accepted } ))
-    setPending(my_friends.filter( (friend) => { return !friend.accepted } ))
-    setReceived(my_invites)
-  }
 
-  const updateFriendsListFromDb = async () => {
-    const my_friends = await getMyFriendsFromDb()
-    const my_invites = await getFriendRequestsFromDb()
-    updateFriendsList(my_friends, my_invites)
-  }
+      const updateFriendsListFromDb = async () => {
+          const my_friends = await getMyFriendsFromDb()
+          const my_invites = await getFriendRequestsFromDb()
+          updateFriendsList(my_friends, my_invites)
+      }
 
-  useEffect(() => {
+
     let channel: null | RealtimeChannel = null
 
     if (process.env.NEXT_PUBLIC_TESTING) {
@@ -97,7 +99,7 @@ export default function FriendsList() {
         }
   }
 
-  }, [subscribeToDbChanges, updateFriendsListFromDb, supabase])
+  }, [supabase, my_id])
 
     return (
         <div className="text-gray-200 mx-auto w-fit ">

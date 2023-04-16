@@ -64,7 +64,8 @@ export const mockIncomingGameInvite: GameInvite[] = [
     gid: null,
     rows: 6,
     cols: 6,
-    layers: 1
+    layers: 1,
+    start_fences: 10
   },
 ]
 export const mockSentGameInvite: GameInvite[] = [
@@ -80,7 +81,8 @@ export const mockSentGameInvite: GameInvite[] = [
     gid: null,
     rows: 10,
     cols: 10,
-    layers: 2
+    layers: 2,
+    start_fences: 10
   },
 ]
 export const mockInProgressGameInvite: GameInvite[] = [
@@ -96,7 +98,8 @@ export const mockInProgressGameInvite: GameInvite[] = [
     gid: "c0ff33",
     rows: 9,
     cols: 9,
-    layers: 3
+    layers: 3,
+    start_fences: 10
   },
 ]
 

@@ -38,147 +38,146 @@ const subscribeToDbChanges = (supabase: SupabaseClient<Database>, id_to_listen_o
             () => { callback() }
         )
         .subscribe((status: any) => {
-              console.log('game-invites table status:', status)
+            console.log('game-invites table status:', status)
         })
     return channel
 }
 
 
 export default function FriendsList() {
-  let searchParams = useSearchParams()
-  let username = searchParams.get('username') ?? ''
-  const { supabase, session } = useSupabase()
+    let searchParams = useSearchParams()
+    let username = searchParams.get('username') ?? ''
+    const { supabase, session } = useSupabase()
 
-  const my_id = session?.user!.id || ''
+    const my_id = session?.user!.id || ''
 
-  const [sent, setSent] = useState<GameInvite[]>([])
-  const [received, setReceived] = useState<GameInvite[]>([])
-  const [inProgress, setInProgress] = useState<GameInvite[]>([])
+    const [sent, setSent] = useState<GameInvite[]>([])
+    const [received, setReceived] = useState<GameInvite[]>([])
+    const [inProgress, setInProgress] = useState<GameInvite[]>([])
 
-  const updateTableFromDB = async () => {
-        const { data, error } = await supabase
-            .from('game-invites')
-            .select('initiator:initiator_id(username, id), opponent:opponent_id(username, id), gid, rows, cols, layers')
-            .or(`initiator_id.eq.${my_id},opponent_id.eq.${my_id}`)
 
-        if (data) {
-            let game_invites = data as GameInvite[]
-            setSent(game_invites.filter((invite) => { return invite.initiator.id == my_id && invite.gid == null }))
-            setReceived(game_invites.filter((invite) => { return invite.opponent.id == my_id && invite.gid == null }))
-            setInProgress(game_invites.filter((invite) => { return invite.gid != null }))
+    useEffect(() => {
+        const updateTableFromDB = async () => {
+            const { data, error } = await supabase
+                .from('game-invites')
+                .select('initiator:initiator_id(username, id), opponent:opponent_id(username, id), gid, rows, cols, layers')
+                .or(`initiator_id.eq.${my_id},opponent_id.eq.${my_id}`)
+
+            if (data) {
+                let game_invites = data as GameInvite[]
+                setSent(game_invites.filter((invite) => { return invite.initiator.id == my_id && invite.gid == null }))
+                setReceived(game_invites.filter((invite) => { return invite.opponent.id == my_id && invite.gid == null }))
+                setInProgress(game_invites.filter((invite) => { return invite.gid != null }))
+            }
         }
-  }
 
-
-
-  useEffect(() => {
-    let channel: null | RealtimeChannel = null
-    if (process.env.NEXT_PUBLIC_TESTING) {
-      setSent(mockSentGameInvite)
-      setReceived(mockIncomingGameInvite)
-      setInProgress(mockInProgressGameInvite)
-    } else {
-      channel = subscribeToDbChanges(supabase, my_id, updateTableFromDB)
-      updateTableFromDB()
-    }
-
-      return () => {
-        if (channel) {
-          supabase.removeChannel(channel)
+        let channel: null | RealtimeChannel = null
+        if (process.env.NEXT_PUBLIC_TESTING) {
+            setSent(mockSentGameInvite)
+            setReceived(mockIncomingGameInvite)
+            setInProgress(mockInProgressGameInvite)
+        } else {
+            channel = subscribeToDbChanges(supabase, my_id, updateTableFromDB)
+            updateTableFromDB()
         }
-      }
 
-  }, [supabase, updateTableFromDB])
+        return () => {
+            if (channel) {
+                supabase.removeChannel(channel)
+            }
+        }
 
-  return (
-    <div className="text-gray-200 mx-auto w-fit ">
-      <div className="w-fit align-center mx-auto my-10 bg-blue-200 bg-opacity-10 backdrop-blur p-4 border-2 border-gray-200 rounded-md">
-        <CreateInvite my_id={my_id} username={username} />
-      </div>
+    }, [supabase, my_id])
 
-    <AddRightBorder>
+    return (
+        <div className="text-gray-200 mx-auto w-fit ">
+            <div className="w-fit align-center mx-auto my-10 bg-blue-200 bg-opacity-10 backdrop-blur p-4 border-2 border-gray-200 rounded-md">
+                <CreateInvite my_id={my_id} username={username} />
+            </div>
+
+            <AddRightBorder>
                 <div className="bg-blue-200 bg-opacity-10 backdrop-blur p-4">
-        <table>
-          <thead>
-            <tr>
-              <th className="font-display">GAME INVITES SENT</th>
-            </tr>
-          </thead>
-          <tbody>
-            {sent &&
-            sent.map((game) => (
-                <tr key={game.opponent.id}>
-                  <td>{game.opponent.username}</td>
-                </tr>
-              ))}
-          </tbody>
-        </table>
-      </div>
-    </AddRightBorder>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th className="font-display">GAME INVITES SENT</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {sent &&
+                                sent.map((game) => (
+                                    <tr key={game.opponent.id}>
+                                        <td>{game.opponent.username}</td>
+                                    </tr>
+                                ))}
+                        </tbody>
+                    </table>
+                </div>
+            </AddRightBorder>
 
-    <DecorativeCircles />
+            <DecorativeCircles />
 
-      <div className="grid grid-cols-2 gap-2">
-        <div className="bg-blue-200 bg-opacity-10 backdrop-blur border-2 border-gray-200 p-2 rounded-l-md">
-          <table className="w-full border-separate border-spacing-y-2">
-              <thead>
-                <tr>
-                  <th className="text-start font-display">GAME INVITES RECEIVED</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                {received &&
-                received.map((game) => (
-                    <tr key={game.initiator.id} className="h-9">
-                      <td>
-                        {game.initiator.username}
-                      </td>
-                      <td className="text-end">
-                        <AcceptRejectInvite initiator_id={game.initiator.id}
-                                            opponent_id={game.opponent.id}
-                                            rows={game.rows}
-                                            cols={game.cols}
-                                            layers={game.layers}
-                                            start_fences={game.start_fences}
-                        />
-                      </td>
-                    </tr>
-                  ))}
-              </tbody>
-            </table>
-          </div>
-
-        <div className="bg-blue-200 bg-opacity-10 backdrop-blur border-2 border-gray-200 p-2 rounded-r-md">
+            <div className="grid grid-cols-2 gap-2">
+                <div className="bg-blue-200 bg-opacity-10 backdrop-blur border-2 border-gray-200 p-2 rounded-l-md">
                     <table className="w-full border-separate border-spacing-y-2">
-        <thead>
-          <tr>
-            <th className="text-start font-display">ACTIVE GAMES</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          {inProgress &&
-          inProgress.map((game: any) => {
-            console.log(game)
-              let their_id = game.initiator.id == my_id ? game.opponent.id : game.initiator.id
-              let their_name = game.initiator.id == my_id ? game.opponent.username : game.initiator.username
+                        <thead>
+                            <tr>
+                                <th className="text-start font-display">GAME INVITES RECEIVED</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {received &&
+                                received.map((game) => (
+                                    <tr key={game.initiator.id} className="h-9">
+                                        <td>
+                                            {game.initiator.username}
+                                        </td>
+                                        <td className="text-end">
+                                            <AcceptRejectInvite initiator_id={game.initiator.id}
+                                                opponent_id={game.opponent.id}
+                                                rows={game.rows}
+                                                cols={game.cols}
+                                                layers={game.layers}
+                                                start_fences={game.start_fences}
+                                            />
+                                        </td>
+                                    </tr>
+                                ))}
+                        </tbody>
+                    </table>
+                </div>
 
-            return (
-              <tr key={their_id} className="h-9">
-                <td>
-                  {their_name}
-                </td>
-                <td className="text-end">
-                  <JoinGame gid={game.gid} />
-                </td>
-              </tr>
-              )
-          })}
-        </tbody>
-      </table>
+                <div className="bg-blue-200 bg-opacity-10 backdrop-blur border-2 border-gray-200 p-2 rounded-r-md">
+                    <table className="w-full border-separate border-spacing-y-2">
+                        <thead>
+                            <tr>
+                                <th className="text-start font-display">ACTIVE GAMES</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {inProgress &&
+                                inProgress.map((game: any) => {
+                                    console.log(game)
+                                    let their_id = game.initiator.id == my_id ? game.opponent.id : game.initiator.id
+                                    let their_name = game.initiator.id == my_id ? game.opponent.username : game.initiator.username
+
+                                    return (
+                                        <tr key={their_id} className="h-9">
+                                            <td>
+                                                {their_name}
+                                            </td>
+                                            <td className="text-end">
+                                                <JoinGame gid={game.gid} />
+                                            </td>
+                                        </tr>
+                                    )
+                                })}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
-    </div>
-    </div>
-  )
+    )
 }

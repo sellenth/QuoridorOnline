@@ -7,7 +7,7 @@ import { identity, translate, projection, addVec3, rotationYZ, rotationXZ, scale
 import { Camera } from "./camera";
 import { GameLogic } from "./gameLogic";
 import {
-    ClientMessage, GameStatePayload, ID, MessageType, Orientation,
+    ClientMessage, ID, MessageType, Orientation,
     Player, ServerPayload, Mat4, NetworkCamera
 } from "../shared/types"
 import type { SupabaseClient } from '@supabase/auth-helpers-nextjs'

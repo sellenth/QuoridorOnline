@@ -3,14 +3,8 @@ import SupabaseProvider from '../components/supabase-provider'
 import Header from '../components/header'
 import { createServerClient } from '../utils/supabase-server'
 
-import { Orbitron } from '@next/font/google'
-export const orbitron = Orbitron({
-  subsets: ['latin'],
-  variable: '--font-orbitron',
-  display: 'swap'
-})
-
 import './globals.css'
+import { orbitron } from './head'
 
 
 // do not cache this layout
