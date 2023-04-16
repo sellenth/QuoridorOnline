@@ -544,7 +544,7 @@ export default class Engine {
 
                 if (this.gameLogic.IsMyTurn() && this.gameLogic.cursorMode == "pawn") {
                     let modelMat = translate(...(this.gameLogic.getActivePlayer()?.pos ?? [0, 0, 0]), identity());
-                    modelMat = translate(...this.gameLogic.cursor.pos, modelMat);
+                    modelMat = translate(...this.gameLogic.pawnCursor.pos, modelMat);
                     modelMat = scale(0.2, 0.2, 0.2, modelMat);
                     modelMat = translate(-1, -1, -1, modelMat);
 
@@ -785,16 +785,26 @@ export default class Engine {
                 })
 
                 if (this.gameLogic.IsMyTurn() && this.gameLogic.cursorMode == "fence") {
-                    let modelMat = translate(...this.gameLogic.cursor.pos, identity());
-                    modelMat = scale(1.01, 1.01, 1.01, modelMat); // prevent z fighting
-                    if (this.gameLogic.cursor.orientation == Orientation.Flat) {
-                        modelMat = rotationYZ(3 * Math.PI / 2, modelMat);
-                    }
-                    if (this.gameLogic.cursor.orientation == Orientation.Vertical) {
-                        modelMat = rotationXZ(Math.PI / 2, modelMat);
-                    }
-                    if (this.gameLogic.cursor.orientation == Orientation.Horizontal) {
-
+                    let modelMat = translate(...this.gameLogic.fenceCursor.pos, identity());
+                    switch (this.gameLogic.fenceCursor.orientation) {
+                        case Orientation.Flat:
+                            modelMat = translate(+2, 0, +2, modelMat);
+                            modelMat = scale(1.05, 1.05, 1.05, modelMat); // prevent z fighting
+                            modelMat = translate(-2, 0, -2, modelMat);
+                            modelMat = rotationYZ(3 * Math.PI / 2, modelMat);
+                            break;
+                        case Orientation.Vertical:
+                            modelMat = translate(0, +2, +2, modelMat);
+                            modelMat = scale(1.05, 1.05, 1.05, modelMat); // prevent z fighting
+                            modelMat = translate(0, -2, -2, modelMat);
+                            modelMat = rotationXZ(Math.PI / 2, modelMat);
+                            break;
+                        case Orientation.Horizontal:
+                            modelMat = translate(+2, +2, 0, modelMat);
+                            modelMat = scale(1.05, 1.05, 1.05, modelMat); // prevent z fighting
+                            modelMat = translate(-2, -2, 0, modelMat);
+                            break;
+                        default:
                     }
 
                     let modelLoc = gl.getUniformLocation(fenceProgram!, "model");
