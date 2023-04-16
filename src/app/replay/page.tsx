@@ -78,7 +78,7 @@ export default function Replay() {
     return (
       <div>
           <main className="h-full flex flex-col items-center justify-center">
-              <canvas id="c" className="mt-10 border border-black h-1/2 w-5/6" tabIndex={0}></canvas>
+              <canvas id="c" className="mt-10 border border-black square" tabIndex={0}></canvas>
               <div className="grid grid-cols-2 text-gray-200 gap-2">
                 <button className="font-display w-full mt-2 shadow-lg hover:bg-theme-200 hover:shadow-theme-200/50 border-2 rounded-b-md border-theme-200 py-1 px-2"
                   onClick={back}>back</button>
