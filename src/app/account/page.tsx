@@ -93,7 +93,7 @@ export default function AccountPage (){
     }
 
     effectAction()
-  }, [])
+  }, [my_id, supabase])
 
   const handleLogout = async () => {
       const { error } = await supabase.auth.signOut()

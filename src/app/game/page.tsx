@@ -63,7 +63,7 @@ export default function GameView() {
             engine.render = false;
         }
 
-    }, [])
+    }, [session?.user.id, supabase])
 
     return (<>
         <div id="fps" className="absolute left-5 bottom-5 text-gray-200">fps:

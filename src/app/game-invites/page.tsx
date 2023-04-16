@@ -88,7 +88,7 @@ export default function FriendsList() {
         }
       }
 
-  }, [])
+  }, [supabase, updateTableFromDB])
 
   return (
     <div className="text-gray-200 mx-auto w-fit ">

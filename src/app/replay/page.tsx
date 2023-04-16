@@ -38,7 +38,7 @@ export default function Replay() {
         if (engine && gameData) {
             engine.IngestGameState(gameData)
         }
-    }, [gameData])
+    }, [engine, gameData])
 
     useEffect(() => {
         if (engine) {
@@ -69,7 +69,7 @@ export default function Replay() {
 
         }
 
-    }, [engine])
+    }, [engine, supabase])
 
     useEffect(() => {
         setEngine(new Engine())

@@ -97,7 +97,7 @@ export default function FriendsList() {
         }
   }
 
-  }, [])
+  }, [subscribeToDbChanges, updateFriendsListFromDb, supabase])
 
     return (
         <div className="text-gray-200 mx-auto w-fit ">
