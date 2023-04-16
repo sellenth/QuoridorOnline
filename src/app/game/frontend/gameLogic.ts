@@ -249,27 +249,47 @@ export class GameLogic {
     }
 
     MoveCursorUp() {
-        this.MoveCursor(this.GetNearestAxis(this.cameraRef!.upVec, 1));
+        if (this._3dMode) {
+            this.MoveCursor(this.GetNearestAxis(this.cameraRef!.upVec, 1));
+        }
     }
 
     MoveCursorDown() {
-        this.MoveCursor(this.GetNearestAxis(this.cameraRef!.upVec, -1));
+        if (this._3dMode) {
+            this.MoveCursor(this.GetNearestAxis(this.cameraRef!.upVec, -1));
+        }
     }
 
     MoveCursorFront() {
-        this.MoveCursor(this.GetNearestAxis(this.cameraRef!.frontVec, -1));
+        if (this._3dMode) {
+            this.MoveCursor(this.GetNearestAxis(this.cameraRef!.frontVec, -1));
+        } else {
+            this.MoveCursor([0, 0, 2])
+        }
     }
 
     MoveCursorBack() {
-        this.MoveCursor(this.GetNearestAxis(this.cameraRef!.frontVec, 1));
+        if (this._3dMode) {
+            this.MoveCursor(this.GetNearestAxis(this.cameraRef!.frontVec, 1));
+        } else {
+            this.MoveCursor([0, 0, -2])
+        }
     }
 
     MoveCursorLeft() {
-        this.MoveCursor(this.GetNearestAxis(this.cameraRef!.rightVec, -1));
+        if (this._3dMode) {
+            this.MoveCursor(this.GetNearestAxis(this.cameraRef!.rightVec, -1));
+        } else {
+            this.MoveCursor([-2, 0, 0])
+        }
     }
 
     MoveCursorRight() {
-        this.MoveCursor(this.GetNearestAxis(this.cameraRef!.rightVec, 1));
+        if (this._3dMode) {
+            this.MoveCursor(this.GetNearestAxis(this.cameraRef!.rightVec, 1));
+        } else {
+            this.MoveCursor([2, 0, 0])
+        }
     }
 
     PreviousPlayerCursor() {
