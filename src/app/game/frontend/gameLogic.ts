@@ -24,11 +24,12 @@ export class GameLogic {
     fencePositions: Cursor[];
     gameSpace: GameSpace;
     extents: Extents;
-    _3dMode: boolean = true
+    _3dMode: boolean = true;
     colorPicker: Vec3[] = [
         [.1, .9, .3],
         [.92, 0, .4]
-    ]
+    ];
+    gameOver: boolean = false;
 
 
     notifyServer: (msg: [number, number, number, number]) => Promise<void>;
@@ -64,13 +65,15 @@ export class GameLogic {
             id: "p1",
             pos: [5,1,5],
             color: this.colorPicker[0],
-            walls: 15
+            fences: 15,
+            goalZ: -100
         })
         this.players.push({
             id: "p2",
             pos: [7,3,13],
             color: this.colorPicker[1],
-            walls: 15
+            fences: 15,
+            goalZ: -100
         })
 
         this.fencePositions.push( { pos: [8, 0, 8], orientation: Orientation.Horizontal } )
@@ -106,6 +109,7 @@ export class GameLogic {
                      goalZ: 1,
                      numFences: data.start_fences,
                      pos: [p_start_col, p_start_layer, p2_start_row] }
+
 
         applyMovesToGameSpace(this.gameSpace, data.moves, p1, p2)
 
@@ -176,7 +180,8 @@ export class GameLogic {
                     id: player.id,
                     pos: player.pos,
                     color: this.colorPicker[idx],
-                    walls: player.numFences,
+                    fences: player.numFences,
+                    goalZ: player.goalZ
                 }
             )
         });
@@ -316,7 +321,7 @@ export class GameLogic {
     switchCursorMode() {
         if (this.cursorMode == "fence") {
             this.cursorMode = "pawn";
-            this.NextPlayerCursor()
+            this.cursor.pos = this.validCursorPositions[0] as Vec3
         }
         else if (this.cursorMode == "pawn") {
             this.cursorMode = "fence";
@@ -335,7 +340,6 @@ export class GameLogic {
     }
 
     commitMove() {
-        console.log(this.myId)
         if (this.myId != this.activePlayerId) {
             console.log("It isn't your turn, it is %d's turn", this.activePlayerId);
             return;
@@ -351,14 +355,12 @@ export class GameLogic {
 
     commitPawnMove() {
         let pos = this.cursor.pos;
-        console.log('pawn', pos)
         this.notifyServer([0, ...pos])
     }
 
 
     commitFenceMove() {
         let pos = this.cursor.pos;
-        console.log('fence', pos)
         let orientation = this.cursor.orientation;
         this.notifyServer([orientation, ...pos])
     }
