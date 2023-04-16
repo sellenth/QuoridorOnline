@@ -13,13 +13,17 @@ export class GameLogic {
     activePlayerId: ID = UNINITIALIZED;
     cameraRef: Camera | null = null
 
-    cursor: Cursor = {
+    pawnCursor: Cursor = {
+        pos: [2, 0, 0],
+        orientation: Orientation.Vertical
+    }
+    fenceCursor: Cursor = {
         pos: [2, 0, 0],
         orientation: Orientation.Vertical
     }
     validCursorPositions: Vec3[] = []
     cursorIdx: number = 0
-    cursorMode = "fence";
+    cursorMode = "pawn";
     players: Player[];
     fencePositions: Cursor[];
     gameSpace: GameSpace;
@@ -132,6 +136,7 @@ export class GameLogic {
         } else {
             this.validCursorPositions = generateValidCursors(this.gameSpace, this.extents, this._3dMode, p1, p2)
         }
+        this.NextPlayerCursor()
     }
 
     drawGameState() {
@@ -194,7 +199,7 @@ export class GameLogic {
     }
 
     IsMyTurn() {
-        if (this.players.length == 0 || this.myId == UNINITIALIZED) {
+        if (this.players.length == 0 || this.myId == UNINITIALIZED || this.gameOver) {
             return false;
         }
         return this.getActivePlayer()?.id == this.myId;
@@ -206,7 +211,7 @@ export class GameLogic {
 
     MoveCursor(v: Vec3) {
         if (this.cursorMode == "fence") {
-            this.cursor.pos = addVec3(this.cursor.pos, v);
+            this.fenceCursor.pos = addVec3(this.fenceCursor.pos, v);
             this.ClampCursorToBoard();
         }
 
@@ -216,8 +221,10 @@ export class GameLogic {
         let xModifier = 0;
         let yModifier = 0;
         let zModifier = 0;
+        const cursor = this.cursorMode == "fence" ? this.fenceCursor : this.pawnCursor;
+
         if (this.cursorMode == "fence") {
-            switch (this.cursor.orientation) {
+            switch (this.fenceCursor.orientation) {
                 case Orientation.Horizontal:
                     xModifier = 4;
                     yModifier = 4;
@@ -233,9 +240,9 @@ export class GameLogic {
 
             }
         }
-        this.cursor.pos[0] = clamp(this.cursor.pos[0], 0, this.extents.right - xModifier);
-        this.cursor.pos[1] = clamp(this.cursor.pos[1], 0, this.extents.top - yModifier);
-        this.cursor.pos[2] = clamp(this.cursor.pos[2], 0, this.extents.far - zModifier);
+        cursor.pos[0] = clamp(cursor.pos[0], 0, this.extents.right - xModifier);
+        cursor.pos[1] = clamp(cursor.pos[1], 0, this.extents.top - yModifier);
+        cursor.pos[2] = clamp(cursor.pos[2], 0, this.extents.far - zModifier);
     }
 
     GetNearestAxis(v: Vec3, sign: -1 | 1): Vec3 {
@@ -303,7 +310,7 @@ export class GameLogic {
             if (this.cursorIdx < 0) {
                 this.cursorIdx = Math.max(0, this.validCursorPositions.length - 1)
             }
-            this.cursor.pos = this.validCursorPositions[this.cursorIdx] as Vec3
+            this.pawnCursor.pos = this.validCursorPositions[this.cursorIdx] as Vec3
         }
     }
 
@@ -313,7 +320,7 @@ export class GameLogic {
             if (this.cursorIdx >= this.validCursorPositions.length) {
                 this.cursorIdx = 0
             }
-            this.cursor.pos = this.validCursorPositions[this.cursorIdx] as Vec3
+            this.pawnCursor.pos = this.validCursorPositions[this.cursorIdx] as Vec3
 
         }
     }
@@ -321,22 +328,22 @@ export class GameLogic {
     switchCursorMode() {
         if (this.cursorMode == "fence") {
             this.cursorMode = "pawn";
-            this.cursor.pos = this.validCursorPositions[0] as Vec3
         }
         else if (this.cursorMode == "pawn") {
             this.cursorMode = "fence";
-            this.cursor.pos = addVec3([-1, -1, -1], this?.getActivePlayer()?.pos ?? [0., 0., 0.]);
             this.ClampCursorToBoard();
         }
     }
 
     nextCursorOrientation() {
-        this.cursor.orientation++;
-        if (this.cursor.orientation > (this._3dMode ? Orientation.Flat : Orientation.Vertical)) {
-            this.cursor.orientation = Orientation.Horizontal;
-        }
+        if (this.cursorMode == "fence") {
+            this.fenceCursor.orientation++;
+            if (this.fenceCursor.orientation > (this._3dMode ? Orientation.Flat : Orientation.Vertical)) {
+                this.fenceCursor.orientation = Orientation.Horizontal;
+            }
 
-        this.ClampCursorToBoard();
+            this.ClampCursorToBoard();
+        }
     }
 
     commitMove() {
@@ -354,14 +361,14 @@ export class GameLogic {
     }
 
     commitPawnMove() {
-        let pos = this.cursor.pos;
+        let pos = this.pawnCursor.pos;
         this.notifyServer([0, ...pos])
     }
 
 
     commitFenceMove() {
-        let pos = this.cursor.pos;
-        let orientation = this.cursor.orientation;
+        let pos = this.fenceCursor.pos;
+        let orientation = this.fenceCursor.orientation;
         this.notifyServer([orientation, ...pos])
     }
 }
