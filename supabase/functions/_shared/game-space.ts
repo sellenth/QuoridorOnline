@@ -86,11 +86,17 @@ export function calculateMoveOffets(move: Move, curr_player: Player): [number, n
 }
 
 export function validHeading(gameSpace: GameSpace, extents: Extents, move: Move, x_offset: number, y_offset: number, z_offset: number) {
-    return (inBounds(extents, [0, move[s.x] + x_offset, move[s.y] + y_offset, move[s.z] + z_offset])
+    const noWall = inBounds(extents, [0, move[s.x] + x_offset, move[s.y] + y_offset, move[s.z] + z_offset])
         && gameSpace[move[s.x] + x_offset][move[s.y] + y_offset][move[s.z] + z_offset] == VACANT
 
-        && inBounds(extents, [0, move[s.x] + 2 * x_offset, move[s.y] + 2 * y_offset, move[s.z] + 2 * z_offset])
-        && gameSpace[move[s.x] + 2 * x_offset][move[s.y] + 2 * y_offset][move[s.z] + 2 * z_offset] != EXPLORED)
+    const oneBeyondX = x_offset + Math.sign(x_offset)
+    const oneBeyondY = y_offset + Math.sign(y_offset)
+    const oneBeyondZ = z_offset + Math.sign(z_offset)
+
+    const notExplored = inBounds(extents, [0, move[s.x] + oneBeyondX, move[s.y] + oneBeyondY, move[s.z] + oneBeyondZ])
+        && gameSpace[move[s.x] + oneBeyondX][move[s.y] + oneBeyondY][move[s.z] + oneBeyondZ] != EXPLORED
+
+    return ( noWall && notExplored)
 }
 
 export function inBounds(extents: Extents, [_, x, y, z]: Move) {
@@ -139,12 +145,12 @@ export function generateValidCursors(gameSpace: GameSpace, extents: Extents, _3d
                                   ]
 
     generateCursorsAboutPoint(gameSpace, extents, _3dMode, curr_player.pos).forEach( (pos) => {
-       if (curr_player.pos[0] + pos[0] != other_player.pos[0] ||
-           curr_player.pos[1] + pos[1] != other_player.pos[1] ||
-           curr_player.pos[2] + pos[2] != other_player.pos[2]) {
-           validCursors.push(pos.slice() as Pos)
-       } else {
+       if (curr_player.pos[0] + pos[0] == other_player.pos[0] &&
+           curr_player.pos[1] + pos[1] == other_player.pos[1] &&
+           curr_player.pos[2] + pos[2] == other_player.pos[2]) {
            faceToFace = true
+       } else {
+           validCursors.push(pos.slice() as Pos)
        }
     } )
 
