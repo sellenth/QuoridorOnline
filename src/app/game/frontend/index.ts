@@ -1,6 +1,6 @@
 // @ts-nocheck
 
-import vss from "./vs";
+import { vss } from "./vs";
 import { fsFence, fsPlayer, fsCamera, fsGrid} from "./fs";
 import { createShader, createProgram, resizeCanvasToDisplaySize, sleep } from "./utils"
 import { identity, translate, projection, addVec3, rotationYZ, rotationXZ, scale, degreesToRadians, subVec3, q_projection } from "./math"
@@ -460,6 +460,15 @@ export default class Engine {
             1.20, 1.90, 1.20,
             1.20, 1.90, 0.80,
 
+            0.50, 0.0, 0.50, // 16
+            0.50, 0.0, 1.50,
+            1.50, 0.0, 1.50,
+            1.50, 0.0, 0.50,
+
+            0.50, 0.20, 0.50, // 20
+            0.50, 0.20, 1.50,
+            1.50, 0.20, 1.50,
+            1.50, 0.20, 0.50,
         ];
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(cubeData), gl.STATIC_DRAW);
 
@@ -497,7 +506,25 @@ export default class Engine {
             8, 12, 15,
 
             12, 13, 14,
-            12, 14, 15
+            12, 14, 15,
+
+            16, 17, 18,
+            16, 18, 19,
+
+            20, 21, 22,
+            20, 22, 23,
+
+            16, 20, 21,
+            16, 17, 21,
+
+            17, 21, 22,
+            17, 18, 22,
+
+            18, 22, 23,
+            18, 19, 23,
+
+            16, 23, 20,
+            16, 19, 23
 
         ]
         gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(elements), gl.STATIC_DRAW);
