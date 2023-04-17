@@ -152,7 +152,8 @@ serve(async (req: any) => {
         })
 
 
-        writeGameSpaceToConsole(gameSpace)
+        // see note on function definition
+        // writeGameSpaceToConsole(gameSpace)
 
         // if all checks are passed, append this move to database record and increment move_num
         if (isValid) {
@@ -382,7 +383,8 @@ export function getAdjacentCells(gameSpace: GameSpace, move: Move) {
     return adjacentCells;
 }
 
-
+// deployed function will not have access to WriteAllSync
+// so don't call this function unless you're developing locally
 export function writeGameSpaceToConsole(gameSpace: GameSpace) {
     for (let z = extents.far; z >= 0; --z) {
         for (let y = 0; y <= extents.top; ++y) {

@@ -82,3 +82,5 @@ how to create replay system
 - the database will be seeded with supabase/seed.sql
 - local db studio available [here](http://localhost:54323/project/default)
 - create types based on local db `npm run generate-types`
+- on every new vercel deployment, update github oauth QO-supabase and supabase.com > authentication > configuration > URL configuration
+- to push edge function `npx supabase functions deploy handle-move`

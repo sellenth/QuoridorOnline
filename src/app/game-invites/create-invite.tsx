@@ -58,7 +58,7 @@ export default function CreateInvite( { username, my_id }: props) {
                     </div>
                     <div className="flex">
                         <h3 className="text-end self-center">Board layers:</h3>
-                        <NumberUpDown max={15} min={3} curr_val={layers} updater={setLayers} increment={1} />
+                        <NumberUpDown max={15} min={2} curr_val={layers} updater={setLayers} increment={1} />
                     </div>
                     <div className="flex">
                         <h3 className="text-end self-center">Starting fences:</h3>
