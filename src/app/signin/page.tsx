@@ -73,6 +73,7 @@ export default function SignIn() {
             </p>
             <div className="inline-flex items-center justify-center w-full">
                 <hr className="w-64 h-px my-8 bg-gray-200 border-0" />
+                                                                                          {/* BG_COLOR_HERE */}
                 <span className="absolute px-3 font-medium text-gray-200 -translate-x-1/2 bg-[#30343b] left-1/2">OR</span>
             </div>
             <div className="inline-flex items-center justify-center w-full gap-x-2">

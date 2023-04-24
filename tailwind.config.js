@@ -29,7 +29,7 @@ module.exports = {
         theme: {
           100: '#8386f5',
           200: '#3d43b4',
-          300: '#202124',
+          300: '#202124', // if you edit, search "BG_COLOR_HERE" to ensure consistency
           400: '#083e12',
           500: '#1afe49',
           red: '#de004e'

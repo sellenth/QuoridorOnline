@@ -78,6 +78,9 @@ export const fsGrid = `#version 300 es
     uniform vec3 color;
     uniform vec2 u_resolution;
     uniform float _3dMode;
+    uniform float u_numRows;
+    uniform float u_numCols;
+    uniform float u_time;
     out vec4 outColor;
 
     in vec4 modelCoord;
@@ -86,8 +89,24 @@ export const fsGrid = `#version 300 es
     void main() {
         vec2 st = gl_FragCoord.xy / u_resolution;
 
-        float a = clamp((10. - distance(camPos.xyz, worldCoord.xyz)) / 5., 0., 1.);
-        outColor = vec4(0., .5, 0., a + (1. - _3dMode ));
+        float pulse = smoothstep(.8, 1., (sin(u_time * .5) + 1.) / 2.);
+
+        float progress = distance(worldCoord.x, (sin(u_time) + 1.) / 2. * u_numCols);
+        float pPrime = (1. - smoothstep(0., 5., progress)) * pulse + (1. - pulse);
+
+        float nearBound = 2.01;
+        float inNearZone = 1. - step(nearBound, worldCoord.z);
+        vec4  nearZone = vec4(.1, inNearZone, .3, inNearZone * .6 * pPrime);
+
+        float farBound = u_numRows - 2.;
+        float inFarZone = step(farBound, worldCoord.z);
+        vec4  farZone = vec4(inFarZone, 0., 0., inFarZone * .6 * pPrime);
+
+        float alpha = smoothstep(0., 15., (10. - distance(camPos.xyz, worldCoord.xyz)));
+        float interior = step(nearBound, worldCoord.z) - step(farBound, worldCoord.z);
+        vec4 interiorColor = vec4(interior, interior, interior, alpha * interior + (1. - _3dMode ));
+
+        outColor = interiorColor + nearZone + farZone ;
     }
 `;
 

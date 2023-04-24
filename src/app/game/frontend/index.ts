@@ -133,7 +133,7 @@ export default class Engine {
         this.gameLogic.cameraRef = this.camera
         this.demoMode = false;
 
-        let gl_ctx = this.canvas.getContext("webgl2", { premultipliedAlpha: false });
+        let gl_ctx = this.canvas.getContext("webgl2", { alpha: false });
 
         if (!gl_ctx) {
             alert("You need a webGL compatible browser")
@@ -281,7 +281,8 @@ export default class Engine {
             resizeCanvasToDisplaySize(canvas, 1);
 
             gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
-            gl.clearColor(0., 0., 0., 0.);
+            //BG_COLOR_HERE
+            gl.clearColor(0.12, 0.13, 0.14, 0.);
             gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
             // Update camera position
@@ -405,6 +406,15 @@ export default class Engine {
 
                 let _3dModeLoc = gl.getUniformLocation(gridProgram!, "_3dMode");
                 gl.uniform1f(_3dModeLoc, this.gameLogic._3dMode);
+
+                let timeLoc = gl.getUniformLocation(gridProgram!, "u_time");
+                gl.uniform1f(timeLoc, this.frameTiming.elapsed);
+
+                let rowLoc = gl.getUniformLocation(gridProgram!, "u_numRows");
+                gl.uniform1f(rowLoc, this.gameLogic.extents.far);
+
+                let colLoc = gl.getUniformLocation(gridProgram!, "u_numCols");
+                gl.uniform1f(colLoc, this.gameLogic.extents.right);
 
                 let modelMat = identity();
                 let modelLoc = gl.getUniformLocation(gridProgram!, "model");

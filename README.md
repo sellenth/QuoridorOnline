@@ -53,9 +53,26 @@ Thursday 4/6
 - [x] create new pawn model
 - [x] make the player colors more distinct
 
-Next time 4/??
-- [ ] host on internet
-- [ ] indicate direction that player is headed towards
+Sunday 4/16
+- [x] host on internet
+
+Sunday 4/23
+- [x] update grid to indicate end zone for each player
+- [x] update pawn model again
+- [x] better anti-aliasing
+
+next time ??
+- [ ] implement quick game feature to pair with another online user
+- [ ] color username on game page for understandability
+- [ ] pulse the game border box when it's your turn
+- [ ] tell user if username/email already used, to check email to confirm
+- [ ] *alert user if signup procces goes wrong (email not confirmed, row not created)
+- [ ] *warn user when they are searching for friend/user that doesn't exist
+
+- [ ] timeout condition for game end
+- [ ] (stretch) add mobile controls on 2d game board for
+- [ ] (stretch) allow spectating top 3's current game
+- [ ] add challenge button on leaderboard
 
 - [ ] display row/col/layer info on games page
 - [ ] is there a way to enforce uniqueness on two columns as a combination? (game invite table)
@@ -65,8 +82,6 @@ Next time 4/??
 - [ ] does move num need to exist on games table?
 - [ ] change game table to use gid instead of id
 
-- [ ] warn user when they are searching for friend/user that doesn't exist
-- [ ] alert user if signup procces goes wrong (email not confirmed, row not created)
 - [ ] update DB policies for table more secure access
 
 ## talking points
