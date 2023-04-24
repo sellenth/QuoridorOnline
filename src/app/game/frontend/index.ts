@@ -1,9 +1,9 @@
 // @ts-nocheck
 
-import { vss } from "./vs";
+import { vss, vsPlayer } from "./vs";
 import { fsFence, fsPlayer, fsCamera, fsGrid} from "./fs";
 import { createShader, createProgram, resizeCanvasToDisplaySize, sleep } from "./utils"
-import { identity, translate, projection, addVec3, rotationYZ, rotationXZ, scale, degreesToRadians, subVec3, q_projection } from "./math"
+import { identity, translate, projection, addVec3, rotationYZ, rotationXZ, scale, degreesToRadians, subVec3, q_projection, rotationXY } from "./math"
 import { Camera } from "./camera";
 import { GameLogic } from "./gameLogic";
 import {
@@ -418,7 +418,7 @@ export default class Engine {
     createPlayerProgram() {
         const gl = this.gl!;
 
-        let vs = createShader(gl, gl.VERTEX_SHADER, vss);
+        let vs = createShader(gl, gl.VERTEX_SHADER, vsPlayer);
         let fs = createShader(gl, gl.FRAGMENT_SHADER, fsPlayer);
 
         if (!vs || !fs) {
@@ -465,10 +465,10 @@ export default class Engine {
             1.50, 0.0, 1.50,
             1.50, 0.0, 0.50,
 
-            0.50, 0.20, 0.50, // 20
-            0.50, 0.20, 1.50,
-            1.50, 0.20, 1.50,
-            1.50, 0.20, 0.50,
+            0.80, 1.20, 0.80,
+            0.80, 1.20, 1.20,
+            1.20, 1.20, 1.20,
+            1.20, 1.20, 0.80,
         ];
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(cubeData), gl.STATIC_DRAW);
 
@@ -555,10 +555,15 @@ export default class Engine {
                 let camLoc = gl.getUniformLocation(playerProgram!, "camera");
                 gl.uniformMatrix4fv(camLoc, false, viewMat);
 
-                this.gameLogic.players.forEach((player) => {
+                let timeLoc = gl.getUniformLocation(playerProgram!, "u_time");
+
+
+                this.gameLogic.players.forEach((player, idx) => {
                     let modelMat = translate(...player.pos, identity());
                     modelMat = scale(0.8, 0.8, 0.8, modelMat);
                     modelMat = translate(-1, -1, -1, modelMat);
+
+                    gl.uniform1f(timeLoc, this.frameTiming.elapsed + idx);
 
                     let colorLoc = gl.getUniformLocation(playerProgram!, "color");
                     gl.uniform3fv(colorLoc, player.color);
