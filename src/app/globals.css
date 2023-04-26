@@ -14,3 +14,10 @@ body {
   width: 65vmin;
   height: 65vmin;
 }
+
+
+.btn-transition {
+    transition-property: color;
+    transition-timing-function: cubic-bezier(.4,0,.2,1);
+    transition-duration: 400ms;
+}
