@@ -188,35 +188,37 @@ export function generateValidCursors(gameSpace: GameSpace, extents: Extents, _3d
 
 function generateCursorsAboutPoint(gameSpace: GameSpace, extents: Extents, _3dMode: boolean, pos: Pos) {
     let cursors: Pos[] = []
-    // x motion
+    // left
     let proposed_move: Pos = [-1, 0, 0]
     if (validHeading(gameSpace, extents, [MoveType.Pawn, ...pos], ...proposed_move)) {
         cursors.push([-2, 0, 0])
     }
-    proposed_move = [+1, 0, 0]
-    if (validHeading(gameSpace, extents, [MoveType.Pawn, ...pos], ...proposed_move)) {
-        cursors.push([+2, 0, 0])
-    }
-
-    // z motion
-    proposed_move = [0, 0, -1]
-    if (validHeading(gameSpace, extents, [MoveType.Pawn, ...pos], ...proposed_move)) {
-        cursors.push([0, 0, -2])
-    }
+    // up
     proposed_move = [0, 0, +1]
     if (validHeading(gameSpace, extents, [MoveType.Pawn, ...pos], ...proposed_move)) {
         cursors.push([0, 0, +2])
     }
+    // right
+    proposed_move = [+1, 0, 0]
+    if (validHeading(gameSpace, extents, [MoveType.Pawn, ...pos], ...proposed_move)) {
+        cursors.push([+2, 0, 0])
+    }
+    // down
+    proposed_move = [0, 0, -1]
+    if (validHeading(gameSpace, extents, [MoveType.Pawn, ...pos], ...proposed_move)) {
+        cursors.push([0, 0, -2])
+    }
+
 
     // y motion (should be disabled in 2d mode)
     if (_3dMode) {
-        proposed_move = [0, -1, 0]
-        if (validHeading(gameSpace, extents, [MoveType.Pawn, ...pos], ...proposed_move)) {
-            cursors.push([0, -2, 0])
-        }
         proposed_move = [0, +1, 0]
         if (validHeading(gameSpace, extents, [MoveType.Pawn, ...pos], ...proposed_move)) {
             cursors.push([0, +2, 0])
+        }
+        proposed_move = [0, -1, 0]
+        if (validHeading(gameSpace, extents, [MoveType.Pawn, ...pos], ...proposed_move)) {
+            cursors.push([0, -2, 0])
         }
     }
 

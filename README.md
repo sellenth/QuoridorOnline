@@ -62,15 +62,16 @@ Sunday 4/23
 - [x] better anti-aliasing
 
 next time ??
-- [ ] implement quick game feature to pair with another online user
+- [ ] (stretch) add mobile controls on 2d game board for
 - [ ] color username on game page for understandability
 - [ ] pulse the game border box when it's your turn
+- [ ] mobile styling
+- [ ] implement quick game feature to pair with another online user
 - [ ] tell user if username/email already used, to check email to confirm
 - [ ] *alert user if signup procces goes wrong (email not confirmed, row not created)
 - [ ] *warn user when they are searching for friend/user that doesn't exist
 
 - [ ] timeout condition for game end
-- [ ] (stretch) add mobile controls on 2d game board for
 - [ ] (stretch) allow spectating top 3's current game
 - [ ] add challenge button on leaderboard
 
