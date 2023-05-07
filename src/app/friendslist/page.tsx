@@ -102,7 +102,7 @@ export default function FriendsList() {
   }, [supabase, my_id])
 
     return (
-        <div className="text-gray-200 mx-auto w-fit ">
+        <div className="text-gray-200 mx-auto px-10 w-fit text-xs md:text-lg">
             <div className="w-fit grid grid-rows-3 align-center mx-auto my-10 bg-blue-200 bg-opacity-10 backdrop-blur p-4 border-2 border-gray-200 rounded-md">
                 <InviteFriend />
             </div>
@@ -141,7 +141,7 @@ export default function FriendsList() {
                         <tbody>
                             {received_invite &&
                                 received_invite.map((user) => (
-                                    <tr key={user.requester.id}  className="h-9">
+                                    <tr key={user.requester.id}  className="h-6 md:h-9">
                                         <td>
                                             {user.requester.username}
                                         </td>
@@ -165,7 +165,7 @@ export default function FriendsList() {
                         <tbody>
                             {accepted &&
                                 accepted.map((user) => (
-                                    <tr key={user.friend.id} className="h-9">
+                                    <tr key={user.friend.id} className="h-6 md:h-9">
                                         <td>
                                             {user.friend.username}
                                         </td>

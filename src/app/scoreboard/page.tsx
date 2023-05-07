@@ -35,7 +35,7 @@ export default async function Scoreboard() {
                             w-fit text-gray-200 pl-4">
                 <table className="border-separate border-spacing-y-4">
                     <thead>
-                        <tr className="font-display text-4xl">
+                        <tr className="font-display lg:text-4xl">
                             <th colSpan={2} className="px-8">USERNAME</th>
                             <th className="font-display px-4">ELO</th>
                         </tr>

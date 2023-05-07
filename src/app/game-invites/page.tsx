@@ -90,7 +90,7 @@ export default function FriendsList() {
     }, [supabase, my_id])
 
     return (
-        <div className="text-gray-200 mx-auto w-fit ">
+        <div className="text-gray-200 mx-auto px-10 w-fit text-xs md:text-lg">
             <div className="w-fit align-center mx-auto my-10 bg-blue-200 bg-opacity-10 backdrop-blur p-4 border-2 border-gray-200 rounded-md">
                 <CreateInvite my_id={my_id} username={username} />
             </div>
