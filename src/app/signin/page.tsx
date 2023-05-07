@@ -2,8 +2,9 @@
 
 import { useSupabase } from "@/components/supabase-provider"
 import Link from "next/link"
-import { FormEvent, useRef } from "react"
+import { FormEvent, useEffect, useRef, useState } from "react"
 import { useRouter } from 'next/navigation';
+import { AnimatedCandy, SlashCandy } from "@/components/decordatives";
 
 export default function SignIn() {
     const { supabase, session } = useSupabase()
@@ -46,10 +47,13 @@ export default function SignIn() {
         }
     }
 
+
     const handleGoogleLogin = async () => {
         const { data, error } = await supabase.auth.signInWithOAuth({
             provider: 'google',
         })
+
+
 
         if (error) {
             console.log({ error })
@@ -57,25 +61,36 @@ export default function SignIn() {
     }
 
     return (<div className="text-gray-200">
-        <div className="max-w-sm align-center mx-auto my-10 bg-blue-200 bg-opacity-10 backdrop-blur p-4 border-2 border-gray-200 rounded-md">
-            <h1 className="font-display">LOG IN</h1>
+        <div className="w-5/6 sm:max-w-md align-center mx-auto my-10 bg-blue-200 bg-opacity-10 backdrop-blur p-4 border-2 border-gray-200 rounded-md">
+            <AnimatedCandy />
+            <SlashCandy>
+                <h1 className="font-display w-max">LOG IN</h1>
+            </SlashCandy>
+            <SlashCandy>
+                <></>
+            </SlashCandy>
+
             <form onSubmit={handleEmailLogin}>
-                <input autoFocus required className="w-full block bg-transparent border-b-2 outline-none" type="text" placeholder="email" ref={emailRef} />
-                <input required className="w-full block bg-transparent border-b-2 outline-none" type="password" placeholder="password" ref={passwordRef} />
+                <SlashCandy>
+                    <input autoFocus required className="w-auto inline block bg-transparent border-b-2 outline-none" type="text" placeholder="email" ref={emailRef} />
+                </SlashCandy>
+                <SlashCandy>
+                    <input required className="w-auto block bg-transparent border-b-2 outline-none" type="password" placeholder="password" ref={passwordRef} />
+                </SlashCandy>
+                <SlashCandy>
+                    <></>
+                </SlashCandy>
                 <button type="submit" className="font-display w-full my-2 shadow-lg hover:bg-theme-200 hover:shadow-theme-200/50 border-2 rounded-b-md border-theme-200 py-1 px-2"
                 >Submit</button>
             </form>
-            <p>Don&apos;t have an account? <span>
+
+            <p className="text-center">Don&apos;t have an account? <span>
                 <Link className="underline" href="signup">
                     Sign Up
                 </Link>
             </span>
             </p>
-            <div className="inline-flex items-center justify-center w-full">
-                <hr className="w-64 h-px my-8 bg-gray-200 border-0" />
-                                                                                          {/* BG_COLOR_HERE */}
-                <span className="absolute px-3 font-medium text-gray-200 -translate-x-1/2 bg-[#30343b] left-1/2">OR</span>
-            </div>
+            <p className="my-4 text-center">--- OR ---</p>                                                 {/* BG_COLOR_HERE */}
             <div className="inline-flex items-center justify-center w-full gap-x-2">
                 <button onClick={handleGitHubLogin} className="font-display mt-2 shadow-lg hover:bg-theme-200 hover:shadow-theme-200/50 border-2 rounded-md border-theme-200 py-1 px-2"
                 >

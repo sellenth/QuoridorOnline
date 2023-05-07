@@ -3,6 +3,7 @@ import { useSupabase } from "@/components/supabase-provider"
 import { FormEvent, useRef } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+import { AnimatedCandy, SlashCandy } from "@/components/decordatives"
 
 export default function SignUn() {
     const { supabase, session } = useSupabase()
@@ -37,14 +38,29 @@ export default function SignUn() {
 
 
     return (<div className="text-gray-200">
-        <div className="max-w-sm align-center mx-auto my-10 bg-[#192331] p-4 border-2 border-gray-200 rounded-md">
-            <h1 className="font-display">SIGN UP</h1>
+        <div className="w-5/6 sm:max-w-md align-center mx-auto my-10 bg-blue-200 bg-opacity-10 backdrop-blur p-4 border-2 border-gray-200 rounded-md">
+            <AnimatedCandy />
+            <SlashCandy>
+                <h1 className="font-display w-max">SIGN UP</h1>
+            </SlashCandy>
+            <SlashCandy>
+                <h1 className="font-display w-max"></h1>
+            </SlashCandy>
             <form onSubmit={handleEmailSignUp}>
-            <input autoFocus required className="w-full block bg-transparent border-b-2 outline-none" type="text" maxLength={18} placeholder="username" ref={usernameRef} />
-            <input required className="w-full block bg-transparent border-b-2 outline-none" type="text" placeholder="email" ref={emailRef} />
-            <input required className="w-full block bg-transparent border-b-2 outline-none" type="password" placeholder="password" ref={passwordRef} />
-            <button type="submit" className="font-display w-full my-2 shadow-lg hover:bg-theme-200 hover:shadow-theme-200/50 border-2 rounded-b-md border-theme-200 py-1 px-2"
-            >Submit</button>
+                <SlashCandy>
+                    <input autoFocus required className="w-fit block bg-transparent border-b-2 outline-none" type="text" maxLength={18} placeholder="username" ref={usernameRef} />
+                </SlashCandy>
+                <SlashCandy>
+                    <input required className="w-fit block bg-transparent border-b-2 outline-none" type="text" placeholder="email" ref={emailRef} />
+                </SlashCandy>
+                <SlashCandy>
+                    <input required className="w-fit block bg-transparent border-b-2 outline-none" type="password" placeholder="password" ref={passwordRef} />
+                </SlashCandy>
+                <SlashCandy>
+                    <></>
+                </SlashCandy>
+                <button type="submit" className="font-display w-full my-2 shadow-lg hover:bg-theme-200 hover:shadow-theme-200/50 border-2 rounded-b-md border-theme-200 py-1 px-2"
+                >Submit</button>
             </form>
             <p>Already have an account? <span>
                 <Link className="underline" href="signin">
