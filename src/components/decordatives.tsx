@@ -18,7 +18,7 @@ export const SlashCandy = ({ prefix = '///', children }: Props) => {
         <div className="font-display flex">
             <span className="flex-fit text-gray-500">{prefix}</span>
             <span className="flex-initial">{children}</span>
-            <span className="flex-fit text-gray-500 overflow-x-hidden">{'///////////////////////////////////////////////////////////'}</span>
+            <span className="flex-fit text-gray-500 overflow-x-hidden" tabIndex={-1}>{'///////////////////////////////////////////////////////////'}</span>
         </div>
     </>
 }
@@ -49,7 +49,7 @@ export const AnimatedSpan = ({ className, length, magic }: { className?: string,
 }
 
 export const AnimatedCandy = () => {
-    return <div className="font-display flex overflow-x-hidden">
+    return <div className="font-display flex overflow-x-hidden" tabIndex={-1}>
         <AnimatedSpan className="text-gray-500" length={40} magic={112} />
         <AnimatedSpan length={40} magic={43} />
         <span className="flex-fit text-gray-500">{'///////////////////////////////////////////////////////////'}</span>
