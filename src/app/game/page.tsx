@@ -28,12 +28,12 @@ export default function GameView() {
 
         ( async () => {
             await engine.networkTick(gid);
-            engine.startRenderLoop();
             if (gamePad?.current && !engine.gameLogic._3dMode) {
                 gamePad.current.style.display = "block"
             }
             }
         )();
+        engine.startRenderLoop();
 
 
         const channel = supabase
@@ -99,7 +99,7 @@ export default function GameView() {
                 </div>
             </div>
 
-            <canvas id="c" className="border border-gray-200 outline-green square" tabIndex={0}></canvas>
+            <canvas id="c" className="border border-gray-200 outline-none square" tabIndex={0}></canvas>
 
 
         </main>

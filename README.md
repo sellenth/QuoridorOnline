@@ -63,10 +63,10 @@ Sunday 4/23
 
 Sunday 5/7
 - [x] (stretch) add mobile controls on 2d game board
+- [x] color username on game page for understandability
+- [x] pulse the game border box when it's your turn
 
 next time ??
-- [ ] color username on game page for understandability
-- [ ] pulse the game border box when it's your turn
 - [ ] mobile styling
 - [ ] implement quick game feature to pair with another online user
 - [ ] tell user if username/email already used, to check email to confirm

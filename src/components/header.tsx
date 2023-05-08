@@ -28,7 +28,7 @@ export default function Header() {
       <HeaderButton link="/scoreboard" text="SCOREBOARD" />
       <HeaderButton link="/friendslist" text="FRIENDS" authed={isAuthed}/>
       <HeaderButton link="/game-invites" text="GAMES" authed={isAuthed}/>
-      <HeaderButton link="/account" text={username ? "ACCOUNT" : "ACCOUNT"} color="text-theme-500" authed={isAuthed} />
+      <HeaderButton link="/account" text={username ? "LOGIN" : "ACCOUNT"} color="text-theme-500" authed={isAuthed} />
     </div>
   )
 }

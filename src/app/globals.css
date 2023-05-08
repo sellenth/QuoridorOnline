@@ -21,3 +21,33 @@ body {
     transition-timing-function: cubic-bezier(.4,0,.2,1);
     transition-duration: 400ms;
 }
+
+/*
+.grab-focus {
+  border-color: theme('colors.theme.200');
+  border-width: 2px;
+
+  transition-property: border-op;
+  transition-timing-function: cubic-bezier(.4,0,.2,1);
+  transition-duration: 400ms;
+}*/
+
+.grab-focus {
+  outline: none;
+  -webkit-tap-highlight-color: rgba(255, 255, 255, 0); /* mobile webkit */
+
+	animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+	0% {
+    box-shadow: 0 0 0 0 theme('colors.theme.100');
+  }
+
+  70% {
+    box-shadow: 0 0 0 5px theme('colors.theme.200');
+  }
+	100% {
+    box-shadow: 0 0 0 8px theme('colors.theme.300');
+  }
+}

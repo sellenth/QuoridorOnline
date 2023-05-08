@@ -27,10 +27,10 @@ class GameStatusHandler {
     myFencesElement: Node;
     theirFencesElement: Node;
     turnIndicatorElement: Node;
+    gameCanvas: Node;
     //GameOverModal: Node;
 
-    constructor() {
-    }
+    constructor() {}
 
     Update( my_id,
             active_player_id,
@@ -38,18 +38,19 @@ class GameStatusHandler {
             p2_id, p2_username,
             p1_num_fences, p2_num_fences) {
 
-        this.UpdateFences(my_id, p1_id, p1_username, p1_num_fences)
-        this.UpdateFences(my_id, p2_id, p2_username, p2_num_fences)
+        this.UpdateFences(my_id, p1_id, p1_username, p1_num_fences, true)
+        this.UpdateFences(my_id, p2_id, p2_username, p2_num_fences, false)
 
         this.UpdateTurnIndicator(my_id, active_player_id);
 
     }
 
-    UpdateFences(my_id, id, username, fences) {
+    UpdateFences(my_id, id, username, fences, green) {
         const indicatorElement = my_id == id ? this.myFencesElement : this.theirFencesElement;
 
         if (this.gameInfoElement) {
             indicatorElement.textContent = `${username} - ${fences}`;
+            indicatorElement.classList.add( green ? "text-theme-500" : "text-theme-red")
         }
     }
 
@@ -58,6 +59,14 @@ class GameStatusHandler {
         if (this.gameInfoElement) {
             this.turnIndicatorElement.textContent = `It's ${who} turn.`
         }
+
+        if (this.gameCanvas) {
+            if (myID == activePlayerId) {
+                this.gameCanvas.classList.add("grab-focus");
+            } else {
+                this.gameCanvas.classList.remove("grab-focus");
+            }
+        }
     }
 
     SetGameInfoElement(el: HTMLElement) {
@@ -65,6 +74,9 @@ class GameStatusHandler {
         this.myFencesElement = document.querySelector("#myFences")!;
         this.theirFencesElement = document.querySelector("#theirFences")!;
         this.turnIndicatorElement = document.querySelector("#turnIndicator")!;
+        this.gameCanvas = document.querySelector("#c")!;
+
+        //this.gameCanvas.style = "display: none";
     }
 
     SetGameWon(username) {
