@@ -200,6 +200,10 @@ export class Camera {
                 gameLogic.NextPlayerCursor();
                 gameLogic.nextCursorOrientation();
             }
+            if (e.key == "R"){
+                    gameLogic.PreviousPlayerCursor();
+                    gameLogic.prevCursorOrientation();
+            }
         })
 
         canvas.addEventListener('keyup', (e: KeyboardEvent) => {

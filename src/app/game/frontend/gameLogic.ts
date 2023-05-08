@@ -335,6 +335,17 @@ export class GameLogic {
         }
     }
 
+    prevCursorOrientation() {
+        if (this.cursorMode == "fence") {
+            this.fenceCursor.orientation--
+            if (this.fenceCursor.orientation < 1){
+                this.fenceCursor.orientation = this._3dMode ? Orientation.Flat : Orientation.Vertical;
+            }
+
+            this.ClampCursorToBoard();
+        }
+    }
+
     nextCursorOrientation() {
         if (this.cursorMode == "fence") {
             this.fenceCursor.orientation++;
