@@ -61,8 +61,10 @@ Sunday 4/23
 - [x] update pawn model again
 - [x] better anti-aliasing
 
+Sunday 5/7
+- [x] (stretch) add mobile controls on 2d game board
+
 next time ??
-- [ ] (stretch) add mobile controls on 2d game board for
 - [ ] color username on game page for understandability
 - [ ] pulse the game border box when it's your turn
 - [ ] mobile styling

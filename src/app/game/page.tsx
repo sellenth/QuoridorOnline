@@ -4,19 +4,20 @@ import Engine from './frontend/index'
 import { useEffect, useRef, useState } from 'react'
 import { useSupabase } from '../../components/supabase-provider'
 import { getCookie } from 'cookies-next'
+import { GamePad } from './gamepad'
+
 
 export default function GameView() {
-    const [ left, setLeft ] = useState( () => () => {} )
-    const [ right, setRight ] = useState( () => () => {} )
-    const [ commit, setCommit ] = useState( () => () => {} )
-
     const { supabase, session } = useSupabase()
     const fpsCounterRef = useRef(null)
     const gameInfoRef = useRef(null)
+    const gamePad = useRef<HTMLDivElement>(null);
+    const [engine, setEngine] = useState<Engine | undefined>();
 
     useEffect(() => {
         const gid = getCookie('current_gid') as string
         const engine = new Engine()
+        setEngine(engine)
 
         engine.registerDbClient(supabase, gid)
 
@@ -24,11 +25,16 @@ export default function GameView() {
         gameInfoRef.current && engine.setGameInfoElement(gameInfoRef.current)
 
         engine.gameLogic.assignId(session?.user.id ?? "NA");
-        engine.startRenderLoop()
-        engine.networkTick(gid)
-        setLeft( () => () => {engine.gameLogic.PreviousPlayerCursor()} )
-        setRight( () => () => {engine.gameLogic.NextPlayerCursor()} )
-        setCommit( () => () => {engine.gameLogic.commitMove()} )
+
+        ( async () => {
+            await engine.networkTick(gid);
+            engine.startRenderLoop();
+            if (gamePad?.current && !engine.gameLogic._3dMode) {
+                gamePad.current.style.display = "block"
+            }
+            }
+        )();
+
 
         const channel = supabase
             .channel('value-db-changes')
@@ -39,7 +45,9 @@ export default function GameView() {
                     schema: 'public',
                     table: 'games',
                 },
-                () => { engine.networkTick(gid) }
+                () => {
+                    engine.networkTick(gid);
+                }
             )
             .subscribe((status: any) => {
                 console.log('game realtime channel:', status)
@@ -86,23 +94,8 @@ export default function GameView() {
                         <p id="theirFences">Them - ???</p>
                     </div>
                 </div>
-
-                <div id="gamePad" className="justify-self-end self-end flex flex-cols-3 gap-1 mt-4 ml-auto">
-                    <button onClick={left} className="border border-gray-200 text-gray-200 rounded-md h-10 w-28">
-                        <svg className="m-auto h-[90%]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M21 16.811c0 .864-.933 1.405-1.683.977l-7.108-4.062a1.125 1.125 0 010-1.953l7.108-4.062A1.125 1.125 0 0121 8.688v8.123zM11.25 16.811c0 .864-.933 1.405-1.683.977l-7.108-4.062a1.125 1.125 0 010-1.953L9.567 7.71a1.125 1.125 0 011.683.977v8.123z" />
-                        </svg>
-                    </button>
-                    <button onClick={commit} className="border border-gray-200 text-gray-200 rounded-md flex h-10 w-28">
-                        <p className="w-fit m-auto font-bold">
-                            COMMIT
-                        </p>
-                    </button>
-                    <button onClick={right} className="border border-gray-200 text-gray-200 rounded-md h-10 w-28">
-                        <svg className="m-auto h-[90%]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M3 8.688c0-.864.933-1.405 1.683-.977l7.108 4.062a1.125 1.125 0 010 1.953l-7.108 4.062A1.125 1.125 0 013 16.81V8.688zM12.75 8.688c0-.864.933-1.405 1.683-.977l7.108 4.062a1.125 1.125 0 010 1.953l-7.108 4.062a1.125 1.125 0 01-1.683-.977V8.688z" />
-                        </svg>
-                    </button>
+                <div id="gamePad" className="justify-self-end self-end ml-auto hidden" ref={gamePad}>
+                    <GamePad engine={engine}/>
                 </div>
             </div>
 

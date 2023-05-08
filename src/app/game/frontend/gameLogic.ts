@@ -23,7 +23,7 @@ export class GameLogic {
     }
     validCursorPositions: Vec3[] = []
     cursorIdx: number = 0
-    cursorMode = "pawn";
+    cursorMode: "pawn" | "fence" = "pawn";
     players: Player[];
     fencePositions: Cursor[];
     gameSpace: GameSpace;
