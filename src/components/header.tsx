@@ -1,7 +1,7 @@
 'use client'
 
-import Login from './login'
 import Link from 'next/link'
+import { useEffect } from 'react'
 import { useSupabase } from './supabase-provider'
 
 
@@ -21,6 +21,15 @@ export default function Header() {
 
   let username = session?.user.user_metadata.preferred_username ?? null
   let isAuthed = !! (session?.user)
+
+  useEffect( () => {
+      if (navigator.userAgent.indexOf('iPhone') > -1) {
+          document
+              .querySelector("[name=viewport]")!
+              .setAttribute("content", "width=device-width, initial-scale=1, maximum-scale=1");
+      }
+  } )
+
 
   return (
     <div className=" z-10 w-full flex items-center justify-center justify-items-center grid-cols-5">
