@@ -66,12 +66,14 @@ Sunday 5/7
 - [x] color username on game page for understandability
 - [x] pulse the game border box when it's your turn
 
-next time ??
-- [ ] mobile styling
-- [ ] implement quick game feature to pair with another online user
+Sunday 5/13
+- [x] mobile styling
 - [ ] tell user if username/email already used, to check email to confirm
 - [ ] *alert user if signup procces goes wrong (email not confirmed, row not created)
 - [ ] *warn user when they are searching for friend/user that doesn't exist
+- [ ] *have instructions popup
+
+- [ ] implement quick game feature to pair with another online user
 
 - [ ] timeout condition for game end
 - [ ] (stretch) allow spectating top 3's current game

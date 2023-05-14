@@ -90,7 +90,7 @@ export default function FriendsList() {
     }, [supabase, my_id])
 
     return (
-        <div className="text-gray-200 mx-auto px-10 w-fit text-xs md:text-lg">
+        <div className="text-gray-200 mx-auto px-2 pb-2 md:px-10 w-full sm:w-fit">
             <div className="w-fit align-center mx-auto my-10 bg-blue-200 bg-opacity-10 backdrop-blur p-4 border-2 border-gray-200 rounded-md">
                 <CreateInvite my_id={my_id} username={username} />
             </div>
@@ -117,8 +117,8 @@ export default function FriendsList() {
 
             <DecorativeCircles />
 
-            <div className="grid grid-cols-2 gap-2">
-                <div className="bg-blue-200 bg-opacity-10 backdrop-blur border-2 border-gray-200 p-2 rounded-l-md">
+            <div className="flex flex-col sm:flex-none sm:grid sm:grid-cols-2 gap-2">
+                <div className="bg-blue-200 bg-opacity-10 backdrop-blur border-2 border-gray-200 p-2 rounded-md sm:rounded-r-none">
                     <table className="w-full border-separate border-spacing-y-2">
                         <thead>
                             <tr>
@@ -129,11 +129,11 @@ export default function FriendsList() {
                         <tbody>
                             {received &&
                                 received.map((game) => (
-                                    <tr key={game.initiator.id} className="h-9">
-                                        <td>
+                                    <tr key={game.initiator.id} className="flex h-9">
+                                        <td className="flex-1 truncate">
                                             {game.initiator.username}
                                         </td>
-                                        <td className="text-end">
+                                        <td className="flex-none text-end">
                                             <AcceptRejectInvite initiator_id={game.initiator.id}
                                                 opponent_id={game.opponent.id}
                                                 rows={game.rows}
@@ -148,7 +148,7 @@ export default function FriendsList() {
                     </table>
                 </div>
 
-                <div className="bg-blue-200 bg-opacity-10 backdrop-blur border-2 border-gray-200 p-2 rounded-r-md">
+                <div className="bg-blue-200 bg-opacity-10 backdrop-blur border-2 border-gray-200 p-2 rounded-md sm:rounded-l-none">
                     <table className="w-full border-separate border-spacing-y-2">
                         <thead>
                             <tr>
@@ -159,16 +159,15 @@ export default function FriendsList() {
                         <tbody>
                             {inProgress &&
                                 inProgress.map((game: any) => {
-                                    console.log(game)
                                     let their_id = game.initiator.id == my_id ? game.opponent.id : game.initiator.id
                                     let their_name = game.initiator.id == my_id ? game.opponent.username : game.initiator.username
 
                                     return (
-                                        <tr key={their_id} className="h-9">
-                                            <td>
+                                        <tr key={their_id} className="flex h-9">
+                                            <td className="flex-1 truncate">
                                                 {their_name}
                                             </td>
-                                            <td className="text-end">
+                                            <td className="flex-none text-end">
                                                 <JoinGame gid={game.gid} />
                                             </td>
                                         </tr>

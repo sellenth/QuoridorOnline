@@ -16,7 +16,7 @@ export default function CreateInvite( { username, my_id }: props) {
     const [layers, setLayers] = useState(3)
     const [start_fences, setStartFences] = useState(15)
 
-    if (session && session.user.id) {
+    if (process.env.NEXT_PUBLIC_TESTING || (session && session.user.id)) {
         const sendInvite = () => {
             async function createInviteUsingUsername( username: string ) {
                 const { data, error } = await supabase
@@ -46,7 +46,7 @@ export default function CreateInvite( { username, my_id }: props) {
         return (
             <>
                 <h3 className="text-center self-center">Invite to game by username</h3>
-                <input className="bg-transparent border-b-2 outline-none" type="text" ref={friendRef} placeholder="username" defaultValue={username} />
+                <input className="bg-transparent rounded-none border-b-2 outline-none w-full" type="text" ref={friendRef} placeholder="username" defaultValue={username} />
                 <div className="grid grid-rows-3 mt-2 gap-y-2 justify-items-end">
                     <div className="flex">
                         <h3 className="text-end self-center">Board rows:</h3>

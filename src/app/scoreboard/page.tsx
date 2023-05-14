@@ -28,7 +28,6 @@ export default async function Scoreboard() {
     }
 
     return (
-        <>
         <div className="mx-auto w-fit">
             <AddRightBorder>
             <div className="mt-10 bg-blue-200 bg-opacity-10 backdrop-blur
@@ -45,7 +44,7 @@ export default async function Scoreboard() {
                             data.map((user, idx) => (
                                 <tr key={user.username}>
                                     <td className="text-center">{getPrefix(idx)}</td>
-                                    <td className={`font-bold border-gray-500 border-b-2 ${getColor(idx)}`}>{user.username}</td>
+                                    <td className={`font-bold border-gray-500 w-[20ch] max-w-[20ch] truncate border-b-2 ${getColor(idx)}`}>{user.username}</td>
                                     <td className="text-center">{user.elo}</td>
                                 </tr>
                             ))}
@@ -54,6 +53,5 @@ export default async function Scoreboard() {
             </div>
             </AddRightBorder>
         </div>
-        </>
     )
 }

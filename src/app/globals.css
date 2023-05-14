@@ -7,7 +7,7 @@ body {
   height: 100dvh;
   width: 100%;
   background-color: theme('colors.theme.300');
-  overflow: hidden;
+  overflow-x: hidden;
   font-size: 16px;
 }
 

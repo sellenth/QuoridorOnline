@@ -61,12 +61,12 @@ export default function SignIn() {
     }
 
     return (<div className="text-gray-200">
-        <div className="w-5/6 sm:max-w-md align-center mx-auto my-10 bg-blue-200 bg-opacity-10 backdrop-blur p-4 border-2 border-gray-200 rounded-md">
+        <div className="max-w-fit align-center mx-auto my-10 bg-blue-200 bg-opacity-10 backdrop-blur p-4 border-2 border-gray-200 rounded-md">
             <AnimatedCandy />
-            <h1 className="font-display w-max">LOG IN</h1>
+            <h1 className="font-display w-max font-bold">LOG IN</h1>
             <form onSubmit={handleEmailLogin}>
-                <input autoFocus required className="w-auto inline block bg-transparent border-b-2 outline-none" type="text" placeholder="email" ref={emailRef} />
-                <input required className="w-auto block bg-transparent border-b-2 outline-none" type="password" placeholder="password" ref={passwordRef} />
+                <input autoFocus required className="w-full inline block bg-transparent border-b-2 outline-none" type="text" placeholder="email" ref={emailRef} />
+                <input required className="w-full block bg-transparent border-b-2 outline-none" type="password" placeholder="password" ref={passwordRef} />
                 <button type="submit" className="font-display w-full my-2 shadow-lg hover:bg-theme-200 hover:shadow-theme-200/50 border-2 rounded-b-md border-theme-200 py-1 px-2"
                 >Submit</button>
             </form>

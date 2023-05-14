@@ -83,23 +83,23 @@ export default function GameView() {
         <div id="fps" className="absolute left-5 bottom-5 text-gray-200">fps:
             <span ref={fpsCounterRef} ></span>
         </div>
-        <main className="h-fit w-fit flex flex-col items-center justify-center mx-auto my-10 ">
+        <main className="h-full flex flex-col items-center justify-center mx-4">
 
-            <div ref={gameInfoRef} id="gameInfo" className="w-full text-gray-200 self-start mb-5 flex">
-                <div>
-                    <p id="turnIndicator">Player ???&apos;s turn</p>
+            <div ref={gameInfoRef} id="gameInfo" className="w-full text-gray-200 self-start my-2 flex-none flex">
+                <div className="grid grid-cols-2 gap-16 mx-auto items-end">
+                    <p id="turnIndicator" className="truncate text-end">Player ???&apos;s turn</p>
                     <div id="fenceInfo">
                         <p>Fences Remaining</p>
                         <p id="myFences">Me - ???</p>
                         <p id="theirFences">Them - ???</p>
                     </div>
                 </div>
-                <div id="gamePad" className="justify-self-end self-end ml-auto hidden" ref={gamePad}>
-                    <GamePad engine={engine}/>
-                </div>
             </div>
 
-            <canvas id="c" className="border border-gray-200 outline-none square" tabIndex={0}></canvas>
+            <canvas id="c" className="border border-gray-200 outline-none max-w-full aspect-square flex-1" tabIndex={0}></canvas>
+            <div id="gamePad" className="mx-auto flex-none my-2" ref={gamePad}>
+                <GamePad engine={engine}/>
+            </div>
 
 
         </main>

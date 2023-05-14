@@ -6,7 +6,7 @@ export default function InviteFriend() {
     const { supabase, session } = useSupabase()
     const friendRef = useRef<HTMLInputElement>(null)
 
-    if (session && session.user.id) {
+    if (process.env.NEXT_PUBLIC_TESTING || (session && session.user.id)) {
         const sendInvite = () => {
             async function getIdFromUsername( username: string ) {
                 const { data, error } = await supabase
@@ -35,7 +35,7 @@ export default function InviteFriend() {
         return (
             <>
                 <h3 className="text-center self-center">Invite a friend by username</h3>
-                <input className="bg-transparent border-b-2 outline-none" type="text" ref={friendRef} placeholder="username" />
+                <input className="bg-transparent border-b-2 rounded-none outline-none" type="text" ref={friendRef} placeholder="username" />
                 <button className="font-display mt-2 shadow-lg hover:bg-theme-200 hover:shadow-theme-200/50 border-2 rounded-b-md border-theme-200 py-1 px-2"
                         onClick={sendInvite}>invite</button>
             </>

@@ -102,8 +102,8 @@ export default function FriendsList() {
   }, [supabase, my_id])
 
     return (
-        <div className="text-gray-200 mx-auto px-10 w-fit text-xs md:text-lg">
-            <div className="w-fit grid grid-rows-3 align-center mx-auto my-10 bg-blue-200 bg-opacity-10 backdrop-blur p-4 border-2 border-gray-200 rounded-md">
+        <div className="text-gray-200 mx-auto px-2 pb-2 sm:px-10 w-full sm:w-fit">
+            <div className="w-fit grid grid-rows-3 align-center mx-auto my-3 md:my-10 bg-blue-200 bg-opacity-10 backdrop-blur p-4 border-2 border-gray-200 rounded-md">
                 <InviteFriend />
             </div>
 
@@ -129,8 +129,8 @@ export default function FriendsList() {
 
             <DecorativeCircles />
 
-            <div className="grid grid-cols-2 gap-2">
-                <div className="bg-blue-200 bg-opacity-10 backdrop-blur border-2 border-gray-200 p-2 rounded-l-md">
+            <div className="flex flex-col sm:flex-none sm:grid sm:grid-cols-2 gap-2">
+                <div className="bg-blue-200 bg-opacity-10 backdrop-blur border-2 border-gray-200 p-2 rounded-md sm:rounded-r-none">
                     <table className="w-full border-separate border-spacing-y-2">
                         <thead>
                             <tr>
@@ -141,11 +141,11 @@ export default function FriendsList() {
                         <tbody>
                             {received_invite &&
                                 received_invite.map((user) => (
-                                    <tr key={user.requester.id}  className="h-6 md:h-9">
-                                        <td>
+                                    <tr key={user.requester.id}  className="flex h-9">
+                                        <td className="flex-1 truncate">
                                             {user.requester.username}
                                         </td>
-                                        <td className="text-end">
+                                        <td className="flex-none">
                                             <AcceptRejectInvite my_id={my_id} requester_id={user.requester.id} />
                                         </td>
                                     </tr>
@@ -154,7 +154,7 @@ export default function FriendsList() {
                     </table>
                 </div>
 
-                <div className="bg-blue-200 bg-opacity-10 backdrop-blur border-2 border-gray-200 p-2 rounded-r-md">
+                <div className="bg-blue-200 bg-opacity-10 backdrop-blur border-2 border-gray-200 p-2 rounded-md sm:rounded-l-none">
                     <table className="w-full border-separate border-spacing-y-2">
                         <thead>
                             <tr>
@@ -165,11 +165,11 @@ export default function FriendsList() {
                         <tbody>
                             {accepted &&
                                 accepted.map((user) => (
-                                    <tr key={user.friend.id} className="h-6 md:h-9">
-                                        <td>
+                                    <tr key={user.friend.id} className="flex h-9">
+                                        <td className="flex-1 truncate">
                                             {user.friend.username}
                                         </td>
-                                        <td className="text-end">
+                                        <td className="flex-none">
                                             <InviteToGame friend_username={user.friend.username} />
                                         </td>
                                     </tr>
