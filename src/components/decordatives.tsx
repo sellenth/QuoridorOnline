@@ -37,7 +37,7 @@ export const AnimatedSpan = ({ className, length, magic }: { className?: string,
                     forward = true;
                 }
 
-                return forward ? frame + 1 : frame - 1
+                return forward ? frame + 1 : frame - 1;
             }
             )
         }, magic)
@@ -49,9 +49,9 @@ export const AnimatedSpan = ({ className, length, magic }: { className?: string,
 }
 
 export const AnimatedCandy = () => {
-    return <div className="font-display flex overflow-x-hidden" tabIndex={-1}>
-        <AnimatedSpan className="text-gray-500" length={40} magic={112} />
-        <AnimatedSpan length={40} magic={43} />
+    return <div className="mx-auto my-2 font-display flex overflow-x-hidden max-w-[20ch]" tabIndex={-1}>
+        <AnimatedSpan className="text-gray-500" length={27} magic={112} />
+        <span className="flex-fit text-gray-200">{'/////'}</span>
         <span className="flex-fit text-gray-500">{'///////////////////////////////////////////////////////////'}</span>
     </div>
 }
