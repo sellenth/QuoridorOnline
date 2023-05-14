@@ -1,6 +1,8 @@
 'use client'
 import { useSupabase } from '../../components/supabase-provider'
 import { useRef } from 'react'
+import { toast } from 'react-tiny-toast'
+
 
 export default function InviteFriend() {
     const { supabase, session } = useSupabase()
@@ -15,6 +17,10 @@ export default function InviteFriend() {
                     .eq('username', username)
 
                 console.log(data, error)
+                if (!data) return;
+                if (data.length == 0 || error) {
+                    toast.show("That user could not be found", { timeout: 3000, position: "bottom-center", className: "text-gray-200 bg-theme-red border border-gray-200" } )
+                }
             if (data && data.length > 0) {
                 console.log('here')
                 const { error } = await supabase

@@ -68,9 +68,9 @@ Sunday 5/7
 
 Sunday 5/13
 - [x] mobile styling
-- [ ] tell user if username/email already used, to check email to confirm
-- [ ] *alert user if signup procces goes wrong (email not confirmed, row not created)
-- [ ] *warn user when they are searching for friend/user that doesn't exist
+- [x] tell user if username/email already used, to check email to confirm
+- [x] *alert user if signup procces goes wrong (email not confirmed, row not created)
+- [x] *warn user when they are searching for friend/user that doesn't exist
 - [ ] *have instructions popup
 
 - [ ] implement quick game feature to pair with another online user

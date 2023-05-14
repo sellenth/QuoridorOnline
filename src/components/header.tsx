@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useEffect } from 'react'
 import { useSupabase } from './supabase-provider'
+import { ToastContainer } from 'react-tiny-toast';
 
 
 function HeaderButton({ link, text, color, authed = true, className = '' }: { link: string, text: string, color?: string, authed?: boolean, className?: string }) {
@@ -23,13 +24,11 @@ export default function Header() {
   let isAuthed = !! (session?.user)
 
   useEffect( () => {
-    /*
       if (navigator.userAgent.indexOf('iPhone') > -1) {
           document
               .querySelector("[name=viewport]")!
               .setAttribute("content", "width=device-width, initial-scale=1, maximum-scale=1");
       }
-    */
   } )
 
 
@@ -40,6 +39,7 @@ export default function Header() {
       <HeaderButton link="/friendslist" text="FRIENDS" authed={isAuthed}/>
       <HeaderButton link="/game-invites" text="GAMES" authed={isAuthed}/>
       <HeaderButton link="/account" text={username ? "ACCOUNT" : "LOGIN"} color="text-theme-500" authed={isAuthed} />
+      < ToastContainer />
     </div>
   )
 }

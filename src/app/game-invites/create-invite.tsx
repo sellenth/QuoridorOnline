@@ -1,7 +1,7 @@
 'use client'
 import { useSupabase } from '../../components/supabase-provider'
 import { useRef, useState } from 'react'
-
+import { toast } from 'react-tiny-toast';
 
 type props = {
     username: string
@@ -24,19 +24,23 @@ export default function CreateInvite( { username, my_id }: props) {
                     .select('id')
                     .eq('username', username)
 
-                console.log(data, error)
+                if (!data) return;
 
-            // we have their id, create a game invite
-            if (data && data.length > 0) {
-                const { error } = await supabase
-                    .from('game-invites')
-                    .insert({ initiator_id: my_id, opponent_id: data[0].id, rows, cols, layers, start_fences})
+                if (data.length == 0 || error) {
+                    toast.show("That user could not be found", { timeout: 3000, position: "bottom-center", className: "text-gray-200 bg-theme-red border border-gray-200" })
+                } else {
+                    // we have their id, create a game invite
+                    if (data && data.length > 0) {
+                        const { error } = await supabase
+                            .from('game-invites')
+                            .insert({ initiator_id: my_id, opponent_id: data[0].id, rows, cols, layers, start_fences })
 
-                if (error) {
-                    console.log(error)
+                        if (error) {
+                            console.log(error)
+                        }
+
+                    }
                 }
-
-            }
             }
 
             createInviteUsingUsername(friendRef.current!.value)

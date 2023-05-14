@@ -3,7 +3,8 @@ import { useSupabase } from "@/components/supabase-provider"
 import { FormEvent, useRef } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { AnimatedCandy, SlashCandy } from "@/components/decordatives"
+import { AnimatedCandy } from "@/components/decordatives"
+import { toast } from 'react-tiny-toast';
 
 export default function SignUn() {
     const { supabase, session } = useSupabase()
@@ -27,9 +28,16 @@ export default function SignUn() {
             })
 
             if (error) {
+                let msg = error.message;
+                if (error.status == 500) {
+                    msg = "That username is already in use"
+                } else if (error.status == 400){
+                    msg = "That email is already in use"
+                }
+                toast.show(msg, { timeout: 3000, position: "bottom-center", className: "text-gray-200 bg-theme-red border border-gray-200" } )
                 console.log({ error })
             } else {
-                router.push('/')
+                toast.show("Please check your email to complete sign up", { timeout: 3000, position: "bottom-center", className: "text-gray-200 bg-theme-200 border border-gray-200" } )
             }
 
         }

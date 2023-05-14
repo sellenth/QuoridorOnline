@@ -4,7 +4,8 @@ import { useSupabase } from "@/components/supabase-provider"
 import Link from "next/link"
 import { FormEvent, useEffect, useRef, useState } from "react"
 import { useRouter } from 'next/navigation';
-import { AnimatedCandy, SlashCandy } from "@/components/decordatives";
+import { AnimatedCandy } from "@/components/decordatives";
+import { toast } from 'react-tiny-toast';
 
 export default function SignIn() {
     const { supabase, session } = useSupabase()
@@ -19,7 +20,8 @@ export default function SignIn() {
         })
 
         if (error) {
-        console.log({ error })
+            toast.show(error.message, { timeout: 3000, position: "bottom-center", className: "text-gray-200 bg-theme-red border border-gray-200" } )
+            console.log({ error })
         }
     }
 
@@ -33,6 +35,7 @@ export default function SignIn() {
             })
 
             if (error) {
+                toast.show(error.message, { timeout: 3000, position: "bottom-center", className: "text-gray-200 bg-theme-red border border-gray-200" } )
                 console.log({ error })
             } else {
                 const queryString = window.location.search
