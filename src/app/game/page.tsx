@@ -1,6 +1,6 @@
 'use client'
 
-import Engine from './frontend/index'
+import Engine from './core_engine/index'
 import { useEffect, useRef, useState } from 'react'
 import { useSupabase } from '../../components/supabase-provider'
 import { getCookie } from 'cookies-next'
@@ -80,7 +80,7 @@ export default function GameView() {
     }, [session?.user.id, supabase])
 
     return (<>
-        <div id="fps" className="absolute left-5 bottom-5 text-gray-200">fps:
+        <div id="fps" className="absolute left-5 bottom-5 text-gray-200 hidden">fps:
             <span ref={fpsCounterRef} ></span>
         </div>
         <main className="h-full flex flex-col items-center justify-center mx-4">

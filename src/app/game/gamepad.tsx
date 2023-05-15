@@ -1,6 +1,6 @@
 import Modal from "@/components/modal";
 import { useState } from "react";
-import Engine from "./frontend";
+import Engine from "./core_engine";
 
 type Props = {
     engine: Engine | undefined,

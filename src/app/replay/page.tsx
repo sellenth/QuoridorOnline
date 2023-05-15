@@ -1,7 +1,7 @@
 'use client'
 
 import {useEffect, useState} from 'react'
-import Engine from '../game/frontend/index'
+import Engine from '../game/core_engine/index'
 import AddRightBorder from '../../components/right-border'
 import { getCookie } from 'cookies-next'
 import { useSupabase } from '@/components/supabase-provider'
