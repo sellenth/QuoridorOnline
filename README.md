@@ -86,6 +86,21 @@ Saturday 5/14
 - [ ] lava lamp the scoreboard
 - [ ] match replay styling to standard game
 
+BUGS:
+ just joined 3d game i was invited to, controls show up in 3d
+ 
+FEEDBACK:
+5/14
+
+Friend invite, auto complete. possibly for game invite too
+Commit button, scared to push
+Pulse background when it's your turn
+Draw, forfeit buttons
+Usernames are case sensitive
+Username shows up before authenticated
+prevent poor taste usernames
+Track elo loss per game in account page
+
          o
         --   X is a player and they'll be suggested turn o to start, can fix? maybe o was valid previously in pawn mode
          x
