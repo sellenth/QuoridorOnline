@@ -66,13 +66,31 @@ Sunday 5/7
 - [x] color username on game page for understandability
 - [x] pulse the game border box when it's your turn
 
-Sunday 5/13
+Saturday 5/13
 - [x] mobile styling
 - [x] tell user if username/email already used, to check email to confirm
 - [x] *alert user if signup procces goes wrong (email not confirmed, row not created)
 - [x] *warn user when they are searching for friend/user that doesn't exist
-- [ ] *have instructions popup
 
+Saturday 5/14
+- [x] *have instructions popup
+- [x] remove fps counter
+- [ ] improve visibility on fence cursor
+- [ ] tooltip for invalid move, game over
+- [ ] reorder account page to show most recent games on top
+- [ ] past games style problem
+- [ ] fix "it's the other player's turn" overflow on mobile
+- [ ] looks like games always start with 15 walls?
+- [ ] scoreboard doesn't show latest values
+- [ ] automatically end the game if on a path that is winning?
+- [ ] lava lamp the scoreboard
+- [ ] match replay styling to standard game
+
+         o
+        --   X is a player and they'll be suggested turn o to start, can fix? maybe o was valid previously in pawn mode
+         x
+
+- [ ] really need some sort of game timer or else noone will finish a lost game
 - [ ] implement quick game feature to pair with another online user
 
 - [ ] timeout condition for game end
