@@ -13,7 +13,7 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        'display': ['var(--font-orbitron)']
+        'displayy': ['var(--font-orbitron)']
       },
       colors: {
         transparent: 'transparent',

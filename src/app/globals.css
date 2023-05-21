@@ -2,6 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer-base {
+  .fancy {
+    font-display: swap;
+    display: ['var(--font-orbitron)']
+  }
+}
+
 html,
 body {
   height: 100dvh;
