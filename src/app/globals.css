@@ -3,9 +3,9 @@
 @tailwind utilities;
 
 @layer-base {
-  .fancy {
+  @font-face {
+    font-family: display;
     font-display: swap;
-    display: ['var(--font-orbitron)']
   }
 }
 
