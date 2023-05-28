@@ -32,6 +32,8 @@ serve(async (req: any) => {
         return new Response('ok', { headers: corsHeaders })
     }
 
+    let ingest_time = new Date();
+
     try {
         // Create a Supabase client with the Auth context of the logged in user.
         const supabaseClient = createClient(
@@ -83,6 +85,65 @@ serve(async (req: any) => {
         console.log(data.moves)
         console.log(data.moves.length)
 
+//////////////
+        const last_update = await supabaseClient
+            .from('games')
+            .select('last_update, p1_time, p2_time')
+            .eq('id', game_id)
+            .single()
+
+        if (last_update.error) throw last_update.error;
+
+        let p1_time = new Date(last_update.data.p1_time);
+        let p2_time = new Date(last_update.data.p2_time);
+        if (last_update.data.last_update == null) {
+            const update_res = await supabaseClient
+                .from('games')
+                .update({ last_update: ingest_time.toISOString() })
+                .eq('id', game_id)
+        } else {
+            let last_t = new Date(last_update.data.last_update);
+            let diff = (ingest_time.getTime() - last_t.getTime());
+
+            if (p2_move) {
+                p2_time = new Date( p2_time.getTime() - diff );
+            } else {
+                p1_time = new Date( p1_time.getTime() - diff );
+            }
+
+            let p1_expired = p1_time.getFullYear() < 1337;
+            let p2_expired = p2_time.getFullYear() < 1337;
+
+            // End game early if one player's timer expires
+            if (p2_move && p2_expired) {
+                console.log('game over, p1 wins')
+                let winner = data.p1_id
+                await updateElo(supabaseClient, winner, data.p2_id)
+                const update_res = await supabaseClient
+                    .from('games')
+                    .update({ p2_time: p2_time.toISOString(), winner: winner })
+                    .eq('id', game_id)
+                return new Response(JSON.stringify({ res: `p1 won!` }), {
+                    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+                    status: 200,
+                })
+            }
+            else if(!p2_move && p1_expired) {
+                let winner = data.p2_id
+                await updateElo(supabaseClient, winner, data.p1_id)
+                const update_res = await supabaseClient
+                    .from('games')
+                    .update({ p1_time: p1_time.toISOString(), winner: winner })
+                    .eq('id', game_id)
+                return new Response(JSON.stringify({ res: `p2 won!` }), {
+                    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+                    status: 200,
+                })
+            }
+        }
+//////////////
+
+
         // reject a move from anyone but current player
         if (
             (p2_move && data.p2_id != user.id) ||
@@ -133,7 +194,7 @@ serve(async (req: any) => {
 
                 if (curr_player.pos[2] == curr_player.goalZ) {
                     winner = curr_player.id
-                    await updateElo(supabaseClient, curr_player, other_player)
+                    await updateElo(supabaseClient, curr_player.id, other_player.id)
                     await deleteGameInvite(supabaseClient, game_id)
                 }
             }
@@ -157,7 +218,7 @@ serve(async (req: any) => {
 
         // if all checks are passed, append this move to database record and increment move_num
         if (isValid) {
-            await writeMoveToDB(supabaseClient, game_id, data.moves, verified_move, winner)
+            await writeMoveToDB(supabaseClient, game_id, data.moves, verified_move, winner, p1_time, p2_time, ingest_time)
         }
 
         return new Response(JSON.stringify({ isValid }), {
@@ -182,17 +243,17 @@ async function deleteGameInvite(supabaseClient: any, game_id: string) {
     console.log(error)
 }
 
-async function updateElo(supabaseClient: any, winner: Player, loser: Player) {
+async function updateElo(supabaseClient: any, winner_id: string, loser_id: string) {
     const {data: {elo: winner_elo}, e1 } = await supabaseClient
         .from('users')
         .select('elo')
-        .eq('id', winner.id)
+        .eq('id', winner_id)
         .single()
 
     const {data: {elo: loser_elo}, e2 } = await supabaseClient
         .from('users')
         .select('elo')
-        .eq('id', loser.id)
+        .eq('id', loser_id)
         .single()
 
     console.log(e1)
@@ -207,12 +268,12 @@ async function updateElo(supabaseClient: any, winner: Player, loser: Player) {
     const { d1, e3 } = await supabaseClient
         .from('users')
         .update({elo: winner_elo + elo_amount})
-        .eq('id', winner.id)
+        .eq('id', winner_id)
 
     const { d2, e4 } = await supabaseClient
         .from('users')
         .update({elo: loser_elo - elo_amount})
-        .eq('id', loser.id)
+        .eq('id', loser_id)
 
     console.log(e3)
     console.log(e4)
@@ -220,12 +281,12 @@ async function updateElo(supabaseClient: any, winner: Player, loser: Player) {
   console.log('winner new elo =', winner_elo + elo_amount)
 }
 
-async function writeMoveToDB(client: any, gid: string, moves: Move[], proposed_move: Move, winner: string | null) {
+async function writeMoveToDB(client: any, gid: string, moves: Move[], proposed_move: Move, winner: string | null, p1_time: Date, p2_time: Date, last_update: Date) {
     moves.push(proposed_move)
 
     const { data, error } = await client
         .from('games')
-        .update({ move_num: moves.length, moves: moves, winner: winner })
+        .update({ move_num: moves.length, moves: moves, winner: winner, p1_time: p1_time.toISOString(), p2_time: p2_time.toISOString(), last_update: last_update.toISOString() })
         .eq('id', gid)
 
     if (error) {
