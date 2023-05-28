@@ -90,8 +90,8 @@ export default function GameView() {
                     <p id="turnIndicator" className="truncate text-end">Player ???&apos;s turn</p>
                     <div id="fenceInfo">
                         <p>Fences Remaining</p>
-                        <p id="myFences">Me - ???</p>
-                        <p id="theirFences">Them - ???</p>
+                        <p><span id="myFences">Me - ???</span> <span id="myTime">05:00</span></p>
+                        <p><span id="theirFences">Them - ???</span> <span id="theirTime">05:00</span></p>
                     </div>
                 </div>
             </div>

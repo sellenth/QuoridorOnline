@@ -26,8 +26,11 @@ class GameStatusHandler {
     gameInfoElement: HTMLElement;
     myFencesElement: Node;
     theirFencesElement: Node;
+    myTime: Node;
+    theirTime: Node;
     turnIndicatorElement: Node;
     gameCanvas: Node;
+    intervalID: number = 0;
     //GameOverModal: Node;
 
     constructor() {}
@@ -36,13 +39,41 @@ class GameStatusHandler {
             active_player_id,
             p1_id, p1_username,
             p2_id, p2_username,
-            p1_num_fences, p2_num_fences) {
+            p1_num_fences, p2_num_fences,
+            p1_time, p2_time, last_update) {
 
         this.UpdateFences(my_id, p1_id, p1_username, p1_num_fences, true)
         this.UpdateFences(my_id, p2_id, p2_username, p2_num_fences, false)
 
+        this.UpdateTimer(my_id, p1_id, p1_time, true);
+        this.UpdateTimer(my_id, p2_id, p2_time, false);
+        if (last_update != null) {
+            this.UpdateTimerOnInterval(my_id, active_player_id, p1_id, p1_time, p2_time, last_update);
+        }
+
         this.UpdateTurnIndicator(my_id, active_player_id);
 
+    }
+
+    UpdateTimer(my_id, id, time, green) {
+        //indicatorElement.classList.add( green ? "text-theme-500" : "text-theme-red")
+        const indicatorElement = my_id == id ? this.myTime : this.theirTime;
+        let d = new Date(time);
+
+        indicatorElement.textContent = String(d.getMinutes()).padStart(2, '0') + ':' + String(d.getSeconds()).padStart(2, '0');
+    }
+
+    UpdateTimerOnInterval(my_id, active_player_id, p1_id, p1_time, p2_time, last_update) {
+        clearInterval(this.intervalID);
+        const indicatorElement = my_id == active_player_id ? this.myTime : this.theirTime;
+        let time = p1_id == active_player_id ? p1_time : p2_time;
+
+        this.intervalID = setInterval( () => {
+            let d = new Date( new Date(time).getTime() - ( new Date().getTime() - new Date(last_update).getTime()) );
+
+            console.log(d)
+            indicatorElement.textContent = String(d.getMinutes()).padStart(2, '0') + ':' + String(d.getSeconds()).padStart(2, '0');
+        }, 1000 );
     }
 
     UpdateFences(my_id, id, username, fences, green) {
@@ -73,6 +104,8 @@ class GameStatusHandler {
         this.gameInfoElement = el
         this.myFencesElement = document.querySelector("#myFences")!;
         this.theirFencesElement = document.querySelector("#theirFences")!;
+        this.myTime = document.querySelector("#myTime")!;
+        this.theirTime = document.querySelector("#theirTime")!;
         this.turnIndicatorElement = document.querySelector("#turnIndicator")!;
         this.gameCanvas = document.querySelector("#c")!;
 
@@ -82,6 +115,7 @@ class GameStatusHandler {
     SetGameWon(username) {
         if (this.gameInfoElement) {
             this.turnIndicatorElement.textContent = `${username} won!`
+            clearInterval(this.intervalID);
         }
     }
 }
@@ -256,13 +290,14 @@ export default class Engine {
                                       this.gameLogic.activePlayerId,
                                       data.p1.id, data.p1.username,
                                       data.p2.id, data.p2.username,
-                                      p1.fences, p2.fences
+                                      p1.fences, p2.fences,
+                                      data.p1_time, data.p2_time, data.last_update
                                      )
 
-        if (p1.goalZ == p1.pos[2]) {
+        if (data.winner == p1.id) {
            this.gameStatusHandler.SetGameWon(data.p1.username)
             this.gameLogic.gameOver = true
-        } else if (p2.goalZ == p2.pos[2]) {
+        } else if (data.winner == p2.id) {
            this.gameStatusHandler.SetGameWon(data.p2.username)
             this.gameLogic.gameOver = true
         }

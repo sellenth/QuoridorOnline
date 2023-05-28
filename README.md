@@ -75,16 +75,26 @@ Saturday 5/13
 Saturday 5/14
 - [x] *have instructions popup
 - [x] remove fps counter
+
+Saturday 5/27
+- [x] really need some sort of game timer or else noone will finish a lost game
+
+Sunday 5/28
+- [ ] fix formatting so time underflow isn't displayed
+- [ ] send msg to server when client detects timer = 0
+- [ ] looks like games always start with 15 walls?
+
 - [ ] improve visibility on fence cursor
 - [ ] tooltip for invalid move, game over
 - [ ] reorder account page to show most recent games on top
 - [ ] past games style problem
 - [ ] fix "it's the other player's turn" overflow on mobile
-- [ ] looks like games always start with 15 walls?
 - [ ] scoreboard doesn't show latest values
 - [ ] automatically end the game if on a path that is winning?
 - [ ] lava lamp the scoreboard
 - [ ] match replay styling to standard game
+- [ ] set up phone# verification
+- [ ] game should end after 100 moves or so
 
 BUGS:
  just joined 3d game i was invited to, controls show up in 3d
@@ -100,12 +110,12 @@ Usernames are case sensitive
 Username shows up before authenticated
 prevent poor taste usernames
 Track elo loss per game in account page
+sound effect for clicking buttons
 
          o
         --   X is a player and they'll be suggested turn o to start, can fix? maybe o was valid previously in pawn mode
          x
 
-- [ ] really need some sort of game timer or else noone will finish a lost game
 - [ ] implement quick game feature to pair with another online user
 
 - [ ] timeout condition for game end
