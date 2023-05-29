@@ -19,7 +19,7 @@ export default function GameView() {
         const engine = new Engine()
         setEngine(engine)
 
-        engine.registerDbClient(supabase, gid)
+        engine.registerDbClient(supabase, gid);
 
         fpsCounterRef.current && engine.setFpsCounterElement(fpsCounterRef.current)
         gameInfoRef.current && engine.setGameInfoElement(gameInfoRef.current)
@@ -53,7 +53,7 @@ export default function GameView() {
                 console.log('game realtime channel:', status)
             })
 
-        const camChannel = supabase.channel('room1')
+        const camChannel = supabase.channel(gid);
         // Subscribe registers your client with the server
         camChannel
             .on('broadcast', { event: 'camera-pos' }, (p: any) => { engine.updateNetworkedCameras(p.payload) })
@@ -73,7 +73,8 @@ export default function GameView() {
                 }
             })
         return () => {
-            supabase.removeChannel(channel)
+            supabase.removeChannel(channel);
+            supabase.removeChannel(camChannel);
             engine.render = false;
         }
 
@@ -90,8 +91,8 @@ export default function GameView() {
                     <p id="turnIndicator" className="truncate text-end">Player ???&apos;s turn</p>
                     <div id="fenceInfo">
                         <p>Fences Remaining</p>
-                        <p><span id="myFences">Me - ???</span> <span id="myTime">05:00</span></p>
-                        <p><span id="theirFences">Them - ???</span> <span id="theirTime">05:00</span></p>
+                        <p><span id="myFences">Me - ???</span> <span id="myTime">__:__</span></p>
+                        <p><span id="theirFences">Them - ???</span> <span id="theirTime">__:__</span></p>
                     </div>
                 </div>
             </div>

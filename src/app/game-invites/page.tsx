@@ -82,11 +82,8 @@ export default function FriendsList() {
         }
 
         return () => {
-            if (channel) {
-                supabase.removeChannel(channel)
-            }
+            if (channel)          supabase.removeChannel(channel)
         }
-
     }, [supabase, my_id])
 
     return (

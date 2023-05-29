@@ -41,7 +41,7 @@ export const GamePad = ({engine}: Props) => {
             : <div />}
         <button onClick={() => commit()} className="border border-gray-200 text-gray-200 rounded-md flex h-10 w-28">
             <p className="w-fit m-auto font-bold">
-                COMMIT
+                {placingFences ? 'PLACE' : 'MOVE'}
             </p>
         </button>
         <button onClick={() => placingFences ? left() : prev()} className="border border-gray-200 text-gray-200 rounded-md h-10 w-28">

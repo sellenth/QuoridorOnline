@@ -80,17 +80,16 @@ Saturday 5/27
 - [x] really need some sort of game timer or else noone will finish a lost game
 
 Sunday 5/28
-- [ ] fix formatting so time underflow isn't displayed
-- [ ] send msg to server when client detects timer = 0
-- [ ] looks like games always start with 15 walls?
+- [x] fix formatting so time underflow isn't displayed
+- [x] send msg to server when client detects timer = 0
+- [x] tooltip for invalid move, game over
+- [x] implement quick game feature to pair with another online user
 
 - [ ] improve visibility on fence cursor
-- [ ] tooltip for invalid move, game over
 - [ ] reorder account page to show most recent games on top
 - [ ] past games style problem
 - [ ] fix "it's the other player's turn" overflow on mobile
 - [ ] scoreboard doesn't show latest values
-- [ ] automatically end the game if on a path that is winning?
 - [ ] lava lamp the scoreboard
 - [ ] match replay styling to standard game
 - [ ] set up phone# verification
@@ -116,9 +115,7 @@ sound effect for clicking buttons
         --   X is a player and they'll be suggested turn o to start, can fix? maybe o was valid previously in pawn mode
          x
 
-- [ ] implement quick game feature to pair with another online user
 
-- [ ] timeout condition for game end
 - [ ] (stretch) allow spectating top 3's current game
 - [ ] add challenge button on leaderboard
 

@@ -12,9 +12,9 @@ create table "public"."games" (
     "move_num"    integer default 0,
     "p1_id"       uuid references users (id),
     "p2_id"       uuid references users (id),
-    "p1_time"     TIMESTAMP default TIMESTAMP '1337-01-01 00:05:00',
-    "p2_time"     TIMESTAMP default TIMESTAMP '1337-01-01 00:05:00',
-    "last_update" TIMESTAMP default null,
+    "p1_time"     TIMESTAMPTZ default TIMESTAMPTZ '1337-01-01 00:05:00',
+    "p2_time"     TIMESTAMPTZ default TIMESTAMPTZ '1337-01-01 00:05:00',
+    "last_update" TIMESTAMPTZ default null,
     "moves"       smallint[] not null default '{}',
 
     rows          int   not null default 9,

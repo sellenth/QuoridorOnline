@@ -1,20 +1,38 @@
 'use client'
 import { useSupabase } from '../../components/supabase-provider'
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { toast } from 'react-tiny-toast';
+import { v4 as uuidv4 } from 'uuid';
+import { setCookie } from 'cookies-next'
+import { useRouter } from 'next/navigation';
+import { RealtimeChannel } from '@supabase/supabase-js';
 
 type props = {
     username: string
     my_id: string
 }
+type PresenceState = {presence_ref: string, online_at: number}
 
 export default function CreateInvite( { username, my_id }: props) {
+    const router = useRouter()
     const { supabase, session } = useSupabase()
     const friendRef = useRef<HTMLInputElement>(null)
     const [rows, setRows] = useState(9)
     const [cols, setCols] = useState(9)
-    const [layers, setLayers] = useState(3)
-    const [start_fences, setStartFences] = useState(15)
+    const [layers, setLayers] = useState(2)
+    const [start_fences, setStartFences] = useState(10)
+    const [quickplayChannel, setQuickplayChannel] = useState<RealtimeChannel | null>(null);
+
+    useEffect( () => {
+        const c = supabase.channel('quickplay', { config: { presence: { key: my_id }, }, });
+        setQuickplayChannel(c);
+
+        return () => {
+            console.log('unsubbing from quickplay')
+            supabase.removeChannel(c);
+        }
+    }, [] )
+
 
     if (process.env.NEXT_PUBLIC_TESTING || (session && session.user.id)) {
         const sendInvite = () => {
@@ -45,12 +63,84 @@ export default function CreateInvite( { username, my_id }: props) {
 
             createInviteUsingUsername(friendRef.current!.value)
 
+        };
+
+        const joinQuickmatch = () => {
+            if (!quickplayChannel) return;
+
+            quickplayChannel
+                .on('broadcast', { event: 'quickplay' }, (p: any) => {
+                    let [id, gid] = p.payload;
+                    console.log(my_id, id)
+                    if (my_id == id) {
+                        setCookie('current_gid', gid);
+                        router.push('/game')
+                    }
+                })
+                .on('presence', { event: 'sync' }, async () => {
+                    const state = quickplayChannel.presenceState();
+                    let minTime = new Date().getTime();
+                    let minUid = null;
+
+                    for (const [uid, value] of Object.entries(state)) {
+                        let timestamp = (value as PresenceState[])[0].online_at;
+                        if (timestamp < minTime) {
+                            minTime = timestamp;
+                            minUid = uid;
+                        }
+                    }
+
+                    if (minUid == my_id) {
+                        const others = Object.keys(state);
+                        if (others.length > 1) {
+                            console.log('im the oldest, creating invite for one other connected client')
+                        }
+                        for (let i = 0; i < others.length; ++i) {
+                            const their_id = others[i];
+                            if (their_id != my_id) {
+                                //invite this user
+                                let gid = uuidv4();
+
+                                const res1 = await supabase
+                                    .from('game-invites')
+                                    .insert({ gid: gid, initiator_id: my_id, opponent_id: their_id, rows, cols, layers, start_fences })
+
+                                // create a game in the games table with this gid
+                                let res2 = await supabase.from('games')
+                                    .insert({ id: gid, move_num: 0, p1_id: my_id, p2_id: their_id, rows, cols, layers, start_fences })
+
+                                console.log(res1)
+                                console.log(res2)
+
+                                quickplayChannel.send({
+                                    type: 'broadcast',
+                                    event: 'quickplay',
+                                    payload: [
+                                        their_id,
+                                        gid
+                                    ]
+                                })
+
+                                setCookie('current_gid', gid)
+                                router.push('/game')
+
+                                break;
+                            }
+                        }
+                    }
+                }).subscribe(async (status) => {
+                    if (status === 'SUBSCRIBED') {
+                        const presenceTrackStatus = await quickplayChannel.track({
+                            online_at: new Date().getTime(),
+                        })
+                        console.log(presenceTrackStatus)
+                    }
+                });
         }
 
         return (
             <>
-                <h3 className="text-center self-center">Invite to game by username</h3>
-                <input className="bg-transparent rounded-none border-b-2 outline-none w-full" type="text" ref={friendRef} placeholder="username" defaultValue={username} />
+                <h3>Game Settings:</h3>
                 <div className="grid grid-rows-3 mt-2 gap-y-2 justify-items-end">
                     <div className="flex">
                         <h3 className="text-end self-center">Board rows:</h3>
@@ -69,9 +159,16 @@ export default function CreateInvite( { username, my_id }: props) {
                         <NumberUpDown max={20} min={1} curr_val={start_fences} updater={setStartFences} increment={1} />
                     </div>
                 </div>
-
-                <button className="font-display w-full mt-2 shadow-lg hover:bg-theme-200 hover:shadow-theme-200/50 border-2 rounded-b-md border-theme-200 py-1 px-2"
-                    onClick={sendInvite}>invite</button>
+                <br />
+                <div className="flex flex-col">
+                    <h3 className="text-center self-center">Invite to game by username</h3>
+                    <input className="bg-transparent rounded-none border-b-2 outline-none" type="text" ref={friendRef} placeholder="username" defaultValue={username} />
+                    <button className="font-display w-full mt-2 shadow-lg hover:bg-theme-200 hover:shadow-theme-200/50 border-2 rounded-b-md border-theme-200 py-1 px-2"
+                        onClick={sendInvite}>INVITE</button>
+                </div>
+                <p className="my-4 text-center">--- OR ---</p>
+                <button className="font-display w-full shadow-lg hover:bg-theme-200 hover:shadow-theme-200/50 border-2 rounded-md border-theme-200 py-1 px-2"
+                    onClick={joinQuickmatch}>QUICKMATCH</button>
             </>
         )
     }

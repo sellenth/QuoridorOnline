@@ -10,6 +10,7 @@ import {
     ClientMessage, ID, MessageType, Orientation,
     Player, ServerPayload, Mat4, NetworkCamera
 } from "../shared/types"
+import { toast } from 'react-tiny-toast';
 import type { SupabaseClient } from '@supabase/auth-helpers-nextjs'
 
 const szFLOAT = 4;
@@ -31,6 +32,7 @@ class GameStatusHandler {
     turnIndicatorElement: Node;
     gameCanvas: Node;
     intervalID: number = 0;
+    notify_game_over = () => {}
     //GameOverModal: Node;
 
     constructor() {}
@@ -60,7 +62,13 @@ class GameStatusHandler {
         const indicatorElement = my_id == id ? this.myTime : this.theirTime;
         let d = new Date(time);
 
-        indicatorElement.textContent = String(d.getMinutes()).padStart(2, '0') + ':' + String(d.getSeconds()).padStart(2, '0');
+        if (d.getUTCFullYear() < 1337) {
+            indicatorElement.textContent = '00:00'
+        } else {
+            indicatorElement.textContent = String(d.getUTCMinutes()).padStart(2, '0')
+                                           + ':'
+                                           + String(d.getUTCSeconds()).padStart(2, '0');
+        }
     }
 
     UpdateTimerOnInterval(my_id, active_player_id, p1_id, p1_time, p2_time, last_update) {
@@ -69,10 +77,19 @@ class GameStatusHandler {
         let time = p1_id == active_player_id ? p1_time : p2_time;
 
         this.intervalID = setInterval( () => {
-            let d = new Date( new Date(time).getTime() - ( new Date().getTime() - new Date(last_update).getTime()) );
+            let inter = ( new Date().getTime() - new Date(last_update).getTime());
+            let d = new Date( new Date(time).getTime() - inter);
 
-            console.log(d)
-            indicatorElement.textContent = String(d.getMinutes()).padStart(2, '0') + ':' + String(d.getSeconds()).padStart(2, '0');
+            if (d.getUTCFullYear() < 1337) {
+                indicatorElement.textContent = '00:00'
+                this.notify_game_over();
+                console.log('notify server of game over')
+                clearInterval(this.intervalID);
+            } else {
+                indicatorElement.textContent = String(d.getUTCMinutes()).padStart(2, '0')
+                                               + ':'
+                                               + String(d.getUTCSeconds()).padStart(2, '0');
+            }
         }, 1000 );
     }
 
@@ -114,7 +131,9 @@ class GameStatusHandler {
 
     SetGameWon(username) {
         if (this.gameInfoElement) {
-            this.turnIndicatorElement.textContent = `${username} won!`
+            const msg = `${username} won!`;
+            this.turnIndicatorElement.textContent = msg
+            toast.show(msg, { timeout: 3000, position: "bottom-center", className: "text-gray-200 bg-theme-200 border border-gray-200", uniqueCode: 'game-over' })
             clearInterval(this.intervalID);
         }
     }
@@ -216,7 +235,15 @@ export default class Engine {
                 console.error(error)
             } else {
                 console.log(data)
+                if (!data.isValid) {
+                    toast.show("The move was declined", { timeout: 3000, position: "bottom-center", className: "text-gray-200 bg-theme-red border border-gray-200" })
+                }
             }
+        }
+        this.gameStatusHandler.notify_game_over = async () => {
+            await this.dbClient.functions.invoke('handle-move', {
+                body: { proposed_move: 'time expired', game_id: gid }
+            })
         }
     }
 
