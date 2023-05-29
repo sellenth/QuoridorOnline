@@ -10,6 +10,7 @@
     "format": "prettier --check --ignore-path .gitignore .",
     "format:fix": "prettier --write --ignore-path .gitignore .",
     "edge-move": "npx supabase functions serve handle-move",
+    "deploy-edge-move": "npx supabase functions deploy handle-move",
     "db-reset": "npx supabase db reset; docker restart realtime-dev.supabase_realtime_quoridor-online",
     "generate-types": "npx supabase gen types typescript --local > src/utils/db-types.ts"
   },
