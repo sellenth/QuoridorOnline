@@ -85,6 +85,8 @@ Sunday 5/28
 - [x] tooltip for invalid move, game over
 - [x] implement quick game feature to pair with another online user
 
+- [ ] sort out game table uniqueness (quickplaying twice will create a new game each time)
+- [ ] instructions modal exceeds mobile screen size
 - [ ] improve visibility on fence cursor
 - [ ] reorder account page to show most recent games on top
 - [ ] past games style problem

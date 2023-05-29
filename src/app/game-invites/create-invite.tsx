@@ -101,13 +101,15 @@ export default function CreateInvite( { username, my_id }: props) {
                                 //invite this user
                                 let gid = uuidv4();
 
-                                const res1 = await supabase
+                                // create a game in the games table with this gid
+                                let res1 = await supabase.from('games')
+                                    .insert({ id: gid, move_num: 0, p1_id: my_id, p2_id: their_id, rows, cols, layers, start_fences })
+
+                                if (res1.error) continue;
+
+                                const res2 = await supabase
                                     .from('game-invites')
                                     .insert({ gid: gid, initiator_id: my_id, opponent_id: their_id, rows, cols, layers, start_fences })
-
-                                // create a game in the games table with this gid
-                                let res2 = await supabase.from('games')
-                                    .insert({ id: gid, move_num: 0, p1_id: my_id, p2_id: their_id, rows, cols, layers, start_fences })
 
                                 console.log(res1)
                                 console.log(res2)
@@ -123,6 +125,7 @@ export default function CreateInvite( { username, my_id }: props) {
 
                                 setCookie('current_gid', gid)
                                 router.push('/game')
+
 
                                 break;
                             }
