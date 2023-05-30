@@ -87,11 +87,11 @@ Sunday 5/28
 
 Monday 5/29
 - [x] surrender button
+- [x] game should end after 100 moves or so
 
 - [ ] highlight last move played with a purple cube
 - [ ] notify if there are people waiting in quick play
 - [ ] set up phone# verification
-- [ ] game should end after 100 moves or so
 - [ ] sort out game table uniqueness (quickplaying twice will create a new game each time)
 - [ ] instructions modal exceeds mobile screen size
 - [ ] improve visibility on fence cursor

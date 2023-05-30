@@ -85,6 +85,17 @@ serve(async (req: any) => {
 
         }
 
+        if (data.moves.length == 63) {
+            const update_res = await supabaseClient
+                .from('games')
+                .update({ winner: data.p2_id })
+                .eq('id', game_id)
+            return new Response(JSON.stringify({ isValid: true, res: `p1 was too slow (64 move limit has been reached)` }), {
+                headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+                status: 200,
+            })
+        }
+
         // Check if this game is over
         if (data.winner != null) {
             return new Response(JSON.stringify({ res: `${data.winner} won!` }), {
@@ -95,8 +106,6 @@ serve(async (req: any) => {
 
         // if the move list length is even, that means it is player 2's turn
         const p2_move = !!(data.moves.length % 2)
-        console.log(data.moves)
-        console.log(data.moves.length)
 
 //////////////
         const last_update = await supabaseClient
