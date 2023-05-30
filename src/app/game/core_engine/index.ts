@@ -230,9 +230,9 @@ export default class Engine {
 
     registerDbClient(dbClient: SupabaseClient, gid: string) {
         this.dbClient = dbClient;
-        this.gameLogic.notifyServer = async (move: [number, number, number, number]) => {
+        this.gameLogic.notifyServer = async (move: [number, number, number, number], msg?: string) => {
             const { data, error } = await this.dbClient.functions.invoke('handle-move', {
-                body: { proposed_move: move, game_id: gid }
+                body: { proposed_move: move, game_id: gid, msg: msg }
             })
             if (error) {
                 console.error(error)

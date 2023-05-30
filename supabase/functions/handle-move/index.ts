@@ -62,7 +62,7 @@ serve(async (req: any) => {
             })
         }
 
-        const { game_id, proposed_move } = await req.json()
+        const { game_id, proposed_move, msg } = await req.json()
 
         // Get the game record
         const { data, error } = await supabaseClient
@@ -71,6 +71,19 @@ serve(async (req: any) => {
             .eq('id', game_id)
             .single()
         if (error) throw error
+
+        if (msg == 'giveup') {
+            let opponentID = data.p1_id == user.id ? data.p2_id : data.p1_id;
+            const update_res = await supabaseClient
+                .from('games')
+                .update({ winner: opponentID })
+                .eq('id', game_id)
+            return new Response(JSON.stringify({ isValid: true, res: `Someone weenied out!` }), {
+                headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+                status: 200,
+            })
+
+        }
 
         // Check if this game is over
         if (data.winner != null) {

@@ -85,6 +85,13 @@ Sunday 5/28
 - [x] tooltip for invalid move, game over
 - [x] implement quick game feature to pair with another online user
 
+Monday 5/29
+- [x] surrender button
+
+- [ ] highlight last move played with a purple cube
+- [ ] notify if there are people waiting in quick play
+- [ ] set up phone# verification
+- [ ] game should end after 100 moves or so
 - [ ] sort out game table uniqueness (quickplaying twice will create a new game each time)
 - [ ] instructions modal exceeds mobile screen size
 - [ ] improve visibility on fence cursor
@@ -94,8 +101,6 @@ Sunday 5/28
 - [ ] scoreboard doesn't show latest values
 - [ ] lava lamp the scoreboard
 - [ ] match replay styling to standard game
-- [ ] set up phone# verification
-- [ ] game should end after 100 moves or so
 
 BUGS:
  just joined 3d game i was invited to, controls show up in 3d

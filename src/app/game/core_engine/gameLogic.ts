@@ -36,7 +36,7 @@ export class GameLogic {
     gameOver: boolean = false;
 
 
-    notifyServer: (msg: [number, number, number, number]) => Promise<void>;
+    notifyServer: (move: [number, number, number, number], msg?: string) => Promise<void>;
 
     constructor() {
         this.players = [];
@@ -302,6 +302,10 @@ export class GameLogic {
         } else {
             this.MoveCursor([2, 0, 0])
         }
+    }
+
+    Giveup() {
+        this.notifyServer([-1, -1, -1, -1], 'giveup');
     }
 
     PreviousPlayerCursor() {
