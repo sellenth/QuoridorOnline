@@ -47,10 +47,13 @@ class GameStatusHandler {
         this.UpdateFences(my_id, p1_id, p1_username, p1_num_fences, true)
         this.UpdateFences(my_id, p2_id, p2_username, p2_num_fences, false)
 
-        this.UpdateTimer(my_id, p1_id, p1_time, true);
-        this.UpdateTimer(my_id, p2_id, p2_time, false);
-        if (last_update != null) {
-            this.UpdateTimerOnInterval(my_id, active_player_id, p1_id, p1_time, p2_time, last_update);
+        if (this.myTime && this.theirTime) {
+            this.UpdateTimer(my_id, p1_id, p1_time, true);
+            this.UpdateTimer(my_id, p2_id, p2_time, false);
+
+            if (last_update != null) {
+                this.UpdateTimerOnInterval(my_id, active_player_id, p1_id, p1_time, p2_time, last_update);
+            }
         }
 
         this.UpdateTurnIndicator(my_id, active_player_id);
