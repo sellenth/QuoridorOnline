@@ -90,7 +90,7 @@ Monday 5/29
 - [x] game should end after 100 moves or so
 
 Saturday 6/10
-- [ ] display num people waiting in quick play
+- [x] display num people waiting in quick play
 - [ ] don't start timer until p2 moves
 - [ ] set up timing on non-quickplay matches
 - [ ] set up phone# verification
@@ -98,6 +98,7 @@ Saturday 6/10
 - [ ] normalize username
 - [ ] dont show username on scoreboard until verified (can ignore if top 10 are all above 400)
 
+- [ ] light mode...
 - [ ] highlight last move played with a purple cube
 - [ ] instructions modal exceeds mobile screen size
 - [ ] improve visibility on fence cursor

@@ -7,6 +7,9 @@ import { setCookie } from 'cookies-next'
 import { useRouter } from 'next/navigation';
 import { RealtimeChannel } from '@supabase/supabase-js';
 
+// access an internal function, hope they don't change that :)
+type HackedChannel = RealtimeChannel & { _isJoined: () => boolean}
+
 type props = {
     username: string
     my_id: string
@@ -21,10 +24,11 @@ export default function CreateInvite( { username, my_id }: props) {
     const [cols, setCols] = useState(9)
     const [layers, setLayers] = useState(2)
     const [start_fences, setStartFences] = useState(10)
-    const [quickplayChannel, setQuickplayChannel] = useState<RealtimeChannel | null>(null);
+    const [quickplayChannel, setQuickplayChannel] = useState<HackedChannel | null>(null);
+    const [numOnline, setNumOnline] = useState(0);
 
     useEffect( () => {
-        const c = supabase.channel('quickplay', { config: { presence: { key: my_id }, }, });
+        const c = supabase.channel('quickplay', { config: { presence: { key: my_id }, }, }) as HackedChannel;
         setQuickplayChannel(c);
 
         return () => {
@@ -66,7 +70,7 @@ export default function CreateInvite( { username, my_id }: props) {
         };
 
         const joinQuickmatch = () => {
-            if (!quickplayChannel) return;
+            if (!quickplayChannel || quickplayChannel._isJoined()) return;
 
             quickplayChannel
                 .on('broadcast', { event: 'quickplay' }, (p: any) => {
@@ -81,6 +85,8 @@ export default function CreateInvite( { username, my_id }: props) {
                     const state = quickplayChannel.presenceState();
                     let minTime = new Date().getTime();
                     let minUid = null;
+
+                    setNumOnline(Object.keys(state).length);
 
                     for (const [uid, value] of Object.entries(state)) {
                         let timestamp = (value as PresenceState[])[0].online_at;
@@ -172,6 +178,9 @@ export default function CreateInvite( { username, my_id }: props) {
                 <p className="my-4 text-center">--- OR ---</p>
                 <button className="font-display w-full shadow-lg hover:bg-theme-200 hover:shadow-theme-200/50 border-2 rounded-md border-theme-200 py-1 px-2"
                     onClick={joinQuickmatch}>QUICKMATCH</button>
+                { numOnline > 0 &&
+                  <p className="mt-4 text-center">{numOnline == 1 ? `1 player` : `${numOnline} players`} waiting</p>
+                }
             </>
         )
     }
