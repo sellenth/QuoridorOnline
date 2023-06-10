@@ -91,11 +91,11 @@ Monday 5/29
 
 Saturday 6/10
 - [x] display num people waiting in quick play
-- [ ] don't start timer until p2 moves
+- [x] don't start timer until p2 moves
+- [ ] normalize username
 - [ ] set up timing on non-quickplay matches
 - [ ] set up phone# verification
 - [ ] sort out game table uniqueness (quickplaying twice will create a new game each time)
-- [ ] normalize username
 - [ ] dont show username on scoreboard until verified (can ignore if top 10 are all above 400)
 
 - [ ] light mode...

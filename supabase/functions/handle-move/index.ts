@@ -118,12 +118,9 @@ serve(async (req: any) => {
 
         let p1_time = new Date(last_update.data.p1_time);
         let p2_time = new Date(last_update.data.p2_time);
-        if (last_update.data.last_update == null) {
-            const update_res = await supabaseClient
-                .from('games')
-                .update({ last_update: ingest_time.toISOString() })
-                .eq('id', game_id)
-        } else {
+
+        // if the game is underway, check if the clock has expired
+        if (last_update.data.last_update) {
             let last_t = new Date(last_update.data.last_update);
             let diff = (ingest_time.getTime() - last_t.getTime());
 
@@ -308,7 +305,13 @@ async function writeMoveToDB(client: any, gid: string, moves: Move[], proposed_m
 
     const { data, error } = await client
         .from('games')
-        .update({ move_num: moves.length, moves: moves, winner: winner, p1_time: p1_time.toISOString(), p2_time: p2_time.toISOString(), last_update: last_update.toISOString() })
+        .update({ move_num: moves.length,
+                  moves: moves,
+                  winner: winner,
+                  p1_time: p1_time.toISOString(),
+                  p2_time: p2_time.toISOString(),
+                  last_update: moves.length >= 2 ? last_update.toISOString() : null
+                })
         .eq('id', gid)
 
     if (error) {
