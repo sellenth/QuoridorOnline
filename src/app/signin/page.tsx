@@ -50,19 +50,6 @@ export default function SignIn() {
         }
     }
 
-
-    const handleGoogleLogin = async () => {
-        const { data, error } = await supabase.auth.signInWithOAuth({
-            provider: 'google',
-        })
-
-
-
-        if (error) {
-            console.log({ error })
-        } else { console.log(data) }
-    }
-
     return (<div className="text-gray-200">
         <div className="max-w-fit align-center mx-auto my-10 bg-blue-200 bg-opacity-10 backdrop-blur p-4 border-2 border-gray-200 rounded-md">
             <AnimatedCandy />
