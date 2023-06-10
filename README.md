@@ -89,10 +89,16 @@ Monday 5/29
 - [x] surrender button
 - [x] game should end after 100 moves or so
 
-- [ ] highlight last move played with a purple cube
-- [ ] notify if there are people waiting in quick play
+Saturday 6/10
+- [ ] display num people waiting in quick play
+- [ ] don't start timer until p2 moves
+- [ ] set up timing on non-quickplay matches
 - [ ] set up phone# verification
 - [ ] sort out game table uniqueness (quickplaying twice will create a new game each time)
+- [ ] normalize username
+- [ ] dont show username on scoreboard until verified (can ignore if top 10 are all above 400)
+
+- [ ] highlight last move played with a purple cube
 - [ ] instructions modal exceeds mobile screen size
 - [ ] improve visibility on fence cursor
 - [ ] reorder account page to show most recent games on top
