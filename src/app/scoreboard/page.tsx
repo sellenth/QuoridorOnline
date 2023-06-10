@@ -30,7 +30,7 @@ export default async function Scoreboard() {
     return (
         <div className="mx-auto w-fit">
             <AddRightBorder>
-            <div className="mt-10 bg-blue-200 bg-opacity-10 backdrop-blur
+            <div className="my-10 bg-blue-200 bg-opacity-10 backdrop-blur
                             w-fit text-gray-200 pl-4">
                 <table className="border-separate border-spacing-y-4">
                     <thead>
