@@ -60,14 +60,14 @@ export default function FriendsList() {
         const updateTableFromDB = async () => {
             const { data, error } = await supabase
                 .from('game-invites')
-                .select('initiator:initiator_id(username, id), opponent:opponent_id(username, id), gid, rows, cols, layers')
+                .select('initiator:initiator_id(username, id), opponent:opponent_id(username, id), gid, rows, cols, layers, game:gid(winner)')
                 .or(`initiator_id.eq.${my_id},opponent_id.eq.${my_id}`)
 
             if (data) {
                 let game_invites = data as GameInvite[]
                 setSent(game_invites.filter((invite) => { return invite.initiator.id == my_id && invite.gid == null }))
                 setReceived(game_invites.filter((invite) => { return invite.opponent.id == my_id && invite.gid == null }))
-                setInProgress(game_invites.filter((invite) => { return invite.gid != null }))
+                setInProgress(game_invites.filter((invite) => { return invite.gid && invite.game.winner }))
             }
         }
 
