@@ -59,14 +59,13 @@ export default function SignUn() {
 
 
     const submitOTP = async (v: string) => {
-        let { session, error } = await supabase.auth.verifyOtp({
+        let response = await supabase.auth.verifyOtp({
             phone: phoneNum,
             token: v,
             type: 'sms',
         })
 
-        console.log(session);
-        console.log(error);
+        console.log(response);
     }
 
 
