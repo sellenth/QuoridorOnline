@@ -13,7 +13,7 @@ export default function SignUn() {
     const phoneRef = useRef<HTMLInputElement>(null)
     const OTPRef = useRef<HTMLInputElement>(null)
     const [ phoneNum, setPhoneNum ] = useState('');
-    const [ showOTP, setShowOTP ] = useState(true);
+    const [ showOTP, setShowOTP ] = useState(false);
 
     const handlePhoneSignup = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
