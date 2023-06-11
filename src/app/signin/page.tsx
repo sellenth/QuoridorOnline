@@ -73,6 +73,12 @@ export default function SignIn() {
                 >
                     Use Github
                 </button>
+                <Link href="phone-signin">
+                    <button className="font-display mt-2 shadow-lg hover:bg-theme-200 hover:shadow-theme-200/50 border-2 rounded-md border-theme-200 py-1 px-2"
+                    >
+                        Use Phone #
+                    </button>
+                </Link>
             </div>
             <AnimatedCandy />
         </div>
