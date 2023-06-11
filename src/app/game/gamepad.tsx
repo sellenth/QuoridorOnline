@@ -28,19 +28,19 @@ export const GamePad = ({engine}: Props) => {
         } : warn;
 
     return <div className="grid grid-rows-3 grid-cols-3 gap-1">
-        <button onClick={() => mode()} className="border border-gray-200 text-gray-200 rounded-md flex h-10 w-28">
+        <button onClick={() => mode()} className="border border-gray-200 text-gray-200 rounded-md flex h-10 w-28 bg-theme-300">
             <p className="w-fit m-auto font-bold">
                 MODE
             </p>
         </button>
         {placingFences ?
-            <button onClick={() => up()} className="border border-gray-200 text-gray-200 rounded-md h-10 w-28">
+            <button onClick={() => up()} className="border border-gray-200 text-gray-200 rounded-md h-10 w-28 bg-theme-300">
                 <svg className="m-auto h-[90%]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                     <path fillRule="evenodd" d="M11.47 7.72a.75.75 0 011.06 0l7.5 7.5a.75.75 0 11-1.06 1.06L12 9.31l-6.97 6.97a.75.75 0 01-1.06-1.06l7.5-7.5z" clipRule="evenodd" />
                 </svg>
             </button>
             : <div />}
-        <button onClick={() => commit()} className="border border-gray-200 text-gray-200 rounded-md flex h-10 w-28">
+        <button onClick={() => commit()} className="border border-gray-200 text-gray-200 rounded-md flex h-10 w-28 bg-theme-300">
             <p className="w-fit m-auto font-bold">
                 {placingFences ? 'PLACE' : 'MOVE'}
             </p>
@@ -62,7 +62,7 @@ export const GamePad = ({engine}: Props) => {
                 <path fillRule="evenodd" d="M16.28 11.47a.75.75 0 010 1.06l-7.5 7.5a.75.75 0 01-1.06-1.06L14.69 12 7.72 5.03a.75.75 0 011.06-1.06l7.5 7.5z" clipRule="evenodd" />
             </svg>
         </button>
-        <button onClick={() => giveup()} className="border border-gray-200 text-gray-200 rounded-md flex h-10 w-28">
+        <button onClick={() => giveup()} className="bg-blue-800 border border-gray-200 text-gray-200 rounded-md flex h-10 w-28">
             <p className="w-fit m-auto font-bold">
                 GIVE UP
             </p>

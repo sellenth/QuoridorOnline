@@ -44,7 +44,7 @@ body {
   outline: none;
   -webkit-tap-highlight-color: rgba(255, 255, 255, 0); /* mobile webkit */
 
-	animation: pulse 2s infinite;
+	animation: pulse 1s infinite;
 }
 
 @keyframes pulse {
@@ -53,9 +53,9 @@ body {
   }
 
   70% {
-    box-shadow: 0 0 0 5px theme('colors.theme.200');
+    box-shadow: 0 0 0 13px theme('colors.theme.200');
   }
 	100% {
-    box-shadow: 0 0 0 8px theme('colors.theme.300');
+    box-shadow: 0 0 0 18px theme('colors.theme.300');
   }
 }

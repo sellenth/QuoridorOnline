@@ -86,7 +86,7 @@ export default function GameView() {
         </div>
         <main className="h-full flex flex-col items-center justify-center mx-4">
 
-            <div ref={gameInfoRef} id="gameInfo" className="w-full text-gray-200 self-start my-2 flex-none flex">
+            <div ref={gameInfoRef} id="gameInfo" className="z-10 w-full text-gray-200 self-start my-2 flex-none flex">
                 <div className="grid grid-cols-2 gap-16 mx-auto items-end">
                     <p id="turnIndicator" className="truncate text-end">Player ???&apos;s turn</p>
                     <div id="fenceInfo">
@@ -97,8 +97,8 @@ export default function GameView() {
                 </div>
             </div>
 
-            <canvas id="c" className="border border-gray-200 outline-none max-w-full aspect-square flex-1" tabIndex={0}></canvas>
-            <div id="gamePad" className="mx-auto flex-none my-2" ref={gamePad}>
+            <canvas id="c" className="z-0 border border-gray-200 outline-none max-w-full aspect-square flex-1" tabIndex={0}></canvas>
+            <div id="gamePad" className="z-10 mx-auto flex-none my-2" ref={gamePad}>
                 <GamePad engine={engine}/>
             </div>
 
