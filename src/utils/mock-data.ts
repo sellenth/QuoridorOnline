@@ -65,7 +65,8 @@ export const mockIncomingGameInvite: GameInvite[] = [
     rows: 6,
     cols: 6,
     layers: 1,
-    start_fences: 10
+    start_fences: 10,
+    game: { winner: null }
   },
 ]
 export const mockSentGameInvite: GameInvite[] = [
@@ -82,7 +83,8 @@ export const mockSentGameInvite: GameInvite[] = [
     rows: 10,
     cols: 10,
     layers: 2,
-    start_fences: 10
+    start_fences: 10,
+    game: { winner: null }
   },
 ]
 export const mockInProgressGameInvite: GameInvite[] = [
@@ -99,7 +101,8 @@ export const mockInProgressGameInvite: GameInvite[] = [
     rows: 9,
     cols: 9,
     layers: 3,
-    start_fences: 10
+    start_fences: 10,
+    game: { winner: null }
   },
 ]
 
