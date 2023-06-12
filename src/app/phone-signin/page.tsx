@@ -1,12 +1,11 @@
 'use client'
 import { useSupabase } from "@/components/supabase-provider"
 import { FormEvent, useRef, useState } from "react"
-import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { AnimatedCandy } from "@/components/decordatives"
 import { toast } from 'react-tiny-toast';
 
-export default function SignUn() {
+export default function PhoneSignUpIn() {
     const { supabase, session } = useSupabase()
     const router = useRouter()
     const usernameRef = useRef<HTMLInputElement>(null)
@@ -21,7 +20,7 @@ export default function SignUn() {
         if (phoneRef.current &&  usernameRef.current) {
             setPhoneNum(phoneRef.current.value.replace(' ', ''))
 
-            console.log(phoneRef.current.value)
+            console.log(phoneNum)
             console.log(usernameRef.current.value)
             const { data, error } = await supabase.auth.signInWithOtp({
                 phone: phoneNum,
@@ -34,13 +33,8 @@ export default function SignUn() {
 
             if (error) {
                 let msg = error.message;
-                if (error.status == 500) {
-                    msg = "That username is already in use"
-                } else if (error.status == 400) {
-                    msg = "That phone is already in use?"
-                }
                 toast.show(msg, { timeout: 3000, position: "bottom-center", className: "text-gray-200 bg-theme-red border border-gray-200" })
-                console.log({ error })
+                console.log(error)
             } else {
                 setShowOTP(true);
             }
@@ -59,13 +53,18 @@ export default function SignUn() {
 
 
     const submitOTP = async (v: string) => {
-        let response = await supabase.auth.verifyOtp({
+        let { data, error } = await supabase.auth.verifyOtp({
             phone: phoneNum,
             token: v,
             type: 'sms',
         })
-
-        console.log(response);
+        if (error) {
+            let msg = error.message;
+            toast.show(msg, { timeout: 3000, position: "bottom-center", className: "text-gray-200 bg-theme-red border border-gray-200" })
+            console.log(error)
+        } else {
+            router.push('/')
+        }
     }
 
 
@@ -93,7 +92,10 @@ export default function SignUn() {
                         className="w-full block bg-transparent border-b-2 outline-none"
                         type="text" minLength={3} maxLength={18}
                         placeholder="username" ref={usernameRef} />
-                    <input required className="w-full block bg-transparent border-b-2 outline-none" type="tel" minLength={9} placeholder="+1 123 456 7890" ref={phoneRef} />
+                    <div className="flex w-full">
+                        <label>+1</label>
+                        <input required className="w-full block bg-transparent border-b-2 outline-none inline" type="tel" minLength={10} maxLength={10} placeholder="5554443210" ref={phoneRef} />
+                    </div>
                     <></>
                     <button type="submit" className="font-display w-full my-2 shadow-lg hover:bg-theme-200 hover:shadow-theme-200/50 border-2 rounded-b-md border-theme-200 py-1 px-2"
                     >Send me a code</button>
