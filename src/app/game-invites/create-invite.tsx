@@ -117,17 +117,18 @@ export default function CreateInvite( { username, my_id }: props) {
                                     .from('game-invites')
                                     .insert({ gid: gid, initiator_id: my_id, opponent_id: their_id, rows, cols, layers, start_fences })
 
+                                console.log(res1)
+                                console.log(res2)
+
                                 // two users are trying to match eachother when they already have an active game
                                 if (res2.error) {
                                     const res3 = await supabase
                                         .from('games')
                                         .delete()
                                         .eq('gid', gid )
+                                    console.log(res3.error)
                                     continue;
                                 }
-
-                                console.log(res1)
-                                console.log(res2)
 
                                 quickplayChannel.send({
                                     type: 'broadcast',
@@ -145,7 +146,6 @@ export default function CreateInvite( { username, my_id }: props) {
                                 break;
                             }
                         }
-                        toast.show("We couldn't match you with anyone at this time.", { timeout: 3000, position: "bottom-center", className: "text-gray-200 bg-theme-red border border-gray-200" })
                     }
                 }).subscribe(async (status) => {
                     if (status === 'SUBSCRIBED') {
