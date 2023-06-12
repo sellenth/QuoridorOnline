@@ -67,7 +67,7 @@ export default function FriendsList() {
                 let game_invites = data as GameInvite[]
                 setSent(game_invites.filter((invite) => { return invite.initiator.id == my_id && invite.gid == null }))
                 setReceived(game_invites.filter((invite) => { return invite.opponent.id == my_id && invite.gid == null }))
-                setInProgress(game_invites.filter((invite) => { return invite.gid && invite.game.winner }))
+                setInProgress(game_invites.filter((invite) => { return invite.gid && !invite.game.winner }))
             }
         }
 
