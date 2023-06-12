@@ -13,6 +13,7 @@ export default function PhoneSignUpIn() {
     const OTPRef = useRef<HTMLInputElement>(null)
     const [ phoneNum, setPhoneNum ] = useState('');
     const [ showOTP, setShowOTP ] = useState(false);
+    const [ submitted, setSubmitted ] = useState(false);
 
     const handlePhoneSignup = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -46,7 +47,7 @@ export default function PhoneSignUpIn() {
 
     const handleOTPInput = ( { target: { value: v } }: React.ChangeEvent<HTMLInputElement> ) => {
         if (v.length == 6) {
-            document.forms[0].submit()
+           submitOTP(v);
         }
 
         if (v.length > 6 && OTPRef.current) {
@@ -64,6 +65,11 @@ export default function PhoneSignUpIn() {
 
 
     const submitOTP = async (v: string) => {
+        if (submitted) {
+            return
+        }
+
+        setSubmitted(true);
         let { data, error } = await supabase.auth.verifyOtp({
             phone: phoneNum,
             token: v,
