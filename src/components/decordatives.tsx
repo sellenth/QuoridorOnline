@@ -26,6 +26,7 @@ export const SlashCandy = ({ prefix = '///', children }: Props) => {
 export const AnimatedSpan = ({ className, length, magic }: { className?: string, length: number, magic: number }) => {
 
     const [frame, setFrame] = useState(0);
+    const [numSlashes, setNumSlashes] = useState(0);
 
     useEffect(() => {
         let forward = true;
@@ -37,20 +38,22 @@ export const AnimatedSpan = ({ className, length, magic }: { className?: string,
                     forward = true;
                 }
 
-                return forward ? frame + 1 : frame - 1;
-            }
-            )
+                let x = forward ? frame + 1 : frame - 1;
+                setNumSlashes(28 / (1 + 1.5 ** (-(x - 14))));
+                return x
+            });
+
         }, magic)
 
         return () => clearInterval(interval);
     }, [])
 
-    return <span className={`${className} w-max`}>{'/'.repeat(frame)}</span>
+    return <span className={`${className} w-max`}>{'/'.repeat(numSlashes)}</span>
 }
 
 export const AnimatedCandy = () => {
     return <div className="mx-auto my-2 font-display flex overflow-x-hidden max-w-[20ch]" tabIndex={-1}>
-        <AnimatedSpan className="text-gray-500" length={27} magic={112} />
+        <AnimatedSpan className="text-gray-500" length={27} magic={64} />
         <span className="flex-fit text-gray-200">{'/////'}</span>
         <span className="flex-fit text-gray-500">{'///////////////////////////////////////////////////////////'}</span>
     </div>
