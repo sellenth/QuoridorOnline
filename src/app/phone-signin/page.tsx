@@ -54,6 +54,14 @@ export default function PhoneSignUpIn() {
         }
     }
 
+    const handleOTPSubmit = (e: FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+
+        if (OTPRef.current) {
+            submitOTP(OTPRef.current.value)
+        }
+    }
+
 
     const submitOTP = async (v: string) => {
         let { data, error } = await supabase.auth.verifyOtp({
@@ -78,7 +86,7 @@ export default function PhoneSignUpIn() {
             <h1 className="font-display w-max font-bold">USE MOBILE</h1>
             <h1 className="font-display w-max"></h1>
             {showOTP ?
-                <form >
+                <form onSubmit={handleOTPSubmit}>
                     <label>Great, now enter the code we sent you.</label>
                     <input autoFocus required
                         className="w-full block bg-transparent border-b-2 outline-none"
