@@ -92,10 +92,13 @@ Monday 5/29
 Saturday 6/10
 - [x] display num people waiting in quick play
 - [x] don't start timer until p2 moves
+
+Sunday 6/11
+- [x] set up phone# verification
+- [x] fix "it's the other player's turn" overflow on mobile
+- [x] sort out game table uniqueness (quickplaying twice will create a new game each time)
+
 - [ ] normalize username
-- [ ] set up timing on non-quickplay matches
-- [ ] set up phone# verification
-- [ ] sort out game table uniqueness (quickplaying twice will create a new game each time)
 - [ ] dont show username on scoreboard until verified (can ignore if top 10 are all above 400)
 
 - [ ] light mode...
@@ -104,7 +107,6 @@ Saturday 6/10
 - [ ] improve visibility on fence cursor
 - [ ] reorder account page to show most recent games on top
 - [ ] past games style problem
-- [ ] fix "it's the other player's turn" overflow on mobile
 - [ ] scoreboard doesn't show latest values
 - [ ] lava lamp the scoreboard
 - [ ] match replay styling to standard game

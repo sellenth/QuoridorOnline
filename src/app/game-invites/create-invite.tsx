@@ -125,7 +125,7 @@ export default function CreateInvite( { username, my_id }: props) {
                                     const res3 = await supabase
                                         .from('games')
                                         .delete()
-                                        .eq('gid', gid )
+                                        .eq('id', gid )
                                     console.log(res3.error)
                                     continue;
                                 }
