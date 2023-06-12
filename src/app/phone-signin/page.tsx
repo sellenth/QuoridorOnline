@@ -46,7 +46,7 @@ export default function PhoneSignUpIn() {
 
     const handleOTPInput = ( { target: { value: v } }: React.ChangeEvent<HTMLInputElement> ) => {
         if (v.length == 6) {
-           submitOTP(v);
+            document.forms[0].submit()
         }
 
         if (v.length > 6 && OTPRef.current) {
