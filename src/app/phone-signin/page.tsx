@@ -18,15 +18,18 @@ export default function PhoneSignUpIn() {
         e.preventDefault();
 
         if (phoneRef.current &&  usernameRef.current) {
-            setPhoneNum(phoneRef.current.value.replace(' ', ''))
+            let username = usernameRef.current.value;
+            let phoneNum = "+1" + phoneRef.current.value.replace(' ', '');
+            setPhoneNum(phoneNum)
 
             console.log(phoneNum)
-            console.log(usernameRef.current.value)
+            console.log(username.length)
             const { data, error } = await supabase.auth.signInWithOtp({
                 phone: phoneNum,
                 options: {
+                    shouldCreateUser: username.length > 0,
                     data: {
-                        preferred_username: usernameRef.current.value
+                        preferred_username: username
                     }
                 },
             })
@@ -88,9 +91,9 @@ export default function PhoneSignUpIn() {
                 </form>
                 :
                 <form onSubmit={handlePhoneSignup}>
-                    <input autoFocus required
+                    <input autoFocus
                         className="w-full block bg-transparent border-b-2 outline-none"
-                        type="text" minLength={3} maxLength={18}
+                        type="text" maxLength={18}
                         placeholder="username" ref={usernameRef} />
                     <div className="flex w-full">
                         <label>+1</label>
