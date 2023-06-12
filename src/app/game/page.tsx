@@ -88,7 +88,7 @@ export default function GameView() {
 
             <div ref={gameInfoRef} id="gameInfo" className="z-10 w-full text-gray-200 self-start my-2 flex-none flex">
                 <div className="grid grid-cols-2 gap-16 mx-auto items-end">
-                    <p id="turnIndicator" className="truncate text-end">Player ???&apos;s turn</p>
+                    <p id="turnIndicator">Player ???&apos;s turn</p>
                     <div id="fenceInfo">
                         <p>Fences Remaining</p>
                         <p><span id="myFences">Me - ???</span> <span id="myTime">__:__</span></p>
