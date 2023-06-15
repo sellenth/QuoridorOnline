@@ -142,10 +142,8 @@ serve(async (req: any) => {
                     .from('games')
                     .update({ p2_time: p2_time.toISOString(), winner: winner })
                     .eq('id', game_id)
-                return new Response(JSON.stringify({ res: `p1 won!` }), {
-                    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-                    status: 200,
-                })
+                return endGame(supabaseClient, game_id, 'p1 won');
+
             }
             else if(!p2_move && p1_expired) {
                 let winner = data.p2_id
@@ -154,10 +152,7 @@ serve(async (req: any) => {
                     .from('games')
                     .update({ p1_time: p1_time.toISOString(), winner: winner })
                     .eq('id', game_id)
-                return new Response(JSON.stringify({ res: `p2 won!` }), {
-                    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-                    status: 200,
-                })
+                return endGame(supabaseClient, game_id, 'p2 won');
             }
         }
 //////////////
@@ -214,7 +209,7 @@ serve(async (req: any) => {
                 if (curr_player.pos[2] == curr_player.goalZ) {
                     winner = curr_player.id
                     await updateElo(supabaseClient, curr_player.id, other_player.id)
-                    await deleteGameInvite(supabaseClient, game_id)
+                    return endGame(supabaseClient, game_id, 'game over');
                 }
             }
         }
@@ -492,4 +487,12 @@ export function writeGameSpaceToConsole(gameSpace: GameSpace) {
         }
         writeAllSync(Deno.stdout, newline)
     }
+}
+
+async function endGame(supabaseClient, game_id, toast_msg){
+    await deleteGameInvite(supabaseClient, game_id)
+    return new Response(JSON.stringify({ res: toast_msg }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200,
+    })
 }

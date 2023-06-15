@@ -59,6 +59,7 @@ export default function CreateInvite( { username, my_id }: props) {
 
                         if (error) {
                             console.log(error)
+                            toast.show("Error creating an invite, are you already in a match with this player?", { timeout: 3000, position: "bottom-center", className: "text-gray-200 bg-theme-red border border-gray-200" })
                         }
 
                     }
