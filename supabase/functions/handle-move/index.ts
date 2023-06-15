@@ -74,26 +74,22 @@ serve(async (req: any) => {
 
         if (msg == 'giveup') {
             let opponentID = data.p1_id == user.id ? data.p2_id : data.p1_id;
+            await updateElo(supabaseClient, opponentID, user.id)
             const update_res = await supabaseClient
                 .from('games')
                 .update({ winner: opponentID })
                 .eq('id', game_id)
-            return new Response(JSON.stringify({ isValid: true, res: `Someone weenied out!` }), {
-                headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-                status: 200,
-            })
+            return endGame(supabaseClient, game_id, 'Someone weenied out!');
 
         }
 
         if (data.moves.length == 63) {
+            await updateElo(supabaseClient, data.p2_id, data.p1_id)
             const update_res = await supabaseClient
                 .from('games')
                 .update({ winner: data.p2_id })
                 .eq('id', game_id)
-            return new Response(JSON.stringify({ isValid: true, res: `p1 was too slow (64 move limit has been reached)` }), {
-                headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-                status: 200,
-            })
+            return endGame(supabaseClient, game_id, 'p1 was too slow (64 move limit has been reached)');
         }
 
         // Check if this game is over
