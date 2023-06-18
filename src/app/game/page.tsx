@@ -93,11 +93,11 @@ export default function GameView() {
             </div>
 
             <div className="w-fit flex-1 flex flex-col items-center justify-center relative text-gray-200">
-                <div className="absolute z-10 right-3 bottom-3">
+                <div className="absolute z-10 right-3 bottom-1">
                     <p className="text-end" id="myTime">__:__</p>
                     <p id="myFences">Me - ???</p>
                 </div>
-                <div className="absolute z-10 right-3 top-3">
+                <div className="absolute z-10 right-3 top-1">
                     <p id="theirFences">Them - ???</p>
                     <p className="text-end" id="theirTime">__:__</p>
                 </div>
