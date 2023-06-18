@@ -4,7 +4,7 @@
 
 import { serve } from 'https://deno.land/std@0.177.0/http/server.ts'
 import { corsHeaders } from '../_shared/cors.ts'
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { createClient, SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { writeAllSync } from 'https://deno.land/std@0.177.0/streams/write_all.ts'
 import { inBounds, isValidPawnMove, validHeading, addFenceToGameSpace, EXPLORED, Extents, FENCE, generateGameSpace, GameSpace, PLAYER, VACANT, applyMovesToGameSpace, MoveType, s, Move, Player  } from '../_shared/game-space.ts'
 
@@ -187,7 +187,7 @@ serve(async (req: any) => {
         const _3dMode = data.layers > 2
         let isValid = true
         let winner = null
-        let verified_move;
+        let verified_move!: Move;
 
         // Check proposed player move
         if (proposed_move[0] == MoveType.Pawn) {
@@ -205,6 +205,7 @@ serve(async (req: any) => {
                 if (curr_player.pos[2] == curr_player.goalZ) {
                     winner = curr_player.id
                     await updateElo(supabaseClient, curr_player.id, other_player.id)
+                    await writeMoveToDB(supabaseClient, game_id, data.moves, verified_move, winner, p1_time, p2_time, ingest_time)
                     return endGame(supabaseClient, game_id, 'game over');
                 }
             }
@@ -485,9 +486,9 @@ export function writeGameSpaceToConsole(gameSpace: GameSpace) {
     }
 }
 
-async function endGame(supabaseClient, game_id, toast_msg){
+async function endGame(supabaseClient: SupabaseClient<any, "public", any>, game_id: string, toast_msg: string){
     await deleteGameInvite(supabaseClient, game_id)
-    return new Response(JSON.stringify({ res: toast_msg }), {
+    return new Response(JSON.stringify({ res: toast_msg, isValid: true }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200,
     })
