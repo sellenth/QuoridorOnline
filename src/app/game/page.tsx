@@ -87,17 +87,22 @@ export default function GameView() {
         <main className="h-full flex flex-col items-center justify-center mx-4">
 
             <div ref={gameInfoRef} id="gameInfo" className="z-10 w-full text-gray-200 self-start my-2 flex-none flex">
-                <div className="grid grid-cols-2 gap-16 mx-auto items-end">
+                <div className="grid grid-cols-1 mx-auto items-end">
                     <p id="turnIndicator">Player ???&apos;s turn</p>
-                    <div id="fenceInfo">
-                        <p>Fences Remaining</p>
-                        <p><span id="myFences">Me - ???</span> <span id="myTime">__:__</span></p>
-                        <p><span id="theirFences">Them - ???</span> <span id="theirTime">__:__</span></p>
-                    </div>
                 </div>
             </div>
 
-            <canvas id="c" className="z-0 border border-gray-200 outline-none max-w-full aspect-square flex-1" tabIndex={0}></canvas>
+            <div className="w-fit flex-1 flex flex-col items-center justify-center relative text-gray-200">
+                <div className="absolute z-10 right-3 bottom-3">
+                    <p className="text-end" id="myTime">__:__</p>
+                    <p id="myFences">Me - ???</p>
+                </div>
+                <div className="absolute z-10 right-3 top-3">
+                    <p id="theirFences">Them - ???</p>
+                    <p className="text-end" id="theirTime">__:__</p>
+                </div>
+                <canvas id="c" className="z-0 border border-gray-200 outline-none max-w-full aspect-square flex-1" tabIndex={0} />
+            </div>
             <div id="gamePad" className="z-10 mx-auto flex-none my-2" ref={gamePad}>
                 <GamePad engine={engine}/>
             </div>
