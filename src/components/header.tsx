@@ -40,7 +40,7 @@ export default function Header() {
     <div className="z-10 w-full flex items-center justify-center justify-items-center grid-cols-5">
       <HeaderButton className="hidden sm:block" link="/" text="HOME" prefetch={true} />
       <HeaderButton link="/scoreboard" text="SCOREBOARD" prefetch={true} />
-      <HeaderButton link="/friendslist" text="FRIENDS" authed={isAuthed} />
+      <HeaderButton className="hidden" link="/friendslist" text="FRIENDS" authed={isAuthed} />
       <HeaderButton link="/game-invites" text="GAMES" authed={isAuthed} />
       <HeaderButton link="/account" text={username ? "ACCOUNT" : "LOGIN"} color="text-theme-500" authed={isAuthed} />
       < ToastContainer />
