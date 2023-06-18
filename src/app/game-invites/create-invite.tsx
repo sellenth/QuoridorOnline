@@ -26,69 +26,29 @@ export default function CreateInvite( { username, my_id }: props) {
     const [start_fences, setStartFences] = useState(10)
     const [quickplayChannel, setQuickplayChannel] = useState<HackedChannel | null>(null);
     const [numOnline, setNumOnline] = useState(0);
+    const [queueing, setQueueing] = useState(false);
 
-    useEffect( () => {
-        const c = supabase.channel('quickplay', { config: { presence: { key: my_id }, }, }) as HackedChannel;
-        setQuickplayChannel(c);
+    const joinQuickmatch = () => {
+        if (!quickplayChannel || quickplayChannel._isJoined()) return;
 
-        return () => {
-            console.log('unsubbing from quickplay')
-            supabase.removeChannel(c);
-        }
-    }, [] )
-
-
-    if (process.env.NEXT_PUBLIC_TESTING || (session && session.user.id)) {
-        const sendInvite = () => {
-            async function createInviteUsingUsername( username: string ) {
-                const { data, error } = await supabase
-                    .from('users')
-                    .select('id')
-                    .eq('username', username)
-
-                if (!data) return;
-
-                if (data.length == 0 || error) {
-                    toast.show("That user could not be found", { timeout: 3000, position: "bottom-center", className: "text-gray-200 bg-theme-red border border-gray-200" })
-                } else {
-                    // we have their id, create a game invite
-                    if (data && data.length > 0) {
-                        const { error } = await supabase
-                            .from('game-invites')
-                            .insert({ initiator_id: my_id, opponent_id: data[0].id, rows, cols, layers, start_fences })
-
-                        if (error) {
-                            console.log(error)
-                            toast.show("Error creating an invite, are you already in a match with this player?", { timeout: 3000, position: "bottom-center", className: "text-gray-200 bg-theme-red border border-gray-200" })
-                        }
-
-                    }
+        quickplayChannel
+            .on('broadcast', { event: 'quickplay' }, (p: any) => {
+                let [id, gid] = p.payload;
+                console.log(my_id, id)
+                if (my_id == id) {
+                    setCookie('current_gid', gid);
+                    router.push('/game')
                 }
-            }
+            })
+            .on('presence', { event: 'sync' }, async () => {
+                const state = quickplayChannel.presenceState();
+                let minTime = new Date().getTime();
+                let minUid = null;
 
-            createInviteUsingUsername(friendRef.current!.value)
+                setNumOnline(Object.keys(state).length);
 
-        };
 
-        const joinQuickmatch = () => {
-            if (!quickplayChannel || quickplayChannel._isJoined()) return;
-
-            quickplayChannel
-                .on('broadcast', { event: 'quickplay' }, (p: any) => {
-                    let [id, gid] = p.payload;
-                    console.log(my_id, id)
-                    if (my_id == id) {
-                        setCookie('current_gid', gid);
-                        router.push('/game')
-                    }
-                })
-                .on('presence', { event: 'sync' }, async () => {
-                    const state = quickplayChannel.presenceState();
-                    let minTime = new Date().getTime();
-                    let minUid = null;
-
-                    setNumOnline(Object.keys(state).length);
-
+                if ( () => queueing ) {
                     for (const [uid, value] of Object.entries(state)) {
                         let timestamp = (value as PresenceState[])[0].online_at;
                         if (timestamp < minTime) {
@@ -107,6 +67,7 @@ export default function CreateInvite( { username, my_id }: props) {
                             if (their_id != my_id) {
                                 //invite this user
                                 let gid = uuidv4();
+
 
                                 // create a game in the games table with this gid
                                 let res1 = await supabase.from('games')
@@ -148,15 +109,84 @@ export default function CreateInvite( { username, my_id }: props) {
                             }
                         }
                     }
-                }).subscribe(async (status) => {
-                    if (status === 'SUBSCRIBED') {
-                        const presenceTrackStatus = await quickplayChannel.track({
-                            online_at: new Date().getTime(),
-                        })
-                        console.log(presenceTrackStatus)
-                    }
-                });
+                }
+            }).subscribe(async (status) => {
+                if (status === 'SUBSCRIBED') {
+                    console.log('quickmatch realtime status:', status)
+                }
+            });
+    }
+
+    useEffect( () => {
+        const c = supabase.channel('quickplay', { config: { presence: { key: my_id }, }, }) as HackedChannel;
+        setQuickplayChannel(c);
+
+        return () => {
+            console.log('unsubbing from quickplay')
+            supabase.removeChannel(c);
         }
+    }, [] );
+
+    useEffect( () => {
+        if (quickplayChannel && !quickplayChannel._isJoined()) {
+            try {
+                joinQuickmatch();
+
+            } catch (e) {
+                console.error(e);
+            }
+        }
+    }, [quickplayChannel]);
+
+    useEffect( () => {
+        if (quickplayChannel) {
+            if (queueing) {
+                quickplayChannel.track({
+                    online_at: new Date().getTime(),
+                })
+            } else {
+                quickplayChannel.untrack();
+            }
+        }
+    }, [queueing]);
+
+    const toggleQueueing = async () => {
+        setQueueing(!queueing);
+    }
+
+
+    if (process.env.NEXT_PUBLIC_TESTING || (session && session.user.id)) {
+        const sendInvite = () => {
+            async function createInviteUsingUsername( username: string ) {
+                const { data, error } = await supabase
+                    .from('users')
+                    .select('id')
+                    .eq('username', username)
+
+                if (!data) return;
+
+                if (data.length == 0 || error) {
+                    toast.show("That user could not be found", { timeout: 3000, position: "bottom-center", className: "text-gray-200 bg-theme-red border border-gray-200" })
+                } else {
+                    // we have their id, create a game invite
+                    if (data && data.length > 0) {
+                        const { error } = await supabase
+                            .from('game-invites')
+                            .insert({ initiator_id: my_id, opponent_id: data[0].id, rows, cols, layers, start_fences })
+
+                        if (error) {
+                            console.log(error)
+                            toast.show("Error creating an invite, are you already in a match with this player?", { timeout: 3000, position: "bottom-center", className: "text-gray-200 bg-theme-red border border-gray-200" })
+                        }
+
+                    }
+                }
+            }
+
+            createInviteUsingUsername(friendRef.current!.value)
+
+        };
+
 
         return (
             <>
@@ -187,11 +217,9 @@ export default function CreateInvite( { username, my_id }: props) {
                         onClick={sendInvite}>INVITE</button>
                 </div>
                 <p className="my-4 text-center">--- OR ---</p>
-                <button className="font-display w-full shadow-lg hover:bg-theme-200 hover:shadow-theme-200/50 border-2 rounded-md border-theme-200 py-1 px-2"
-                    onClick={joinQuickmatch}>QUICKMATCH</button>
-                { numOnline > 0 &&
-                  <p className="mt-4 text-center">{numOnline == 1 ? `1 player` : `${numOnline} players`} waiting</p>
-                }
+                <button onClick={toggleQueueing} className="font-display w-full shadow-lg hover:bg-theme-200 hover:shadow-theme-200/50 border-2 rounded-md border-theme-200 py-1 px-2"
+                    >{ queueing ? 'LEAVE' : 'QUICKMATCH' }</button>
+                <p className="mt-4 text-center">{numOnline == 1 ? `1 player` : `${numOnline} players`} waiting</p>
             </>
         )
     }

@@ -98,6 +98,13 @@ Sunday 6/11
 - [x] fix "it's the other player's turn" overflow on mobile
 - [x] sort out game table uniqueness (quickplaying twice will create a new game each time)
 
+Saturday 6/17
+- [x] double tap to confirm move and giveup
+- [x] show how many are waiting in queue before queueing
+- [x] disable credential autofill on games tab (webkit)
+- [x] free up more game grid real estate (move timer and usernames inside grid)
+- [x] ensure move into endzone is written to db
+
 - [ ] normalize username
 - [ ] dont show username on scoreboard until verified (can ignore if top 10 are all above 400)
 
@@ -118,9 +125,6 @@ FEEDBACK:
 5/14
 
 Friend invite, auto complete. possibly for game invite too
-Commit button, scared to push
-Pulse background when it's your turn
-Draw, forfeit buttons
 Usernames are case sensitive
 Username shows up before authenticated
 prevent poor taste usernames
