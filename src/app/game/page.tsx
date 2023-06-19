@@ -92,8 +92,8 @@ export default function GameView() {
                 </div>
             </div>
 
-            <div className="w-fit flex-1 flex flex-col items-center justify-center relative text-gray-200">
-                <div className="absolute z-10 right-3 bottom-1">
+            <div className="max-w-full aspect-square flex-1 relative text-gray-200">
+                <div className="absolute z-10 left-3 top-1">
                     <p className="text-end" id="myTime">__:__</p>
                     <p id="myFences">Me - ???</p>
                 </div>
@@ -101,10 +101,10 @@ export default function GameView() {
                     <p id="theirFences">Them - ???</p>
                     <p className="text-end" id="theirTime">__:__</p>
                 </div>
-                <canvas id="c" className="z-0 border border-gray-200 outline-none max-w-full aspect-square flex-1" tabIndex={0} />
+                <canvas id="c" className="z-0 border border-gray-200 outline-none w-full h-full" tabIndex={0} />
             </div>
-            <div id="gamePad" className="z-10 mx-auto flex-none my-2" ref={gamePad}>
-                <GamePad engine={engine}/>
+            <div id="gamePad" className="z-10 mx-auto flex-initial my-2" ref={gamePad}>
+                <GamePad engine={engine} />
             </div>
 
 
