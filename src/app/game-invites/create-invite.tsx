@@ -212,7 +212,9 @@ export default function CreateInvite( { username, my_id }: props) {
                 <br />
                 <div className="flex flex-col">
                     <h3 className="text-center self-center">Invite to game by username</h3>
-                    <input name="webkit_search_hack" className="bg-transparent rounded-none border-b-2 outline-none" type="text" ref={friendRef} placeholder="username" defaultValue={username} />
+                    <input onKeyDown={(e) => { if (e.key == 'Enter') sendInvite() }}
+                        name="webkit_search_hack" className="bg-transparent rounded-none border-b-2 outline-none"
+                        type="text" ref={friendRef} placeholder="username" defaultValue={username} />
                     <button className="font-display w-full mt-2 shadow-lg hover:bg-theme-200 hover:shadow-theme-200/50 border-2 rounded-b-md border-theme-200 py-1 px-2"
                         onClick={sendInvite}>INVITE</button>
                 </div>
