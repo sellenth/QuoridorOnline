@@ -94,8 +94,8 @@ export default function GameView() {
 
             <div className="max-w-full aspect-square flex-1 relative text-gray-200">
                 <div className="absolute z-10 left-3 top-1">
-                    <p className="text-end" id="myTime">__:__</p>
                     <p id="myFences">Me - ???</p>
+                    <p className="text-end" id="myTime">__:__</p>
                 </div>
                 <div className="absolute z-10 right-3 top-1">
                     <p id="theirFences">Them - ???</p>
