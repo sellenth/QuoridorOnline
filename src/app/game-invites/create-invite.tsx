@@ -1,6 +1,7 @@
 'use client'
 import { useSupabase } from '../../components/supabase-provider'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
+import useState from 'react-usestateref'
 import { toast } from 'react-tiny-toast';
 import { v4 as uuidv4 } from 'uuid';
 import { setCookie } from 'cookies-next'
@@ -20,9 +21,9 @@ export default function CreateInvite( { username, my_id }: props) {
     const router = useRouter()
     const { supabase, session } = useSupabase()
     const friendRef = useRef<HTMLInputElement>(null)
-    const [rows, setRows] = useState(9)
-    const [cols, setCols] = useState(9)
-    const [layers, setLayers] = useState(2)
+    const [rows, setRows, rowsRef] = useState(9)
+    const [cols, setCols, colsRef] = useState(9)
+    const [layers, setLayers, layersRef] = useState(2)
     const [start_fences, setStartFences] = useState(10)
     const [quickplayChannel, setQuickplayChannel] = useState<HackedChannel | null>(null);
     const [numOnline, setNumOnline] = useState(0);
@@ -68,16 +69,19 @@ export default function CreateInvite( { username, my_id }: props) {
                                 //invite this user
                                 let gid = uuidv4();
 
+                                const r = rowsRef.current;
+                                const c = colsRef.current;
+                                const l = layersRef.current;
 
                                 // create a game in the games table with this gid
                                 let res1 = await supabase.from('games')
-                                    .insert({ id: gid, move_num: 0, p1_id: my_id, p2_id: their_id, rows, cols, layers, start_fences })
+                                    .insert({ id: gid, move_num: 0, p1_id: my_id, p2_id: their_id, rows: r, cols: c, layers: l, start_fences })
 
                                 if (res1.error) continue;
 
                                 const res2 = await supabase
                                     .from('game-invites')
-                                    .insert({ gid: gid, initiator_id: my_id, opponent_id: their_id, rows, cols, layers, start_fences })
+                                    .insert({ gid: gid, initiator_id: my_id, opponent_id: their_id, rows: r, cols: c, layers: l, start_fences })
 
                                 console.log(res1)
                                 console.log(res2)
