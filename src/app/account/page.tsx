@@ -15,6 +15,14 @@ type PastGame = {
   winner: string | null
 }
 
+type User = {
+  elo: number,
+  email: string,
+  id: string,
+  member_since: string,
+  username: string
+}
+
 
 function PastGamesTable( { pastGames, my_id }: { pastGames: PastGame[], my_id: string }) {
 
@@ -74,8 +82,9 @@ function GameReviewItem( { pastGame, my_id }: { pastGame: PastGame, my_id: strin
 
 export default function AccountPage (){
   const { supabase, session } = useSupabase()
-  const my_id = session?.user!.id || ''
-  const [ pastGames, setPastGames ] = useState<PastGame[]>([])
+  const [ userdata, setUserData ] = useState<User | null>();
+  const my_id = session?.user!.id || '';
+  const [ pastGames, setPastGames ] = useState<PastGame[]>([]);
 
   let username = session?.user.user_metadata.preferred_username ?? null
 
@@ -87,8 +96,20 @@ export default function AccountPage (){
             .or(`p1_id.eq.${my_id},p2_id.eq.${my_id}`)
             .not('winner', 'is', null)
 
-      if (data) {
-        setPastGames( data as PastGame[] )
+        if (data) {
+          setPastGames( data as PastGame[] )
+        }
+
+      {
+        const { data, error } = await supabase
+            .from('users')
+            .select('*')
+            .eq('id', my_id)
+            .single()
+
+        if (data) {
+          setUserData(data as User);
+        }
       }
     }
 
@@ -107,7 +128,8 @@ export default function AccountPage (){
 
 return <div className="text-gray-200">
         <div className="max-w-sm align-center mx-auto my-10 bg-blue-200 bg-opacity-10 backdrop-blur p-4 border-2 border-gray-200 rounded-md">
-            <h1 className="my-2 underline font-display">{username}</h1>
+            <h1 className="mt-2 underline font-display">{userdata?.username}</h1>
+            <h3 className="">Rating: {userdata?.elo}</h3>
             {
             pastGames.length > 0 && <PastGamesTable pastGames={pastGames} my_id={my_id} />
             }
