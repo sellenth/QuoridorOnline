@@ -20,7 +20,7 @@ export const GamePad = ({engine}: Props) => {
             func();
         } else {
             setFlag(true);
-            setTimeout(() => setFlag(false), 1700);
+            setTimeout(() => setFlag(false), 5000);
         }
     }
 
