@@ -157,7 +157,9 @@ how to create replay system
 
 ## dev notes
 
-- `npx supabase start` to start docker containers
+- `git clone https://github.com/sellenth/QuoridorOnline.git` && cd QuoridorOnline
+- `npx supabase start` to start docker containers. (You'll need to have docker installed)
+- `npm run dev` to start the nextjs dev server
 - `npm run db-reset` to reset db (Note: this causes problems with realtime container, command also restarts realtime)
 - the database will be seeded with supabase/seed.sql
 - local db studio available [here](http://localhost:54323/project/default)
