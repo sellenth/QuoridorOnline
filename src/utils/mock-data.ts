@@ -105,6 +105,8 @@ export const mockInProgressGameInvite: GameInvite[] = [
     rows: 9,
     cols: 9,
     layers: 3,
+    p1_time: "1337-01-05T00:00:00Z",
+    p2_time: "1337-01-05T00:00:00Z",
     start_fences: 10,
     game: { winner: null }
   },
