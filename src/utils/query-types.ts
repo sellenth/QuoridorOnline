@@ -24,6 +24,8 @@ export type GameInvite = {
     id: string,
   }
   gid: null | string,
+  p1_time: string,
+  p2_time: string,
   rows: number,
   cols: number,
   layers: number,

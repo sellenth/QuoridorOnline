@@ -24,7 +24,8 @@ export default function CreateInvite( { username, my_id }: props) {
     const [rows, setRows, rowsRef] = useState(9)
     const [cols, setCols, colsRef] = useState(9)
     const [layers, setLayers, layersRef] = useState(2)
-    const [start_fences, setStartFences] = useState(10)
+    const [start_fences, setStartFences, startFencesRef] = useState(10)
+    const [timeFormat, setTimeFormat, timeFormatRef] = useState('1337-01-05T00:00:00Z');
     const [quickplayChannel, setQuickplayChannel] = useState<HackedChannel | null>(null);
     const [numOnline, setNumOnline] = useState(0);
     const [queueing, setQueueing] = useState(false);
@@ -72,16 +73,25 @@ export default function CreateInvite( { username, my_id }: props) {
                                 const r = rowsRef.current;
                                 const c = colsRef.current;
                                 const l = layersRef.current;
+                                const f = startFencesRef.current;
+                                const t = timeFormatRef.current;
 
                                 // create a game in the games table with this gid
                                 let res1 = await supabase.from('games')
-                                    .insert({ id: gid, move_num: 0, p1_id: my_id, p2_id: their_id, rows: r, cols: c, layers: l, start_fences })
+                                    .insert({
+                                        id: gid, move_num: 0, p1_id: my_id, p2_id: their_id, rows: r, cols: c, layers: l, start_fences: f,
+                                        p1_time: new Date(t).toISOString(),
+                                        p2_time: new Date(t).toISOString()
+                                    })
 
                                 if (res1.error) continue;
 
                                 const res2 = await supabase
                                     .from('game-invites')
-                                    .insert({ gid: gid, initiator_id: my_id, opponent_id: their_id, rows: r, cols: c, layers: l, start_fences })
+                                    .insert({ gid: gid, initiator_id: my_id, opponent_id: their_id, rows: r, cols: c, layers: l, start_fences: f,
+                                        p1_time: new Date(t).toISOString(),
+                                        p2_time: new Date(t).toISOString()
+                                    })
 
                                 console.log(res1)
                                 console.log(res2)
@@ -176,7 +186,10 @@ export default function CreateInvite( { username, my_id }: props) {
                     if (data && data.length > 0) {
                         const { error } = await supabase
                             .from('game-invites')
-                            .insert({ initiator_id: my_id, opponent_id: data[0].id, rows, cols, layers, start_fences })
+                            .insert({ initiator_id: my_id, opponent_id: data[0].id, rows, cols, layers, start_fences,
+                                        p1_time: new Date(timeFormat).toISOString(),
+                                        p2_time: new Date(timeFormat).toISOString()
+                                    });
 
                         if (error) {
                             console.log(error)
@@ -189,6 +202,10 @@ export default function CreateInvite( { username, my_id }: props) {
 
             createInviteUsingUsername(friendRef.current!.value)
 
+        };
+
+        const handleOptionChange = (event: React.FormEvent<HTMLInputElement>) => {
+            setTimeFormat(event.currentTarget.value);
         };
 
 
@@ -212,6 +229,40 @@ export default function CreateInvite( { username, my_id }: props) {
                         <h3 className="text-end self-center">Starting fences:</h3>
                         <NumberUpDown max={20} min={1} curr_val={start_fences} updater={setStartFences} increment={1} />
                     </div>
+                    <div>
+                        <h3 className="block text-start self-center">Time Format:</h3>
+                        <div className="flex gap-5">
+                            <label>
+                                <input
+                                    type="radio"
+                                    value="1337-01-01T00:03:00Z"
+                                    checked={timeFormat === '1337-01-01T00:03:00Z'}
+                                    onChange={handleOptionChange}
+                                />
+                                3 min
+                            </label>
+
+                            <label>
+                                <input
+                                    type="radio"
+                                    value="1337-01-01T00:10:00Z"
+                                    checked={timeFormat === '1337-01-01T00:10:00Z'}
+                                    onChange={handleOptionChange}
+                                />
+                                10 min
+                            </label>
+
+                            <label>
+                                <input
+                                    type="radio"
+                                    value="1337-01-05T00:00:00Z"
+                                    checked={timeFormat === '1337-01-05T00:00:00Z'}
+                                    onChange={handleOptionChange}
+                                />
+                                120 hours
+                            </label>
+                        </div>
+                    </div>
                 </div>
                 <br />
                 <div className="flex flex-col">
@@ -224,7 +275,7 @@ export default function CreateInvite( { username, my_id }: props) {
                 </div>
                 <p className="my-4 text-center">--- OR ---</p>
                 <button onClick={toggleQueueing} className="font-display w-full shadow-lg hover:bg-theme-200 hover:shadow-theme-200/50 border-2 rounded-md border-theme-200 py-1 px-2"
-                    >{ queueing ? 'LEAVE' : 'QUICKMATCH' }</button>
+                >{queueing ? 'LEAVE' : 'QUICKMATCH'}</button>
                 <p className="mt-4 text-center">{numOnline == 1 ? `1 player` : `${numOnline} players`} waiting</p>
             </>
         )

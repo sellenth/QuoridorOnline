@@ -2,6 +2,8 @@
 CREATE TABLE "public"."game-invites" (
     initiator_id  uuid      NOT NULL,
     opponent_id   uuid      NOT NULL,
+    p1_time     TIMESTAMPTZ default TIMESTAMPTZ '1337-01-01 00:05:00',
+    p2_time     TIMESTAMPTZ default TIMESTAMPTZ '1337-01-01 00:05:00',
     rows          int   not null default 9,
     cols          int   not null default 9,
     layers        int   not null default 3,

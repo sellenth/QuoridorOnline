@@ -60,7 +60,7 @@ export default function FriendsList() {
         const updateTableFromDB = async () => {
             const { data, error } = await supabase
                 .from('game-invites')
-                .select('initiator:initiator_id(username, id), opponent:opponent_id(username, id), gid, rows, cols, layers, game:gid(winner)')
+                .select('initiator:initiator_id(username, id), opponent:opponent_id(username, id), gid, rows, cols, layers, game:gid(winner), p1_time, p2_time')
                 .or(`initiator_id.eq.${my_id},opponent_id.eq.${my_id}`)
 
             if (data) {
@@ -136,6 +136,8 @@ export default function FriendsList() {
                                                 rows={game.rows}
                                                 cols={game.cols}
                                                 layers={game.layers}
+                                                p1_time={game.p1_time}
+                                                p2_time={game.p2_time}
                                                 start_fences={game.start_fences}
                                             />
                                         </td>
