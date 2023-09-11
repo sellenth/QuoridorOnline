@@ -65,6 +65,8 @@ export const mockIncomingGameInvite: GameInvite[] = [
     rows: 6,
     cols: 6,
     layers: 1,
+    p1_time: "1337-01-05T00:00:00Z",
+    p2_time: "1337-01-05T00:00:00Z",
     start_fences: 10,
     game: { winner: null }
   },
@@ -83,6 +85,8 @@ export const mockSentGameInvite: GameInvite[] = [
     rows: 10,
     cols: 10,
     layers: 2,
+    p1_time: "1337-01-05T00:00:00Z",
+    p2_time: "1337-01-05T00:00:00Z",
     start_fences: 10,
     game: { winner: null }
   },
