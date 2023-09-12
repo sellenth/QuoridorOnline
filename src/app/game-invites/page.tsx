@@ -72,24 +72,29 @@ export default function FriendsList() {
         let { data, error } = await supabase.from('game-invites')
                                  .select('*')
                                  .match({ 'initiator_id': initiator_id, 'opponent_id': opponent_id })
-        if (data && data[0].gid == null) {
-            console.log(data)
-            // create a game in the games table with this gid
-            let res2 = await supabase.from('games')
-                                    .insert({id: gid, move_num: 0, p1_id: initiator_id, p2_id: opponent_id,
-                                             rows, cols, layers, p1_time, p2_time, start_fences})
-            // add gid to this game-invite
-            let res1 = await supabase.from('game-invites')
-                                    .update({gid: gid})
-                                    .match({ 'initiator_id': initiator_id, 'opponent_id': opponent_id })
+        if (data) {
+            if ( data[0].gid == null ) {
+                console.log(data)
+                // create a game in the games table with this gid
+                let res2 = await supabase.from('games')
+                                        .insert({id: gid, move_num: 0, p1_id: initiator_id, p2_id: opponent_id,
+                                                rows, cols, layers, p1_time, p2_time, start_fences})
+                // add gid to this game-invite
+                let res1 = await supabase.from('game-invites')
+                                        .update({gid: gid})
+                                        .match({ 'initiator_id': initiator_id, 'opponent_id': opponent_id })
 
 
-            console.log(res1)
-            console.log(res2)
+                console.log(res1)
+                console.log(res2)
 
-            setCookie('current_gid', gid);
-            router.push('/game');
-        } else if (error) {
+                setCookie('current_gid', gid);
+                router.push('/game');
+            } else {
+                setCookie('current_gid', gid);
+                router.push('/game');
+            }
+        } else {
             console.log(error)
             toast.show("Couldn't accept invite", { timeout: 3000, position: "bottom-center", className: "text-gray-200 bg-theme-red border border-gray-200" })
         }
