@@ -72,8 +72,7 @@ export default function FriendsList() {
         let { data, error } = await supabase.from('game-invites')
                                  .select('*')
                                  .match({ 'initiator_id': initiator_id, 'opponent_id': opponent_id })
-        if (data) {
-            if ( data[0].gid == null ) {
+        if (data && data[0].gid == null ) {
                 console.log(data)
                 // create a game in the games table with this gid
                 let res2 = await supabase.from('games')
@@ -90,10 +89,6 @@ export default function FriendsList() {
 
                 setCookie('current_gid', gid);
                 router.push('/game');
-            } else {
-                setCookie('current_gid', gid);
-                router.push('/game');
-            }
         } else {
             console.log(error)
             toast.show("Couldn't accept invite", { timeout: 3000, position: "bottom-center", className: "text-gray-200 bg-theme-red border border-gray-200" })
@@ -105,7 +100,12 @@ export default function FriendsList() {
             const el = URLmatchedInvite;
             setURLmatchedInvite(undefined);
             if (el != undefined) {
-                await accept(el.initiator.id, el.opponent.id, el.p1_time, el.p2_time, el.rows, el.cols, el.layers, el.start_fences);
+                if (el.gid == null) {
+                    await accept(el.initiator.id, el.opponent.id, el.p1_time, el.p2_time, el.rows, el.cols, el.layers, el.start_fences);
+                } else {
+                    setCookie('current_gid', el.gid);
+                    router.push('/game');
+                }
             }
         }
         fn();
