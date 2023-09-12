@@ -83,8 +83,12 @@ export default function FriendsList() {
                                     .update({gid: gid})
                                     .match({ 'initiator_id': initiator_id, 'opponent_id': opponent_id })
 
+
             console.log(res1)
             console.log(res2)
+
+            setCookie('current_gid', gid);
+            router.push('/game');
         } else if (error) {
             console.log(error)
             toast.show("Couldn't accept invite", { timeout: 3000, position: "bottom-center", className: "text-gray-200 bg-theme-red border border-gray-200" })
@@ -97,9 +101,6 @@ export default function FriendsList() {
             setURLmatchedInvite(undefined);
             if (el != undefined) {
                 await accept(el.initiator.id, el.opponent.id, el.p1_time, el.p2_time, el.rows, el.cols, el.layers, el.start_fences);
-
-                setCookie('current_gid', el.gid);
-                router.push('/game');
             }
         }
         fn();
