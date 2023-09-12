@@ -4,7 +4,8 @@ import CreateInvite from './create-invite'
 import { useSupabase } from '../../components/supabase-provider'
 import AcceptRejectInvite from './accept-reject-invite'
 import { useEffect, useState } from 'react'
-import { useSearchParams } from 'next/navigation'
+import { setCookie } from 'cookies-next'
+import { useSearchParams, useRouter } from 'next/navigation'
 import JoinGame from './join-game'
 import { RealtimeChannel, SupabaseClient } from '@supabase/supabase-js'
 import { Database } from '@/utils/db-types'
@@ -12,6 +13,8 @@ import { mockIncomingGameInvite, mockInProgressGameInvite, mockMyId, mockMyUsern
 import { GameInvite } from '@/utils/query-types'
 import AddRightBorder from '@/components/right-border'
 import { DecorativeCircles } from '@/components/decordatives'
+import { v4 as uuidv4 } from 'uuid';
+import { toast } from 'react-tiny-toast';
 
 
 const subscribeToDbChanges = (supabase: SupabaseClient<Database>, id_to_listen_on: string, callback: () => any) => {
@@ -47,14 +50,60 @@ const subscribeToDbChanges = (supabase: SupabaseClient<Database>, id_to_listen_o
 export default function FriendsList() {
     let searchParams = useSearchParams()
     let username = searchParams.get('username') ?? ''
+    let firstId = searchParams.get('firstId') ?? ''
+    let secondId = searchParams.get('secondId') ?? ''
     const { supabase, session } = useSupabase()
+    const router = useRouter()
 
     const my_id = session?.user!.id || ''
 
     const [sent, setSent] = useState<GameInvite[]>([])
     const [received, setReceived] = useState<GameInvite[]>([])
     const [inProgress, setInProgress] = useState<GameInvite[]>([])
+    const [URLmatchedInvite, setURLmatchedInvite] = useState<GameInvite | undefined>(undefined);
 
+    const accept = async (initiator_id: string, opponent_id: string,
+                          p1_time: string, p2_time: string,
+                          rows: number, cols: number, layers: number,
+                          start_fences: number) => {
+        console.log('accepting')
+        let gid = uuidv4();
+
+        let { data, error } = await supabase.from('game-invites')
+                                 .select('*')
+                                 .match({ 'initiator_id': initiator_id, 'opponent_id': opponent_id })
+        if (data && data[0].gid == null) {
+            console.log(data)
+            // create a game in the games table with this gid
+            let res2 = await supabase.from('games')
+                                    .insert({id: gid, move_num: 0, p1_id: initiator_id, p2_id: opponent_id,
+                                             rows, cols, layers, p1_time, p2_time, start_fences})
+            // add gid to this game-invite
+            let res1 = await supabase.from('game-invites')
+                                    .update({gid: gid})
+                                    .match({ 'initiator_id': initiator_id, 'opponent_id': opponent_id })
+
+            console.log(res1)
+            console.log(res2)
+        } else if (error) {
+            console.log(error)
+            toast.show("Couldn't accept invite", { timeout: 3000, position: "bottom-center", className: "text-gray-200 bg-theme-red border border-gray-200" })
+        }
+    }
+
+    useEffect(() => {
+        const fn = async () => {
+            const el = URLmatchedInvite;
+            setURLmatchedInvite(undefined);
+            if (el != undefined) {
+                await accept(el.initiator.id, el.opponent.id, el.p1_time, el.p2_time, el.rows, el.cols, el.layers, el.start_fences);
+
+                setCookie('current_gid', el.gid);
+                router.push('/game');
+            }
+        }
+        fn();
+    }, [URLmatchedInvite])
 
     useEffect(() => {
         const updateTableFromDB = async () => {
@@ -68,6 +117,12 @@ export default function FriendsList() {
                 setSent(game_invites.filter((invite) => { return invite.initiator.id == my_id && invite.gid == null }))
                 setReceived(game_invites.filter((invite) => { return invite.opponent.id == my_id && invite.gid == null }))
                 setInProgress(game_invites.filter((invite) => { return invite.gid && !invite.game.winner }))
+
+                let match = game_invites.find((el) => { return el.initiator.id == firstId && el.opponent.id == secondId })
+                if (match) {
+                    // maybe this can be cleaned up, do I really need this extra state var?
+                    setURLmatchedInvite(match);
+                }
             }
         }
 
@@ -82,7 +137,7 @@ export default function FriendsList() {
         }
 
         return () => {
-            if (channel)          supabase.removeChannel(channel)
+            if (channel) supabase.removeChannel(channel)
         }
     }, [supabase, my_id])
 
@@ -131,7 +186,9 @@ export default function FriendsList() {
                                             {game.initiator.username}
                                         </td>
                                         <td className="flex-none text-end">
-                                            <AcceptRejectInvite initiator_id={game.initiator.id}
+                                            <AcceptRejectInvite
+                                                acceptFn={accept}
+                                                initiator_id={game.initiator.id}
                                                 opponent_id={game.opponent.id}
                                                 rows={game.rows}
                                                 cols={game.cols}
