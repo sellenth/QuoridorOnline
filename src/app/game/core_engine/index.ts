@@ -60,17 +60,23 @@ class GameStatusHandler {
 
     }
 
+    CreateTimerString(d: Date) {
+        return        String(d.getUTCHours() + (24 * d.getUTCDate())).padStart(2, '0')
+                    + ':'
+                    + String(d.getUTCMinutes()).padStart(2, '0')
+                    + ':'
+                    + String(d.getUTCSeconds()).padStart(2, '0');
+    }
+
     UpdateTimer(my_id, id, time, green) {
         //indicatorElement.classList.add( green ? "text-theme-500" : "text-theme-red")
         const indicatorElement = my_id == id ? this.myTime : this.theirTime;
         let d = new Date(time);
 
         if (d.getUTCFullYear() < 1337) {
-            indicatorElement.textContent = '00:00'
+            indicatorElement.textContent = '00:00:00'
         } else {
-            indicatorElement.textContent = String(d.getUTCMinutes()).padStart(2, '0')
-                                           + ':'
-                                           + String(d.getUTCSeconds()).padStart(2, '0');
+            indicatorElement.textContent = this.CreateTimerString(d);
         }
     }
 
@@ -84,14 +90,12 @@ class GameStatusHandler {
             let d = new Date( new Date(time).getTime() - inter);
 
             if (d.getUTCFullYear() < 1337) {
-                indicatorElement.textContent = '00:00'
+                indicatorElement.textContent = '00:00:00'
                 this.notify_game_over();
                 console.log('notify server of game over')
                 clearInterval(this.intervalID);
             } else {
-                indicatorElement.textContent = String(d.getUTCMinutes()).padStart(2, '0')
-                                               + ':'
-                                               + String(d.getUTCSeconds()).padStart(2, '0');
+                indicatorElement.textContent = this.CreateTimerString(d);
             }
         }, 1000 );
     }
