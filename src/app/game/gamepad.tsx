@@ -11,6 +11,7 @@ export const GamePad = ({engine}: Props) => {
     const [ moveArmed, setMoveArmed ] = useState(false)
     const [ giveupArmed, setGiveupArmed ] = useState(false)
     const engineRef = useRef(engine); // Store the initial value of `engine` in a ref
+    const autoRotate = false;
 
 
     const warn = () => {console.error('the buttons are not active yet')};
@@ -25,15 +26,17 @@ export const GamePad = ({engine}: Props) => {
     }
 
     useEffect( () => {
-        const intervalId = setInterval(next, 1000);
-        // Clear the interval and update engineRef when `engine` changes
-        return () => {
-            clearInterval(intervalId);
-            engineRef.current = engine;
-        };
+        if (autoRotate) {
+            const intervalId = setInterval(next, 1000);
+            // Clear the interval and update engineRef when `engine` changes
+            return () => {
+                clearInterval(intervalId);
+                engineRef.current = engine;
+            };
+        }
     }, [engine]);
 
-    const prev = engine ? () => engine.gameLogic.PreviousPlayerCursor() : warn;
+    const prev   = engine ? () => engine.gameLogic.PreviousPlayerCursor()  : warn;
     const next   = engine ? () => engine.gameLogic.NextPlayerCursor()      : warn;
     const rotate = engine ? () => engine.gameLogic.nextCursorOrientation() : warn;
     const up     = engine ? () => engine.gameLogic.MoveCursorFront()       : warn;
@@ -68,7 +71,7 @@ export const GamePad = ({engine}: Props) => {
                     placingFences ? 'PLACE' : 'MOVE'}
             </p>
         </button>
-        <button onClick={placingFences ? left : () => {}} className={`border border-gray-200 text-gray-200 rounded-md h-10 w-28 ${placingFences ? '' : 'invisible'}`}>
+        <button onClick={placingFences ? left : () => { if (!autoRotate) prev()}} className={`border border-gray-200 text-gray-200 rounded-md h-10 w-28 ${autoRotate ? 'invisible' : ''}`}>
             <svg className="m-auto h-[90%]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                 <path fillRule="evenodd" d="M7.72 12.53a.75.75 0 010-1.06l7.5-7.5a.75.75 0 111.06 1.06L9.31 12l6.97 6.97a.75.75 0 11-1.06 1.06l-7.5-7.5z" clipRule="evenodd" />
             </svg>
@@ -80,7 +83,7 @@ export const GamePad = ({engine}: Props) => {
                 </svg>
             </button>
             : <div />}
-        <button onClick={placingFences ? right : () => {}} className={`border border-gray-200 text-gray-200 rounded-md h-10 w-28 ${placingFences ? '' : 'invisible'}`}>
+        <button onClick={placingFences ? right : () => { if (!autoRotate) next()}} className={`border border-gray-200 text-gray-200 rounded-md h-10 w-28 ${autoRotate ? 'invisible' : ''}`}>
             <svg className="m-auto h-[90%]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                 <path fillRule="evenodd" d="M16.28 11.47a.75.75 0 010 1.06l-7.5 7.5a.75.75 0 01-1.06-1.06L14.69 12 7.72 5.03a.75.75 0 011.06-1.06l7.5 7.5z" clipRule="evenodd" />
             </svg>
