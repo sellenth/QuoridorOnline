@@ -124,7 +124,10 @@ export default function FriendsList() {
                 setReceived(game_invites.filter((invite) => { return invite.opponent.id == my_id && invite.gid == null }))
                 setInProgress(game_invites.filter((invite) => { return invite.gid && !invite.game.winner }))
 
+                console.log(game_invites)
                 let match = game_invites.find((el) => { return el.initiator.id == firstId && el.opponent.id == secondId })
+
+                console.log(match)
                 if (match) {
                     // maybe this can be cleaned up, do I really need this extra state var?
                     setURLmatchedInvite(match);
