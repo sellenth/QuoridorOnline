@@ -114,7 +114,12 @@ Monday 9/11
 - [x] lay pipes for "join game" link
 
 Tuesday 9/12
-- [ ] fix incorrect gid on subsequent uses of join game link
+- [x] ~~fix incorrect gid on subsequent uses of join game link.~~ It sorted itself out
+- [x] buttom to copy down the join game link
+- [x] allow join game link to work even if the user isn't logged in yet (email)
+- [ ] do the same as above for github signins
+- [ ] do the same as above for SMS signins
+- [ ] spruce up login details for VIP user
 
 - [ ] normalize username
 - [ ] dont show username on scoreboard until verified (can ignore if top 10 are all above 400)

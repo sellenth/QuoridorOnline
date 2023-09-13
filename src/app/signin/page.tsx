@@ -15,8 +15,18 @@ export default function SignIn() {
 
 
     const handleGitHubLogin = async () => {
+        let params = new URLSearchParams(window.location.search);
+        let redirectUrl = params.get('redirectUrl') ?? '';
+        let firstId = params.get('firstId') ?? '';
+        let secondId = params.get('secondId') ?? '';
+        const qp = { firstId, secondId }
+        console.log(qp)
         const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'github',
+            provider: 'github',
+            options: {
+                redirectTo: `${window.location.origin}/${redirectUrl}`,
+                queryParams: qp
+            }
         })
 
         if (error) {

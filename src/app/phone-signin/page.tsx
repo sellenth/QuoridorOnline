@@ -71,7 +71,11 @@ export default function PhoneSignUpIn() {
             toast.show(msg, { timeout: 3000, position: "bottom-center", className: "text-gray-200 bg-theme-red border border-gray-200" })
             console.log(error)
         } else {
-            router.push('/')
+            let params = new URLSearchParams(window.location.search);
+            let redirectUrl = params.get('redirectUrl') ?? '';
+            let firstId = params.get('firstId') ?? '';
+            let secondId = params.get('secondId') ?? '';
+            router.push(`/game-invites?firstId=${firstId}&secondId=${secondId}&redirectUrl=${redirectUrl}`)
         }
     }
 
