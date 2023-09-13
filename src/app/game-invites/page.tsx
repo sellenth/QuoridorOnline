@@ -228,12 +228,12 @@ export default function FriendsList() {
                                     let their_name = game.initiator.id == my_id ? game.opponent.username : game.initiator.username
 
                                     return (
-                                        <tr key={game.gid} className="flex h-9">
-                                            <td className="flex-1 truncate">
+                                        <tr key={game.gid} className="h-9">
+                                            <td className="truncate w-fit inline-block">
                                                 {their_name}
                                             </td>
-                                            <td className="flex-none text-end">
-                                                <JoinGame gid={game.gid} />
+                                            <td className="ml-auto text-end">
+                                                <JoinGame gid={game.gid} firstId={game.initiator.id} secondId={game.opponent.id} />
                                             </td>
                                         </tr>
                                     )
