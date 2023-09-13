@@ -105,6 +105,17 @@ Saturday 6/17
 - [x] free up more game grid real estate (move timer and usernames inside grid)
 - [x] ensure move into endzone is written to db
 
+Sunday 9/10 
+- [x] add time format chooser
+
+Monday 9/11
+- [x] reformat timer to display 100s of hours
+- [x] disable auto-rotate cursor (for now)
+- [x] lay pipes for "join game" link
+
+Tuesday 9/12
+- [ ] fix incorrect gid on subsequent uses of join game link
+
 - [ ] normalize username
 - [ ] dont show username on scoreboard until verified (can ignore if top 10 are all above 400)
 
