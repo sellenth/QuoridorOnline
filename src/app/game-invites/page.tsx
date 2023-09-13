@@ -150,6 +150,14 @@ export default function FriendsList() {
         }
     }, [supabase, my_id])
 
+    const copy = async (firstId: string, secondId: string) => {
+        let link = `${window.location.origin}/game-invites?firstId=${firstId}&secondId=${secondId}`
+        console.log(link)
+        navigator.clipboard.writeText(link)
+        toast.show("Game invite copied.", { timeout: 3000, position: "bottom-center", className: "text-gray-200 bg-theme-200 border border-gray-200" })
+    }
+
+
     return (
         <div className="text-gray-200 mx-auto px-2 pb-2 md:px-10 w-full sm:w-fit">
             <div className="w-fit align-center mx-auto my-10 bg-blue-200 bg-opacity-10 backdrop-blur p-4 border-2 border-gray-200 rounded-md">
@@ -168,7 +176,16 @@ export default function FriendsList() {
                             {sent &&
                                 sent.map((game) => (
                                     <tr key={game.opponent.id}>
-                                        <td>{game.opponent.username}</td>
+                                        <td>
+                                        <button
+                                            className="font-display shadow-lg hover:bg-theme-200 h-8 hover:shadow-theme-200/50 border-2 rounded-md border-theme-200 mr-2 px-2 py-2 w-fit"
+                                            onClick={() => { copy(game.initiator.id, game.opponent.id) }}>
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={3} stroke="currentColor" className="w-3 h-3">
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
+                                            </svg>
+                                        </button>
+                                        {game.opponent.username}
+                                        </td>
                                     </tr>
                                 ))}
                         </tbody>
