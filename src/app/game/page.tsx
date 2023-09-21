@@ -47,9 +47,6 @@ export default function GameView() {
                 },
                 () => {
                     engine.networkTick(gid);
-                    navigator.vibrate([
-                        100, 30, 100, 30, 100, 30, 200, 30, 200, 30, 200, 30, 100, 30, 100, 30, 100,
-                    ]);
                 }
             )
             .subscribe((status: any) => {
