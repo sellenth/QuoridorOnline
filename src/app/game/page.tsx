@@ -5,18 +5,100 @@ import { useEffect, useRef, useState } from 'react'
 import { useSupabase } from '../../components/supabase-provider'
 import { getCookie } from 'cookies-next'
 import { GamePad } from './gamepad'
+import OneSignal from 'react-onesignal'
+import { User } from '@supabase/supabase-js'
 
+const oneSignalAppId = process.env.NEXT_PUBLIC_ONESIGNAL_APP_ID!
 
 export default function GameView() {
     const { supabase, session } = useSupabase()
     const fpsCounterRef = useRef(null)
     const gameInfoRef = useRef(null)
     const gamePad = useRef<HTMLDivElement>(null);
-    const [engine, setEngine] = useState<Engine | undefined>();
+    const [engine, setEngine] = useState<Engine | undefined>()
+    const [user, setUser] = useState<User | null>(null);
+
+    const [oneSignalInitialized, setOneSignalInitialized] =
+        useState<boolean>(false)
+
+    /**
+    * Initializes OneSignal SDK for a given Supabase User ID
+    * @param uid Supabase User ID
+    */
+    const initializeOneSignal = async (uid: string) => {
+        if (oneSignalInitialized) {
+            return
+        }
+        setOneSignalInitialized(true)
+        await OneSignal.init({
+            appId: oneSignalAppId,
+            notifyButton: {
+                enable: true,
+            },
+
+            allowLocalhostAsSecureOrigin: true,
+        })
+
+        await OneSignal.login(uid)
+    }
+
+    const sendMagicLink = async (event: React.FormEvent<HTMLButtonElement>) => {
+        event.preventDefault()
+        const email = 'halston@sellent.in'
+        if (typeof email !== 'string') return
+
+        const { error } = await supabase.auth.signInWithOtp({ email })
+        if (error) {
+            alert(error.message)
+        } else {
+            alert('Check your email inbox')
+        }
+    }
 
     useEffect(() => {
-        const gid = getCookie('current_gid') as string
-        const engine = new Engine()
+        const initialize = async () => {
+            const initialUser = (await supabase.auth.getUser())?.data.user
+            OneSignal.Debug.setLogLevel('error');
+            OneSignal.User.PushSubscription.optIn();
+
+            setUser(initialUser ?? null)
+            if (initialUser) {
+                initializeOneSignal(initialUser.id)
+            }
+        }
+
+        initialize()
+
+        return () => {
+            authListener.data.subscription.unsubscribe()
+        }
+    }, []);
+
+    useEffect(() => {
+        const initialize = async () => {
+            const initialUser = (await supabase.auth.getUser())?.data.user
+            setUser(initialUser ?? null)
+            if (initialUser) {
+                initializeOneSignal(initialUser.id)
+            }
+        }
+
+        initialize()
+
+        const authListener = supabase.auth.onAuthStateChange(
+            async (event, session) => {
+                const user = session?.user ?? null
+                setUser(user)
+                if (user) {
+                    initializeOneSignal(user.id)
+                }
+            }
+        )
+    }, [])
+
+      useEffect(() => {
+          const gid = getCookie('current_gid') as string
+          const engine = new Engine()
         setEngine(engine)
 
         engine.registerDbClient(supabase, gid);
@@ -96,6 +178,7 @@ export default function GameView() {
                 <div className="absolute z-10 left-3 top-1">
                     <p id="myFences">Me - ???</p>
                     <p className="text-end" id="myTime">__:__</p>
+            <button onClick={sendMagicLink} >ahhh</button>
                 </div>
                 <div className="absolute z-10 right-3 top-1">
                     <p id="theirFences">Them - ???</p>
