@@ -68,10 +68,6 @@ export default function GameView() {
         }
 
         initialize()
-
-        return () => {
-            authListener.data.subscription.unsubscribe()
-        }
     }, []);
 
     useEffect(() => {
@@ -94,6 +90,10 @@ export default function GameView() {
                 }
             }
         )
+
+        return () => {
+            authListener.data.subscription.unsubscribe()
+        }
     }, [])
 
       useEffect(() => {
