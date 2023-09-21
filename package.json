@@ -29,6 +29,7 @@
     "next": "13.1.5",
     "react": "18.2.0",
     "react-dom": "18.2.0",
+    "react-onesignal": "^3.0.1",
     "react-tiny-toast": "^1.0.2",
     "react-usestateref": "^1.0.8",
     "server-only": "^0.0.1",
