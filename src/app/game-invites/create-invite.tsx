@@ -25,7 +25,7 @@ export default function CreateInvite( { username, my_id }: props) {
     const [cols, setCols, colsRef] = useState(9)
     const [layers, setLayers, layersRef] = useState(2)
     const [start_fences, setStartFences, startFencesRef] = useState(10)
-    const [timeFormat, setTimeFormat, timeFormatRef] = useState('1337-01-05T00:00:00Z');
+    const [timeFormat, setTimeFormat, timeFormatRef] = useState('1337-01-06T00:00:00Z');
     const [quickplayChannel, setQuickplayChannel] = useState<HackedChannel | null>(null);
     const [numOnline, setNumOnline] = useState(0);
     const [queueing, setQueueing] = useState(false);
