@@ -176,13 +176,12 @@ export default function GameView() {
 
             <div className="max-w-full aspect-square flex-1 relative text-gray-200">
                 <div className="absolute z-10 left-3 top-1">
-                    <p id="myFences">Me - ???</p>
-                    <p className="text-end" id="myTime">__:__</p>
-            <button onClick={sendMagicLink} >ahhh</button>
+                    <p id="p1Fences">Me - ???</p>
+                    <p className="text-end" id="p1Time">__:__</p>
                 </div>
                 <div className="absolute z-10 right-3 top-1">
-                    <p id="theirFences">Them - ???</p>
-                    <p className="text-end" id="theirTime">__:__</p>
+                    <p id="p2Fences">Them - ???</p>
+                    <p className="text-end" id="p2Time">__:__</p>
                 </div>
                 <canvas id="c" className="z-0 border border-gray-200 outline-none w-full h-full" tabIndex={0} />
             </div>

@@ -25,10 +25,10 @@ type VisualUnit =
 
 class GameStatusHandler {
     gameInfoElement: HTMLElement;
-    myFencesElement: Node;
-    theirFencesElement: Node;
-    myTime: Node;
-    theirTime: Node;
+    p1FencesElement: Node;
+    p2FencesElement: Node;
+    p1TimeElement: Node;
+    p2TimeElement: Node;
     turnIndicatorElement: Node;
     gameCanvas: Node;
     intervalID: number = 0;
@@ -40,19 +40,19 @@ class GameStatusHandler {
     Update( my_id,
             active_player_id,
             p1_id, p1_username,
-            p2_id, p2_username,
+            _p2_id, p2_username,
             p1_num_fences, p2_num_fences,
             p1_time, p2_time, last_update) {
 
-        this.UpdateFences(my_id, p1_id, p1_username, p1_num_fences, true)
-        this.UpdateFences(my_id, p2_id, p2_username, p2_num_fences, false)
+        this.UpdateFences(true,  p1_username, p1_num_fences)
+        this.UpdateFences(false, p2_username, p2_num_fences)
 
-        if (this.myTime && this.theirTime) {
-            this.UpdateTimer(my_id, p1_id, p1_time, true);
-            this.UpdateTimer(my_id, p2_id, p2_time, false);
+        if (this.p1TimeElement && this.p2TimeElement) {
+            this.UpdateTimer(true, p1_time);
+            this.UpdateTimer(false, p2_time);
 
             if (last_update != null) {
-                this.UpdateTimerOnInterval(my_id, active_player_id, p1_id, p1_time, p2_time, last_update);
+                this.UpdateTimerOnInterval(active_player_id == p1_id, p1_time, p2_time, last_update);
             }
         }
 
@@ -61,16 +61,16 @@ class GameStatusHandler {
     }
 
     CreateTimerString(d: Date) {
-        return        String(d.getUTCHours() + (24 * d.getUTCDate())).padStart(2, '0')
+        return        String(d.getUTCHours() + (24 * (d.getUTCDate() - 1))).padStart(2, '0')
                     + ':'
                     + String(d.getUTCMinutes()).padStart(2, '0')
                     + ':'
                     + String(d.getUTCSeconds()).padStart(2, '0');
     }
 
-    UpdateTimer(my_id, id, time, green) {
+    UpdateTimer(p1_turn: bool, time) {
         //indicatorElement.classList.add( green ? "text-theme-500" : "text-theme-red")
-        const indicatorElement = my_id == id ? this.myTime : this.theirTime;
+        const indicatorElement = p1_turn ? this.p1TimeElement : this.p2TimeElement;
         let d = new Date(time);
 
         if (d.getUTCFullYear() < 1337) {
@@ -80,10 +80,10 @@ class GameStatusHandler {
         }
     }
 
-    UpdateTimerOnInterval(my_id, active_player_id, p1_id, p1_time, p2_time, last_update) {
+    UpdateTimerOnInterval(p1_turn, p1_time, p2_time, last_update) {
         clearInterval(this.intervalID);
-        const indicatorElement = my_id == active_player_id ? this.myTime : this.theirTime;
-        let time = p1_id == active_player_id ? p1_time : p2_time;
+        const indicatorElement = p1_turn ? this.p1TimeElement : this.p2TimeElement;
+        let time = p1_turn ? p1_time : p2_time;
 
         this.intervalID = setInterval( () => {
             let inter = ( new Date().getTime() - new Date(last_update).getTime());
@@ -100,12 +100,12 @@ class GameStatusHandler {
         }, 1000 );
     }
 
-    UpdateFences(my_id, id, username, fences, green) {
-        const indicatorElement = my_id == id ? this.myFencesElement : this.theirFencesElement;
+    UpdateFences(p1_turn: bool, username, fences) {
+        const indicatorElement = p1_turn ? this.p1FencesElement : this.p2FencesElement;
 
         if (this.gameInfoElement) {
             indicatorElement.textContent = `${username} - ${fences}`;
-            indicatorElement.classList.add( green ? "text-theme-500" : "text-theme-red")
+            indicatorElement.classList.add( p1_turn ? "text-theme-500" : "text-theme-red")
         }
     }
 
@@ -126,10 +126,10 @@ class GameStatusHandler {
 
     SetGameInfoElement(el: HTMLElement) {
         this.gameInfoElement = el
-        this.myFencesElement = document.querySelector("#myFences")!;
-        this.theirFencesElement = document.querySelector("#theirFences")!;
-        this.myTime = document.querySelector("#myTime")!;
-        this.theirTime = document.querySelector("#theirTime")!;
+        this.p1FencesElement = document.querySelector("#p1Fences")!;
+        this.p2FencesElement = document.querySelector("#p2Fences")!;
+        this.p1TimeElement = document.querySelector("#p1Time")!;
+        this.p2TimeElement = document.querySelector("#p2Time")!;
         this.turnIndicatorElement = document.querySelector("#turnIndicator")!;
         this.gameCanvas = document.querySelector("#c")!;
 

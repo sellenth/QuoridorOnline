@@ -255,8 +255,8 @@ export default function CreateInvite( { username, my_id }: props) {
                             <label>
                                 <input
                                     type="radio"
-                                    value="1337-01-05T00:00:00Z"
-                                    checked={timeFormat === '1337-01-05T00:00:00Z'}
+                                    value="1337-01-06T00:00:00Z"
+                                    checked={timeFormat === '1337-01-06T00:00:00Z'}
                                     onChange={handleOptionChange}
                                 />
                                 120 hours
