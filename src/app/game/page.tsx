@@ -56,33 +56,10 @@ export default function GameView() {
     }
 
     useEffect(() => {
-        const initialize = async () => {
-            const initialUser = (await supabase.auth.getUser())?.data.user
-            OneSignal.Debug.setLogLevel('error');
-            OneSignal.User.PushSubscription.optIn();
-
-            setUser(initialUser ?? null)
-            if (initialUser) {
-                initializeOneSignal(initialUser.id)
-            }
-        }
-
-        initialize()
-    }, []);
-
-    useEffect(() => {
-        const initialize = async () => {
-            const initialUser = (await supabase.auth.getUser())?.data.user
-            setUser(initialUser ?? null)
-            if (initialUser) {
-                initializeOneSignal(initialUser.id)
-            }
-        }
-
-        initialize()
-
         const authListener = supabase.auth.onAuthStateChange(
-            async (event, session) => {
+            async (_event, session) => {
+                OneSignal.Debug.setLogLevel('error');
+                OneSignal.User.PushSubscription.optIn();
                 const user = session?.user ?? null
                 setUser(user)
                 if (user) {
@@ -185,7 +162,7 @@ export default function GameView() {
                 </div>
                 <canvas id="c" className="z-0 border border-gray-200 outline-none w-full h-full" tabIndex={0} />
             </div>
-            <div id="gamePad" className="z-10 mx-auto flex-initial my-2" ref={gamePad}>
+            <div id="gamePad" className="z-10 mx-auto flex-initial my-2 lg:w-1/4 md:w-1/2 w-full" ref={gamePad}>
                 <GamePad engine={engine} />
             </div>
 
