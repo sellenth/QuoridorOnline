@@ -11,7 +11,7 @@
 
 html,
 body {
-  height: 100svh;
+  height: 100vh;
   width: 100%;
   background-color: theme('colors.theme.300');
   overflow-x: hidden;
