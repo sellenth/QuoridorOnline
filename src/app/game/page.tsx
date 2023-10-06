@@ -151,7 +151,7 @@ export default function GameView() {
                 </div>
             </div>
 
-            <div className="max-w-full aspect-square flex-1 relative text-gray-200">
+            <div className="max-w-full aspect-square grow relative text-gray-200">
                 <div className="absolute z-10 left-3 top-1">
                     <p id="p1Fences">Me - ???</p>
                     <p className="text-end" id="p1Time">__:__</p>
@@ -162,7 +162,7 @@ export default function GameView() {
                 </div>
                 <canvas id="c" className="z-0 border border-gray-200 outline-none w-full h-full" tabIndex={0} />
             </div>
-            <div id="gamePad" className="z-10 mx-auto flex-initial my-2 lg:w-1/4 md:w-1/2 w-full" ref={gamePad}>
+            <div id="gamePad" className="z-10 mx-auto flex-initial my-2 lg:w-1/4 md:w-1/2 w-full flex-none" ref={gamePad}>
                 <GamePad engine={engine} />
             </div>
 
