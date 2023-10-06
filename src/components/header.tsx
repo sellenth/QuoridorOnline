@@ -28,12 +28,17 @@ export default function Header() {
   let isAuthed = !! (session?.user)
 
   useEffect( () => {
+    setTimeout( () => {
       if (navigator.userAgent.indexOf('iPhone') > -1) {
-          document
-              .querySelector("[name=viewport]")!
-              .setAttribute("content", "width=device-width, initial-scale=1, maximum-scale=1");
+          const viewportElement = document.querySelector("meta[name=viewport]");
+          if (viewportElement !== null) {
+              viewportElement.setAttribute("content", "width=device-width, initial-scale=1, maximum-scale=1");
+          } else {
+              console.error("Viewport element not found");
+          }
       }
-  } )
+    }, 1000 )
+  }, [])
 
 
   return (
