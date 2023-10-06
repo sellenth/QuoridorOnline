@@ -146,9 +146,7 @@ export default function GameView() {
         <main className="h-full flex flex-col items-center justify-center mx-4">
 
             <div ref={gameInfoRef} id="gameInfo" className="z-10 w-full text-gray-200 self-start my-2 h-3 flex-none flex">
-                <div className="grid grid-cols-1 mx-auto items-end">
-                    <p id="turnIndicator">Player ???&apos;s turn</p>
-                </div>
+                <p id="turnIndicator" className="w-full text-center">Player ???&apos;s turn</p>
             </div>
 
             <div className="max-w-full aspect-square grow relative text-gray-200">
