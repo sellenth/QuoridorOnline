@@ -105,20 +105,13 @@ serve(async (req: any) => {
         const p2_move = !!(data.moves.length % 2)
 
 //////////////
-        const last_update = await supabaseClient
-            .from('games')
-            .select('last_update, p1_time, p2_time')
-            .eq('id', game_id)
-            .single()
 
-        if (last_update.error) throw last_update.error;
-
-        let p1_time = new Date(last_update.data.p1_time);
-        let p2_time = new Date(last_update.data.p2_time);
+        let p1_time = new Date(data.p1_time);
+        let p2_time = new Date(data.p2_time);
 
         // if the game is underway, check if the clock has expired
-        if (last_update.data.last_update) {
-            let last_t = new Date(last_update.data.last_update);
+        if (data.last_update) {
+            let last_t = new Date(data.last_update);
             let diff = (ingest_time.getTime() - last_t.getTime());
 
             if (p2_move) {
