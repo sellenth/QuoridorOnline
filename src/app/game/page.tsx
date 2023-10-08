@@ -5,10 +5,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useSupabase } from '../../components/supabase-provider'
 import { getCookie } from 'cookies-next'
 import { GamePad } from './gamepad'
-import OneSignal from 'react-onesignal'
 import { User } from '@supabase/supabase-js'
-
-const oneSignalAppId = process.env.NEXT_PUBLIC_ONESIGNAL_APP_ID!
 
 export default function GameView() {
     const { supabase, session } = useSupabase()
@@ -18,60 +15,6 @@ export default function GameView() {
     const [engine, setEngine] = useState<Engine | undefined>()
     const [user, setUser] = useState<User | null>(null);
 
-    const [oneSignalInitialized, setOneSignalInitialized] =
-        useState<boolean>(false)
-
-    /**
-    * Initializes OneSignal SDK for a given Supabase User ID
-    * @param uid Supabase User ID
-    */
-    const initializeOneSignal = async (uid: string) => {
-        if (oneSignalInitialized) {
-            return
-        }
-        setOneSignalInitialized(true)
-        await OneSignal.init({
-            appId: oneSignalAppId,
-            notifyButton: {
-                enable: true,
-            },
-
-            allowLocalhostAsSecureOrigin: true,
-        })
-
-        await OneSignal.login(uid)
-    }
-
-    const sendMagicLink = async (event: React.FormEvent<HTMLButtonElement>) => {
-        event.preventDefault()
-        const email = 'halston@sellent.in'
-        if (typeof email !== 'string') return
-
-        const { error } = await supabase.auth.signInWithOtp({ email })
-        if (error) {
-            alert(error.message)
-        } else {
-            alert('Check your email inbox')
-        }
-    }
-
-    useEffect(() => {
-        const authListener = supabase.auth.onAuthStateChange(
-            async (_event, session) => {
-                OneSignal.Debug.setLogLevel('error');
-                OneSignal.User.PushSubscription.optIn();
-                const user = session?.user ?? null
-                setUser(user)
-                if (user) {
-                    initializeOneSignal(user.id)
-                }
-            }
-        )
-
-        return () => {
-            authListener.data.subscription.unsubscribe()
-        }
-    }, [])
 
       useEffect(() => {
           const gid = getCookie('current_gid') as string
