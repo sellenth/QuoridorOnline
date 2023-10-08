@@ -83,6 +83,7 @@ serve(async (req: any) => {
 
         }
 
+        /*
         if (data.moves.length == 63) {
             await updateElo(supabaseClient, data.p2_id, data.p1_id)
             const update_res = await supabaseClient
@@ -90,7 +91,7 @@ serve(async (req: any) => {
                 .update({ winner: data.p2_id })
                 .eq('id', game_id)
             return endGame(supabaseClient, game_id, 'p1 was too slow (64 move limit has been reached)');
-        }
+        }*/
 
         // Check if this game is over
         if (data.winner != null) {
