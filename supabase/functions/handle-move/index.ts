@@ -173,8 +173,8 @@ serve(async (req: any) => {
         const p_start_layer = data.layers % 2 ? data.layers : data.layers - 1
 
         let gameSpace = generateGameSpace(extents)
-        const p1: Player = { id: data.p1_id, goalZ: p2_start_row, numFences: 15, pos: [p_start_col, p_start_layer, 1] };
-        const p2: Player = { id: data.p2_id, goalZ: 1, numFences: 15, pos: [p_start_col, p_start_layer, p2_start_row] }
+        const p1: Player = { id: data.p1_id, goalZ: p2_start_row, numFences: data.start_fences, pos: [p_start_col, p_start_layer, 1] };
+        const p2: Player = { id: data.p2_id, goalZ: 1, numFences: data.start_fences, pos: [p_start_col, p_start_layer, p2_start_row] }
 
         applyMovesToGameSpace(gameSpace, data.moves, p1, p2)
 
@@ -183,10 +183,11 @@ serve(async (req: any) => {
         let winner = null
         let verified_move!: Move;
 
+        const curr_player = p2_move ? p2 : p1;
+        const other_player = p2_move ? p1 : p2;
+
         // Check proposed player move
         if (proposed_move[0] == MoveType.Pawn) {
-            const curr_player = p2_move ? p2 : p1;
-            const other_player = p2_move ? p1 : p2;
 
             isValid = isValidPawnMove(gameSpace, extents, _3dMode, proposed_move, curr_player, other_player)
             if (isValid) {
@@ -206,7 +207,7 @@ serve(async (req: any) => {
         }
         // Check proposed fence move
         else {
-            isValid = isValidFenceMove(gameSpace, proposed_move, p1, p2)
+            isValid = isValidFenceMove(gameSpace, proposed_move, curr_player, other_player)
             verified_move = proposed_move.slice();
         }
 
@@ -310,14 +311,15 @@ async function writeMoveToDB(client: any, gid: string, moves: Move[], proposed_m
 
 // Check proposed fence move, make sure it's in bounds, is aligned to proper grid row, col, layer
 // make sure path exists for both players post placement
-export function isValidFenceMove(gameSpace: GameSpace, move: Move, p1: Player, p2: Player) {
+export function isValidFenceMove(gameSpace: GameSpace, move: Move, curr_player: Player, other_player: Player) {
     let isValid = true;
     isValid = spaceExistsForFence(gameSpace, move)
         && !fenceIntersects(gameSpace, move)
+        && curr_player.numFences > 0
     if (isValid) {
         addFenceToGameSpace(gameSpace, move)
-        isValid = pathExistsForPlayer(gameSpace, [0, ...p1.pos], p1.goalZ)
-            && pathExistsForPlayer(gameSpace, [0, ...p2.pos], p2.goalZ)
+        isValid = pathExistsForPlayer(gameSpace, [0, ...curr_player.pos], curr_player.goalZ)
+            && pathExistsForPlayer(gameSpace, [0, ...other_player.pos], other_player.goalZ)
     }
     return isValid
 }
