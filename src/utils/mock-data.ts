@@ -61,7 +61,7 @@ export const mockIncomingGameInvite: GameInvite[] = [
       username: mockMyUsername,
       id: mockMyId
     },
-    gid: null,
+    gid: "80085757-eee0-4e53-9246-2bc83ffcac54",
     rows: 6,
     cols: 6,
     layers: 1,
@@ -98,13 +98,13 @@ export const mockInProgressGameInvite: GameInvite[] = [
       id: mockMyId
     },
     opponent: {
-      username: "al1c3",
+      username: "al1c33",
       id: "1238"
     },
-    gid: "c0ff33",
+    gid: "80085757-eee0-4e53-9246-2bc83ffcac54",
     rows: 9,
     cols: 9,
-    layers: 3,
+    layers: 2,
     p1_time: "1337-01-05T00:00:00Z",
     p2_time: "1337-01-05T00:00:00Z",
     start_fences: 10,
