@@ -46,9 +46,10 @@ export default function GameView() {
                     event: 'UPDATE',
                     schema: 'public',
                     table: 'games',
+                    filter: `id=eq.${gid}`
                 },
-                () => {
-                    engine.networkTick(gid);
+                (payload) => {
+                    engine.networkTick_payload(payload.new);
                 }
             )
             .subscribe((status: any) => {
@@ -74,6 +75,7 @@ export default function GameView() {
                     }, 1000)
                 }
             })
+
         return () => {
             supabase.removeChannel(channel);
             supabase.removeChannel(camChannel);

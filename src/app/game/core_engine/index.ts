@@ -190,12 +190,14 @@ export default class Engine {
     networkedCameras: Record<string, NetworkCamera>
     frameTiming: FrameTiming;
     gameStatusHandler: GameStatusHandler;
-    render = true
-    fpsCounterElement: HTMLDivElement | null
-    gameInfoElement: HTMLDivElement | null
-    dbClient: DBClient | null
-    demoMode: boolean
-    firstTick: boolean = true
+    render = true;
+    fpsCounterElement: HTMLDivElement | null;
+    gameInfoElement: HTMLDivElement | null;
+    dbClient: DBClient | null;
+    demoMode: boolean;
+    firstTick: boolean = true;
+    p1_username: string = 'p1';
+    p2_username: string = 'p2';
 
     constructor() {
         this.canvas = document.querySelector("#c")!;
@@ -274,6 +276,15 @@ export default class Engine {
             .eq('id', game_id)
             .single()
 
+        this.p1_username = data.p1.username
+        this.p2_username = data.p2.username
+        this.IngestGameState(data)
+        this.firstTick = false;
+    }
+
+    async networkTick_payload(data: any) {
+        data.p1 = { id: data.p1_id, username: this.p1_username }
+        data.p2 = { id: data.p2_id, username: this.p2_username }
         this.IngestGameState(data)
         this.firstTick = false;
     }
