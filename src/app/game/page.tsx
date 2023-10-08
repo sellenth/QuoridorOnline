@@ -30,8 +30,12 @@ export default function GameView() {
 
         ( async () => {
             await engine.networkTick(gid);
-            if (gamePad?.current && !engine.gameLogic._3dMode) {
-                gamePad.current.style.display = "block"
+            if (gamePad?.current) {
+                if (engine.gameLogic._3dMode) {
+                    gamePad.current.style.display = "none"
+                } else {
+                    gamePad.current.style.display = "block"
+                }
             }
             }
         )();
